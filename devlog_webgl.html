@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <title>Devlog: Porting to web browser</title>
+
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.01.08">
+    
+    <meta name="description" content="porting a C++/OpenGL game to web browsers">
+    <meta name="keywords" content="game, gamedev, C++, OpenGL, emscripten, webGL, webassembly">
+    <meta name="author" content="Marc Landon">
+
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+    </style>
+    <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
+  </head>
+  
+  <body>
+
+    <div class="sidebar">
+      <h2>About</h2>
+      <p> 
+        <a href="index.html">Home page</a> <br>
+        <a href="devlog.html#AboutMe">About me</a> <br>
+      </p>
+      <h2>Other posts</h2>
+      <ul> 
+        <li> <a href="devlog_impulse.html">impulse response</a> </li>
+        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
+        <li> <a href="devlog_sky.html">render the sky</a> </li>
+        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+      </ul>
+    </div>
+
+    <div class="main">
+    
+<h1>Porting a C++/OpenGL game to web browsers</h1>
+
+<p>
+The web-assembly platform allows to create and run game embedded in web browsers.
+My starting point is a C++ desktop application using <a href="https://www.libsdl.org/">SDL2</a> and <a href="https://www.opengl.org/">OpenGL</a>.
+I found the <a href="https://emscripten.org/">Emscripten</a> toolchain that offers a way to port such applications to web browsers.
+<br>
+In this post, I will detail some difficulties I had when I started to port my games on web browsers:
+<ul>
+  <li>Using Emscripten</li>
+  <li>Support of OpenGL ES - WebGL</li>
+</ul>
+Most of the code is available in <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a>, a toolkit that I created and that I use as basement of my games.  
+</p>
+    
+<h2>Using Emscripten</h2>
+
+<p>
+The <a href="https://emscripten.org/">Emscripten</a> web site already has good documentation.
+The <a href="https://emscripten.org/docs/porting/guidelines/portability_guidelines.html">portability guidelines</a> page is useful to understand the limitations of the code being executed by web browsers.
+In fact, some code logic should be adapted.
+</p>
+
+<h3>The main entry points</h3>
+
+<p>
+If it is not already the case, the game init/update/quit should be seperated in specific functions.
+With Emscripten, the "main()" entry-point is run once,
+and a java script is setup such that the web-brower will run a callback at each frame.
+Consequently, the "main.cpp" will have this skeleton:
+</p>
+
+<pre>
+int  app_init();   <span class="code-comment">// put in the function all needed to initialize data. Run once.</span>
+void app_update(); <span class="code-comment">// actually the game-loop function. Run every frame.</span>
+void app_quit();   <span class="code-comment">// exit properly. Run once, only on Desktop</span>
+
+int main(int argc, char **argv)
+{
+  (void)argc;
+  (void)argv;
+
+  if (app_init() != 0)
+    return -1;
+
+#ifdef TRE_EMSCRIPTEN
+  emscripten_set_main_loop(app_update, 0, true);
+#else
+  while(_continue_)
+  {
+    app_update();
+  }
+  app_quit();
+#endif
+
+  return 0;
+}
+</pre>
+
+<h3>Timing and the FPS monitoring</h3>
+
+<p>
+Because the <code>app_update()</code> method may not be called immediately after a previous call, 
+the handling of the timing needs to be changed accordingly:
+</p>
+
+<pre>
+static Uint32 oldtime;
+
+int app_init()
+{
+  <span class="code-comment">// [...]</span>
+  oldtime = SDL_GetTicks();
+  return status;
+}
+
+void app_update()
+{
+  const Uint32 newtime = SDL_GetTicks();
+  const Uint32 dtms = newtime - oldtime;
+  oldtime = newtime;
+
+  <span class="code-comment">// event managment ...</span>
+  <span class="code-comment">// game update(s) ... with dt = dtms * 1.e-3f</span>
+  <span class="code-comment">// submit render commands ...</span>
+  
+  SDL_GL_SwapWindow(window); <span class="code-comment">// GPU present</span>
+}
+</pre>
+
+<h3>Reading files</h3>
+
+<p>
+Web browsers don't allow (or heavily restrict) to access to the disk. The Emscripten toolchain can emulate the reading of files, by embedding them into the binary. Therefore, I advice to keep the total amount of read file under 100 MB. <br>
+On the other hand, to keep the game loading smoothly, it's a good practice to "bake" the game resources into an optimized and specialized binary file. <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a> implements a baker.
+</p>
+
+<p>
+Writing in progress ...
+</p>
+
+<h3>Performance considerations</h3>
+
+<p>
+<ul>
+  <li>Avoid allocations during the <code>app_update()</code>. Pre-allocate as much as possible in <code>app_int()</code>. Unlike desktop applications, the available memory is preconfigured during the compilation, thus be aware of the amount of memory needed.</li>
+  <li>I didn't try the multi-threading yet. For simplicity, the web-version of my game will stay single threaded.</li>
+  <li>Other listed on the Emscripten documentation <a href="https://emscripten.org/docs/optimizing/Optimizing-Code.html">here</a> </li>
+</ul>
+</p>
+
+
+<h2>Support of OpenGL ES - WebGL</h2>
+
+<p>
+Compared with a desktop application, there are additional limitations and API specific stuff.
+For more details, the readers can refer to the official specifications
+(<a href="https://registry.khronos.org/OpenGL-Refpages/es3/">OpenGL ES 3</a>,
+ <a href="https://registry.khronos.org/webgl/specs/latest/2.0/">WebGL 2.0</a>)
+<br>
+Here some of the modifications required to handle both OpenGL-3.3 and OpenGL-ES-3 with WebGL-2.
+</p>
+
+<h3>Texture compression</h3>
+
+<p>
+The OpenGL-ES API does not permit to compress texture on the fly.
+Hence, the compression must be done on the software level.
+A vastly used compression format is the Ericsson Texture Compression (ETC).
+An implementation is available at the github's <a href="https://github.com/Ericsson/ETCPACK">Ericsson/ETCPACK</a> repository.
+<a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a> implements compression algorithms for the AEC, ETC2, DXT1, DXT3 formats.
+</p>
+<p>
+Here some details about the ETC texture compression<br>
+Writing in progress ...
+</p>
+
+<h3>Render targets</h3>
+
+<p>
+The support of the render-target formats varies between the OpenGL-Core and OpenGL-ES standards.<br>
+Writing in progress ...
+</p>
+
+
+    </div>
+</body></html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
+    <title>Moonlanding project</title>
+
+    <link rel="icon" type="image/x-icon" href="images/Icon.png">
+    <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
+
+    <meta name="description" content="Moonlanding project game homepage">
+    <meta name="keywords" content="game, gamedev, moon, platformer">
+    <meta name="author" content="Marc Landon">
+
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+.main {
+  margin: 20px 0px; 
+  padding: 4px 10px; 
+  background: #111;
+}
+
+.release {
+  margin: 20px 0px;
+  padding: 6px;
+  border: 1px solid #777;
+  background: #222;
+}
+.release::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.release h3 { 
+  color: #CCC;
+}
+
+.releaseColMain {
+  float: left;
+  margin: 0px;
+  padding: 0px 1% 0px 0px;
+  width: 49%;
+}
+
+.releaseColSub {
+  float: left;
+  margin: 0px;
+  padding: 0px 1% 0px 1%;
+  width: 23%;
+}
+
+.releaseColSub img {
+  width:100%; 
+  height:auto;
+  transition:transform 0.25s ease;
+}
+
+.releaseColSub img:hover {
+  -webkit-transform:scale(2.5);
+  transform:scale(2.5);
+ }
+
+@media screen and (max-width: 800px) {
+    .releaseColMain {   width: 100%; }
+    .releaseColSub {  display: none !important; }
+}
+
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
+
+  </head>
+  
+  <body>
+    <div class="header">
+      <h1>Marc Games</h1>
+      <p> ( only in  <img src="images/flag-en.png" alt="english" style="width:auto; height: 0.8em; filter: brightness(50%)"> ) </p>
+    </div>
+    <div class="navbar">
+      <table style="width: 100%" border="0">
+        <tbody>
+          <tr>
+            <td style="width: 20%;"><a href="index.html">Home</a></td>
+            <td style="width: 20%;" class="active"><a href="#">Moonlanding project</a></td>
+            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
+            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
+            <td style="width: 20%;"><a href="devlog.html">Dev log </a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="main">
+    
+    <h2>About the game</h2>
+    
+    <p>
+The player pilots the lunar module and the goal is to reach the arrival platform before running out of fuel.
+Take up the challenge to pilot safely to the destination.
+    </p>
+    
+    <p>
+Play the demo version on web: <a href="#">ichtio page</a>
+    </p>
+    
+    </div>
+    <div class="main">
+
+    <h2>Features</h2>
+    
+    <ul>
+     <li> Build your skills to pilot in a resistless context </li>
+     <li> Admire the accurate modeling of the Moon and the lunar module from Apollo 11 </li>
+     <li> Feel the mass of the lunar module and the low gravity on the Moon surface </li>
+     <li> Create your own levels thanks to the level editor </li>
+     </ul>
+
+    </div>
+    <div class="main">
+
+    <h2>Screenshots</h2>
+
+<div class="slideshow-container">
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">1 / 5</div>
+  <img src="images/Moon/moon_beta7_1.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">2 / 5</div>
+  <img src="images/Moon/moon_beta7_2.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">3 / 5</div>
+  <img src="images/Moon/moon_beta7_3.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">4 / 5</div>
+  <img src="images/Moon/moon_beta7_4.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">5 / 5</div>
+  <img src="images/Moon/moon_beta7_5.jpg" style="width:100%">
+</div>
+
+<a class="prev" onclick="plusSlides(-1)">❮</a>
+<a class="next" onclick="plusSlides(1)">❯</a>
+
+</div>
+<script type="text/javascript" src="gallery.js"> </script>
+
+    <h2>Development log</h2>
+
+    <p>
+    The game is currently released on the version Beta 7.
+    The next release is planned to be the first finalized version.
+    No release date has been fixed.
+    </p>
+
+    <div class="release">
+    <h3>Back-log</h3>
+    <p>
+    </p><ul>
+      <li> <code>[not planned]    </code> Improve rendering of particles </li>
+      <li> <code>[not planned]    </code> Improve the level editor </li>
+      <li> <code>[not planned]    </code> Disable the detector(s) when the antenna is broken </li>
+      <li> <code>[not planned]    </code> Add rendering of the plasma rejected by the engine </li>
+      <li> <code>[planned for v1] </code> Show some stats (with some humor ?) in the credits </li> 
+    </ul>
+    <p></p>
+    </div>
+
+    <div class="release">
+    <div class="releaseColMain">
+    <h3>Release beta 7 (Jan 2023)</h3>
+    <p>
+    From this version, I fixed feedback reported by some testers.
+    </p>
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta7_3.jpg">
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta7_1.jpg">
+    </div>    
+    </div>
+
+    <div class="release">
+    <div class="releaseColMain">
+    <h3>Release beta 5 and 6 (August 2022)</h3>
+    <p>
+    For those versions, I focused to implement all side things that improve the user experience,
+    such as adding check-points and achievements, adding the support of joysticks, ...
+    A level editor was added also that allows the player to edit custom levels.   
+    </p>
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta5_1.jpg">
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta5_2.jpg">
+    </div>
+    </div>
+
+    <div class="release">
+    <div class="releaseColMain">
+    <h3>Release beta 4 (May 2020)</h3>
+    <p>
+    Lot of improvements have been made on the models and the rendering.
+    Lot of efforts have been put for the moon modeling.
+    </p>
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta4_4.png">
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta4_1.png">
+    </div>    
+    </div>
+
+    <div class="release">
+    <div class="releaseColMain">
+    <h3>Release beta 3 (Nov 2018) and before</h3>
+    <p>
+    Those versions follow drafts of the game concept, with basic rendering and placeholder models.
+    It was my first game using C++ / OgenGL, so this game was a good case for learning rendering.
+    The physics part is good enough, to start to feel the game-play.
+    </p>
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta2_3.png">
+    </div>
+    <div class="releaseColSub">
+    <img src="images/Moon/moon_beta3_2.png">
+    </div>    
+    </div>
+
+    <div class="release">
+    <img src="images/Moon/TI-82--1.jpg" style="width: auto; height: 18em; float:right">
+    <h3>Prototype (~2003)</h3>
+    <p>
+    The initial idea was born in my math class and was implemented on the programmable calculator TI-82.
+    The program is lost unfortunately.
+    The game was a 1D, in which you control the engine thrust while the vessel is in space and attracted by the moon's gravity.
+    </p>
+    </div>
+    
+    </div>
+        
+    <div class="footer">
+      <p>Marc Landon - 2023</p>
+    </div>
+
+        
+  
+  
+
+</body></html>

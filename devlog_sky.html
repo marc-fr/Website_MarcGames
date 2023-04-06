@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+
+
+    
+    <title>Devlog: Sky</title>
+
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.01.08">
+    
+    <meta name="description" content="procedural sky rendering">
+    <meta name="keywords" content="game, gamedev, sky, atmosphere, scattering, cloud">
+    <meta name="author" content="Marc Landon">
+
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+    </style>
+    <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
+  </head>
+  
+  <body>
+
+    <div class="sidebar">
+      <h2>About</h2>
+      <p> 
+        <a href="index.html">Home page</a> <br>
+        <a href="devlog.html#AboutMe">About me</a> <br>
+      </p>
+      <h2>Other posts</h2>
+      <ul> 
+        <li> <a href="devlog_impulse.html">impulse response</a> </li>
+        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
+        <li> <a href="devlog_sky.html">render the sky</a> </li>
+        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+      </ul>
+    </div>
+
+    <div class="main">
+    
+<h1>Procedural sky rendering</h1>
+
+<p>
+This post demonstrates how the sky can be fully procedural rendered in real-time.
+I will describe some of the methods that I found relevant for my case, which is to render the sky from the ground (or at low altitude), above the ocean (flat land, highly reflective). Additionally, several steps are detailed, so the reader can gradually use more convincing sky rendering with more complex methods, and see the impact of each improvements.
+</p>
+    
+<h2>1. Atmospheric scattering</h2>
+
+<p>
+The sky color is due to the atmospheric scattering, that comes from the interaction of the particles and gases in the atmosphere with the light.
+Plenty of free resources about the atmospheric scattering are available.
+<a href="https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-16-accurate-atmospheric-scattering">NVidia-Gems: Chapter 16</a> is one of great starting point.
+<br>
+There are two main scattering types:
+</p>
+<ul>
+  <li> the <a href="https://en.wikipedia.org/wiki/Rayleigh_scattering">Rayleigh scattering</a> that explains the color-gradient of the sky, </li>
+  <li> the <a href="https://en.wikipedia.org/wiki/Mie_scattering">Mie scattering</a> is the scattering induced by aerosol particles present in the fog and the clouds. </li>
+</ul>
+
+<h3>1.1 Single scattering</h3>
+
+<div>
+<img src="images/Dev-notes/scattering-single-event.png" style="float:right; width:256px; margin-left: 10px;">
+<p>
+The single scattering method consists in the discretization of the view ray in multiple points,
+and to compute the light after a single scattering events at every of those points.
+Then, there are two light segments, one from the viewer to the point (VP), one from the point to the source (PS). 
+</p>
+<p>
+Firstly, the scattered light ratio at the point P is:
+
+$$ L_P = \beta_R(h) \; \phi_R(\theta) + \beta_M(h) \; \phi_M(\theta) $$
+
+where
+</p>
+<ul>
+  <li> \( \beta_R = \left( 0.11, 0.32, 0.68 \right)_{rgb} \; e^{-h/h0_R} \) is the Rayleigh scattering coefficient, </li>
+  <li> \( \beta_M = \beta_{M0} \left( 0.5, 0.5, 0.5 \right)_{rgb} \; e^{-h/h0_M} \) is the Mie scattering coefficient, </li>
+  <li> \( \phi_R = \frac{3}{16 \pi} \left( 1+\cos(\theta)^2 \right) \) is the Rayleigh phase function, </li>
+  <li> \( \phi_M = \frac{3}{8 \pi} \left( \frac{1 - g^2}{2 + g^2} \right) \frac{1+\cos(\theta)^2}{ \left( 1 + g^2 - 2 g \cos(\theta) \right) ^{ \frac{3}{2} }} \) is the Mie phase function, </li>
+  <li> \( h \) the altitude, </li>
+  <li> \( \theta \) the angle between the view-ray and the source light direction, </li>
+  <li> \( h0_R = 8 km \) and \( h0_M = 1.2 km \) the characteristic altitude of the Rayleigh and Mie scattering. </li>
+</ul>
+<p>
+Secondly, a part of the light is absorbed. The extinction is computed as following:
+
+$$ \alpha(path) = \exp \left( - \alpha_c \beta_R \int_{path} { e^{-h/h0_R} dl }  - \alpha_c \beta_M \int_{path} { e^{-h/h0_M} dl } \right) $$
+
+where \( \alpha_c = 0.037 \) is the extinction coefficient, taken from empirical observation of the results.
+The integral term is called the optical-distance.
+</p>
+<p>
+Finally, the received light on the viewer (at V) is:
+
+$$ \overline{L}_V = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \; \alpha(P \rightarrow Sun) \; L_P \; dl }  $$
+</p>
+</div>
+
+<h4>Extinction pre-computation</h4>
+
+<p>
+The light equation above is evaluated for each point along the view ray, for each pixel.
+Then, this equation must evaluate quickly.
+Sadly, the extinction coefficient is an integral that is costly to evaluate by summation.
+To prevent this, many resources are using a pre-computed lookup texture.
+I could use the same technique, but I decided to use a math approximation instead.
+<br>
+Because the Earth radius is large compared with the altitude of the viewer and the characteristic altitudes of the Rayliegh and Mie scattering, we can express the optical-distance to the sun with:
+
+$$ d_{optic,sun} = \int_{path} { e^{-h/h0} dl } = \int_{x=0}^{+\infty} { e^{ - ( a x^2 + b x + c ) } dx } $$
+
+where \( a = \frac{1-cos^2 \theta}{2 R h0} \) ,  \( b = \frac{cos \theta}{h0} \) , \( c = \frac{h_{start}}{h0} \) .
+
+$$ d_{optic,sun} = \frac{\sqrt{pi}}{2\sqrt{a}} e^{-c} e^{\frac{b^2}{4a}} \left( 1 - \mathrm{erf} \left( \frac{b}{2\sqrt{a}} \right) \right) $$
+
+Because the error-function (erf) is not defined in GLSL, we need to approximate it. Furthermore, we must deal with the case where \( a \rightarrow 0 \).
+Consequently, I used 2 approximations of the erf function. One of the approximations is the asymptotic limit on \( +\infty \).
+Finally, the optical distance to the sun is expressed with:
+
+$$ d_{optic,sun} = 
+\begin{cases}
++ \infty \; \; \; \mathrm{ when } \; b &lt; 0 \; \mathrm{ and } \;  b^2 - 4 a c &gt; 0
+\\
+e^{-c} \frac{1}{|b|} \left(1 - \frac{2a}{b^2} + \frac{12a^2}{b^4} \right) \; \; \; \mathrm{ when } \; 17 a &lt; b^2
+\\
+e^{-c} \frac{\sqrt{pi}}{2 \sqrt{a}} \left( 0.3480242 p - 0.0958798 p^2 + 0.7478556 p^3 \right) \; \; \; \mathrm{ elsewhere }
+\end{cases}
+$$
+
+with \( p = \frac{2 \sqrt{a}}{2 \sqrt{a} + 0.47047 b} \)
+</p>
+
+<h4 id="resultSingle">Results</h4>
+
+<p>
+The single scattering, with this implementation, is often used on available sources.
+It is quick to implement, and it allows real-time rendering, with the help of few trade-offs.
+Despite my efforts, I was not able to reproduce skies with enough consistency. <br>
+On the picture below, the sky is rendered with Rayleigh scattering only, from midday to sunset.
+</p>
+
+<img src="images/Dev-notes/scattering-1way-results.png" alt="1way-results" style="clear:right; width:100%;">
+
+<ul>
+  <li>At midday, the sky looks too dark compared with the horizon light intensity. 
+      To increase the extinction coefficient may appear as a solution, but the sky will appear yellowed even at midday.</li>
+  <li>The overall light intensity behaves weirdly, with a maximal intensity not at midday.</li>
+  <li>The light intensity is lower on the sides, producing spurious pattern. This comes from the Rayleigh phase function.</li>
+  <li>With Mie scattering, the horizon appears dark (not shown here). This is because the poor sampling of the Mie scattering effect, where the light is highly absorbed at low altitude. 
+</li></ul>
+
+<h4>The shader code</h4>
+
+<details>
+<summary>Single scattering, Rayleigh only. (Click to expand)</summary>
+<pre>uniform vec3  sunDirectionIncoming;
+const float rE   = 6.3e3f; <span class="code-comment">// radius of Earth (km)</span>
+const float h0   = 8.f; <span class="code-comment">// Rayleigh ch. altitude (km)</span>
+const float hMax = 80.f;
+const int   rayIntg_nsteps = 25;
+const float rayIntg_norm = 0.04f;
+const vec3  scatteringCoefs_R = vec3(0.11f, 0.32f, 0.68f);
+float phase_R(float c) { return 3.f / 50.2654824574f * (1.f + c * c); }
+float opticalDistance(float csz, float hS)
+{
+  float ret = 1.e30f;
+  float a = (0.5f - 0.5f * csz * csz) / h0 / rE;
+  float b = csz / h0;
+  float c = hS / h0;
+  float bb = b * b;
+  if (b &lt; 0.f &amp;&amp; bb - 4.f * a * c &gt; 0.f) return ret; <span class="code-comment">// hit the surface</span>
+  float expc = exp(-c);
+  float optd_inf = expc / abs(b) * (1.f - 2.f*a/bb + 12.f*a*a/(bb*bb));
+  float p = 2.f * sqrt(a) / (2.f * sqrt(a) + 0.47047f * b);
+  float optd_mid = 0.5f * expc * sqrt(3.141592f / a) * p * (0.3480242f - 0.0958798f * p + 0.7478556f * p * p);
+  ret = (17.f * a &lt; bb) ? optd_inf : optd_mid;
+  return ret;
+}
+vec3 skyColor(vec3 rayView)
+{
+  vec3  ray = vec3(rayView.xy, abs(rayView.z));
+  float cvz = max(rayView.z, 0.f); <span class="code-comment">// cos view zenith</span>
+  float hMaxOverR = hMax / rE;
+  float rayLength = rE * (sqrt(cvz*cvz + 2.f * hMaxOverR + hMaxOverR*hMaxOverR) - cvz);
+  float step = rayLength * rayIntg_norm;
+  float cosRS = dot(-sunDirectionIncoming, ray); <span class="code-comment">// cos of angle between the ray and the sunlight</span>
+  float phase0_R = phase_R(cosRS);
+  vec3  lightAcc = vec3(0.f);
+  float optD_seg1 = 0.f;
+  for (int iStep = 0; iStep &lt; rayIntg_nsteps; ++iStep)
+  {
+    float x   = (0.5f + float(iStep)) * step;
+    vec3  pt  = vec3(0.f, 0.f, rE) + x * ray;
+    float ptR = length(pt);
+    float ptH = ptR - rE; <span class="code-comment">// elevation</span>
+    float csz = clamp(dot(pt, -sunDirectionIncoming) / ptR, -1.f, 1.f);
+    float optD_seg2 = opticalDistance(csz, ptH);
+    float rho = exp(-ptH/r0);
+    vec3  optD = (optD_seg1 + optD_seg2) * scatteringCoefs_R;
+    lightAcc += step * exp(-0.037f * optD) * (rho * scatteringCoefs_R * phase0_R);
+    optD_seg1 += step * rho;
+  }
+  {
+    float sunDisk = min(exp(6.e4f * (cosRS-0.999962f)), 1.f); <span class="code-comment">// Note: the sun-disk is 0.25 degree radius</span>
+    lightAcc += sunDisk * 5.f * vec3(1.f, 1.f, 1.f);
+  }
+  return lightAcc;
+}
+</pre>
+</details>
+
+<h4>Impact of the number of discretized points</h4>
+
+<p>
+I did some tests with various count of discretization points (<code>rayIntg_nsteps</code>).
+Having less scattering points gives a sky as if the extinction coefficient is higher.
+Indeed, it leads to a brighter and more uniform sky, but more yellowished near the horizon.
+</p>
+
+<img src="images/Dev-notes/scattering-1way-results-steps.png" alt="1way-results-steps" style="clear:right; width:100%;">
+
+<h4>Two steps discretization with both Rayleigh and Mie scattering</h4>
+
+<p>
+Because the Mie scattering has a 8-times lower characteristic altitude than the Rayleigh scattering characteristic altitude, 
+the distribution of the discretization points significantly affects the output.
+To have a good sampling of the Mie scattering, the distance between two points should not exceed about 1 km.
+On other hand, the total distance traveled in the atmosphere varies from 80 km to nearly 200 km.
+While keeping the reasonably low number of discretization points, the distribution of the points cannot be uniform anymore.
+Finally, I choose to split the view-ray in 2 parts:
+a first part with a fixed and short distance between 2 discretization points (so the Mie scattering will be correctly evaluated),
+and a second part with a fixed but long distance (so the Rayleigh scattering will be correctly evaluated).
+<br>
+It looks like the following:
+</p>
+<pre>const int   rayIntg_nsteps = 10;
+const int   rayIntg_total = 2 * rayIg_nsteps;
+const float rayIntg_norm = 0.1f;
+[...]
+float stepxA = 5.f               * rayIntg_norm;
+float stepxB = (rayLength - 5.f) * rayIntg_norm;
+for (int iStep = 0; iStep &lt; rayIntg_total; ++iStep)
+{
+  float stepx = (iStep &lt; rayIntg_nsteps) ? stepxA : stepxB;
+  float x     = (iStep &lt; rayIntg_nsteps) ? (0.5f + float(iStep)) * stepxA : 
+                                           5.f + (0.5f + float(iStep - rayIntg_nsteps)) * stepxB;
+  [...]
+}
+</pre>
+<p>
+Besides, it is assumed that the Rayleigh and Mie scatterings do not interfere, 
+so their effect is additive.
+That said, I follow this assumption too.
+</p>
+
+<h3>1.2 Multiple scattering</h3>
+
+<p>
+To improve the global looking, we need to take of account of multiple scattering events.
+For example, <a href="https://old.cescg.org/CESCG-2009/papers/PragueCUNI-Elek-Oskar09.pdf">Rendering Parametrizable Planetary Atmospheres with Multiple Scattering in Real-Time</a> is demonstrating a way to achieve it.
+I choose to explore two ideas: to determine better local scattering that would reduce the spurious darkness on the side, and to emit secondary rays that would improve the global looking.
+</p>
+
+<h4>A. Local scattering evaluation</h4>
+
+<div style="clear:right;">
+<img src="images/Dev-notes/scattering-local-2-events.png" style="float:right; width:256px; margin-left: 10px;">
+
+<p>
+I start by considering a local small sphere around the point P, 
+and to compute a 2-way scattering.
+At any points of the sphere, the amount of incoming light is assumed uniform.
+There are 2 scattering events, one at the point P, one at a point of the sphere (that is called Q).
+The scattered light through both scattering events at points P and Q is:
+
+$$ L_{P,Q}^{\star} (h,x,y) = L_P (h,x) \; L_P (h,z) $$
+
+where \( L_P \) is the single scattering function (defined <a href="#">here</a>) and \( z \) is the angle such that:
+
+$$ \cos(z) = \cos(x) \cos(\theta) + \sin(x) \sin(\theta) \sin(y) $$
+
+Then, the resulting 2-way local scattering function is:
+
+$$ L_P^{(2)} (\theta, h) = L_P (\theta, h) + \int_{y=0}^{2 \pi} \int_{x=0}^{\pi} L_{P,Q}^{\star} (h,x,y) \sin(x) dx dy $$
+</p>
+</div>
+
+<p>
+Like the extinction computation, the 2-way local scattering function contains an integral, that is costly to evaluate by summation.
+Therefore, I will use an approximated model.
+By the way, this term admits an analytically expression with the Rayleigh scattering only.
+After hours of investigation, I ended up with the following model
+...
+</p>
+
+<p>
+Results ...
+</p>
+
+<h4>B. Secondary ray</h4>
+
+<div style="clear:right;">
+<img src="images/Dev-notes/scattering-multi-rays.png" style="float:right; width:256px; margin-left: 10px;">
+
+<p>
+We can take account into multiple scattering events.
+The computation cost will explode, so we must select few of them:
+</p>
+<ul>
+  <li>a ray that goes down (normal to the point):
+      this ray will collect the light scattered from the lower layer at the atmosphere.
+      The light gathered has strong intensity, and heavily colored due to the high extinction.
+  </li>
+  <li>a ray that goes up (normal to the point):
+      this ray will collect the light scattered from the upper layer at the atmosphere.
+      The light is mostly blue with low intensity.
+  </li>
+  <li>a ray that goes to the sun, but tangent to the point: ...  </li>
+  <li>rays that go on-sides: ...  </li>
+</ul>
+
+</div>
+
+<div style="clear:right;">
+
+<p>
+Result ...
+(REWRITE)
+From the tests I've made, a 2-way scattering with 2 rays (up and down) give the best results with good performances.
+With more rays, some spurious patterns appear.
+I may try to address this issue in the future.
+<br>
+The resulting sky now appears good looking, and like if the extinction coefficient is lower.
+Consequently, in the final sky model, I used a higher extinction coefficient than defined in the previous sections.
+</p>
+
+</div>
+
+<h4>The shader code</h4>
+
+<details>
+<summary>Final shader code. (Click to expand)</summary>
+<pre>TODO
+</pre>
+</details>
+
+<h2>2. Offline computation</h2>
+
+<p>
+To perform the lighting computation to render the objects in our scene, like with PBR methods, 
+we often need to get the sky incoming light at many directions.
+Then, to save performance while keeping good looking, either a coarser sky model should be used, either per-computed models can be expressed.
+I choose to use pre-computed models.
+Indeed, because the viewer stays at the low altitude, there are few parameters that impacts the sky rendering.
+<br>
+Those parameters are:
+</p>
+<ul>
+  <li>The sun zenith angle (<code>cosSunZenith</code>)</li>
+  <li>The Mie scattering factor (<code>factorMie</code>)</li>
+  <li>The Mie scattering forward-direction (<code>gMie</code>)</li>
+</ul>
+
+<h3>2.1 Global illumination</h3>
+
+<p>
+The sky color is computed in HDR, and we need to apply a camera/eye exposure model for the final scene rendering.
+For this, we need the global illumination.
+<br>
+Writing in progress ...
+</p>
+
+<h3>2.2 Sky color</h3>
+
+<p>
+Finally, the sky color can be approximated by some math functions.
+<br>
+Writing in progress ...
+</p>
+
+
+
+</div>
+
+
+</body></html>

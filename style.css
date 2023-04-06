@@ -1,0 +1,91 @@
+/* Global */
+
+body {
+  max-width: 1024px;
+  margin: auto;
+  font-family: arial sans-serif;
+  font-size: 16px;
+  background-color: #000;
+  color: #AAA;
+}
+
+#encadrement {
+  width: fit-content;
+  margin: 22px auto;
+  padding: 12px;
+  border: 4px ridge;
+}
+
+pre, code {
+  font-family: monospace;
+}
+
+a:link {
+  color: #eeee77;
+}
+
+a:visited {
+  color: #998866;
+}
+
+/* Header */
+
+.header {
+  font-family: Tahoma, Verdana, sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 52px;
+  font-weight: lighter;
+  color: #FFF
+}
+
+.header p {
+  color: #555;
+}
+
+/* Footer */
+
+.footer {
+  font-family: Tahoma, Verdana, sans-serif;
+  padding: 20px;
+  text-align: center;
+  color: #888;
+}
+
+/* (Sticky) Navbar */
+
+.navbar {
+  overflow: hidden;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  text-align: center;
+  z-index:10;
+}
+
+@media screen and (max-width: 600px) {
+    .navbar { display: none !important; }
+}
+
+.navbar a {
+  color: #CCC;
+  text-decoration: none;
+  display: block;
+  width: 100%;
+}
+     
+.navbar td {
+  background-color: #111;
+  padding: 10px 4px;
+}
+      
+.navbar td:hover {
+  background-color: #444;
+}
+
+.navbar td.active {
+  background-color: #222;
+}

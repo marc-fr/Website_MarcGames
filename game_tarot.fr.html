@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <title>Tarot au bout</title>
+
+    <link rel="icon" type="image/x-icon" href="images/Icon.png">
+    <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
+
+    <meta name="description" content="Page d'accuiel du jeu Tarot au bout">
+    <meta name="keywords" content="game, gamedev, jeu, Tarot, carte, gratuit, solo">
+    <meta name="author" content="Marc Landon">
+
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+.main {
+  margin: 20px 0px; 
+  padding: 4px 10px; 
+  background: #154;
+}
+
+.main a:visited {
+  color: #FFAA55;
+}
+    </style>
+    
+    <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
+
+  </head>
+  
+  <body>
+    <div class="header">
+      <h1>Marc Games</h1>
+      <p> ( only in <img src="images/flag-fr.png" alt="français" style="width:auto; height: 0.8em; filter: brightness(50%)"> ) </p>
+    </div>
+    <div class="navbar">
+      <table style="width: 100%" border="0">
+        <tbody>
+          <tr>
+            <td style="width: 20%;"><a href="index.fr.html">Accueil</a></td>
+            <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
+            <td style="width: 20%;" class="active"><a href="#">Tarot au bout</a></td>
+            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
+            <td style="width: 20%;"><a href="devlog.html">Dev log </a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="main">
+    
+      <h2>Description du jeu</h2>
+    
+      <p>
+Le jeu émule le jeu de Tarot, à 4 et 5 joueurs, en solo (un seul joueur humain).
+Les règles du Tarot sont celles décrites depuis le site de la <a href="http://fftarot.fr/">Fédération Française de Tarot</a>.
+
+      </p>
+
+<!--      
+      <p>
+Jouer à la version demo du jeu sur le web <a href="FF">ici</a>.
+      </p>
+-->
+
+    </div>
+    <div class="main">    
+
+      <h2>Fonctionnalités</h2>
+
+      <ul>
+        <li> partie à 4 joueurs </li>
+        <li> partie à 5 joueurs </li>
+        <li> comptabilisation des points du contrat </li>
+        <li> mode "terminer la partie à ma place" </li>
+        <li> choix du niveau des joueurs contrôlés par l'ordinateur </li>
+        <li> mode "nuit" </li>
+      </ul>
+
+    </div>
+    <div class="main">    
+
+      <h2>Carnet de développement</h2>
+
+      <h3>Prochaine version (non planifiée)</h3>
+      
+      <p>
+      Le développement de l'intéligence artificielle est en cours. Les versions actuelles du jeu contiennent une I.A limitée.
+      </p>
+      
+     <h3>Version beta 4 (Nov 2022)</h3>
+
+     <p>
+     L'interface a été complètement refaite en utilisant ma propre librairie (TRE),
+     construite au fur-et-à-mesure en mettant en commun les parties récurrentes de mes jeux.
+     Le coeur du jeu est stabilisée.
+     L'intelligence artificielle a été améliorée, mais encore loin de l'objectif final.
+     </p>
+
+<div class="slideshow-container">
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #154">1 / 3</div>
+  <img src="images/Tarot/TarotAuBout_beta4_InGame.png" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #154">2 / 3</div>
+  <img src="images/Tarot/TarotAuBout_beta4_CallKing.png" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #154">3 / 3</div>
+  <img src="images/Tarot/TarotAuBout_beta4_ModeSombre.png" style="width:100%">
+</div>
+
+<a class="prev" onclick="plusSlides(-1)">❮</a>
+<a class="next" onclick="plusSlides(1)">❯</a>
+
+</div>
+<script type="text/javascript" src="gallery.js"> </script>
+
+      <div>    
+
+
+      <h3>Prototype (Jan 2018)</h3>
+      
+      <img src="images/Tarot/TarotProject_beta2_screenshot1.png" alt="Capture d'écran prototype" style="width:400px; height:auto; float:right; ">
+     
+      <p>
+      Le prototype a été développé en utilisant Qt, qui est une librairie d'interface utilisateur.
+      Cela a permi aussi de créer le coeur du jeu (en C++), qui contrôle le déroulement des parties. 
+      </p>
+      
+      <div style="clear: right; "> </div>
+      
+      </div>
+    
+    </div>
+    
+    <div class="footer">
+      <p>Marc Landon - 2023</p>
+    </div>
+
+</body></html>

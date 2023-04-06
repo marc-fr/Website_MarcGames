@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <title>Devlog: IS-MCST</title>
+
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.01.08">
+    
+    <meta name="description" content="information set Monte-Carlo search tree">
+    <meta name="keywords" content="game, gamedev, information, monte-carlo, search, tree">
+    <meta name="author" content="Marc Landon">
+
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+    </style>
+    <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
+  </head>
+  
+  <body>
+
+    <div class="sidebar">
+      <h2>About</h2>
+      <p> 
+        <a href="index.html">Home page</a> <br>
+        <a href="devlog.html#AboutMe">About me</a> <br>
+      </p>
+      <h2>Other posts</h2>
+      <ul> 
+        <li> <a href="devlog_impulse.html">impulse response</a> </li>
+        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
+        <li> <a href="devlog_sky.html">render the sky</a> </li>
+        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+      </ul>
+    </div>
+
+    <div class="main">
+    
+<h1>Artificial intelligence for a card game</h1>
+
+<p>
+To learn to play a card game implies firstly to learn the game rules, and then to be able to anticipate the game results.
+Artifical intelligences are designed in the same way:
+a game-graph implements the game rules, and walking the game-graph allows to anticipate the outcome.
+For a card game, the complexity is higher because a game is an incomplete-knowledge game. (Player's cards are hidden from other players.)        
+</p>
+    
+<h2>Methods of A.I</h2>
+
+<p>
+A first class of methods is called 'Evaluator' based-methods.
+The evaluators compute the win esperence with the knowledge of the current game-state, including the history.
+They are based either on heuristics, either on neural networks.
+<br>
+A second class of methods is called 'Tree-search' based-methods.
+The nodes of the tree are all possible game-states.
+The goal is to efficiently travel through the nodes.
+The brute-force algorithm travels all of the nodes, from the initial game state to all possible final states.
+This method can be used for small problems, but it becomes not feasible in terms of compute time for bigger problems. 
+The deep-search algorithm travels a limited number of nodes:
+</p>
+<ul>
+  <li> the Alpha-Beta tree-search: same as brute-force, but skip some trees that don't contribute to the final result</li>
+  <li> the Monte-Carlo tree-search: recursively refine evaluation of random game trees </li>
+</ul>
+<p>
+The most promising method seems to be the Monte-Carlo Tree-Search (MCTS).
+This method is already explored and used by various games.
+Moreover, the MCTS can be extended for incomplete-knowledge game, known as the (incomplete) Information-Set Monte-Carlo Tree-Search (IS-MCTS).
+Finally, the MCTS and the IS-MCTS are well suitable to handle timing constrains, because they progressively refine the evaluation of the game tree over time and the current "best" evaluation is always available.
+</p>
+    
+<h2>A world of probabilities</h2>
+
+<p>
+Before dealing with the IS-MCTS, let's dive into some probabilities!
+</p>
+
+<h3>Distribution of N cards over P players</h3>
+
+<p>
+The goal is to compute the distribution of N un-ordered cards, over P distinguished players.
+We already know that the total count of the distributions is \( P^N  \). 
+Indeed, for each card, we choose a player to give to.
+</p>
+<p>
+Let's take an example, with 3 cards over 4 players:
+</p>
+
+   <table>
+    <tbody>
+     <tr>
+      <td style="width:64px">
+       <img src="images/Dev-notes/distribution-3C-4P-1.png" style="width:100%">
+      </td>
+      <td>
+       <p> There is 1 distribution per repetition, with 4 repetitions. (1 way to give all cards to a player, repeated by the player's choice (either P1, P2, P3 P4)) </p>
+      </td>
+     </tr>
+     <tr>
+      <td style="width:64px">
+       <img src="images/Dev-notes/distribution-3C-4P-2.png" style="width:100%">
+      </td>
+      <td>
+       <p> There are 3 distributions per repetition, with 12 repetitions. (Choose 1 card over the 3 cards to give to a player. Then, repeat by selecting 1 player over 4 and 1 player over the 3 remaining players.) </p>
+      </td>
+     </tr>
+     <tr>
+      <td style="width:64px">
+       <img src="images/Dev-notes/distribution-3C-4P-3.png" style="width:100%">
+      </td>
+      <td>
+       <p> There is 6 distributions per repetition, with 4 repetitions (Choose 1 card, then another card among the remaining cards. Then repeat by choosing the player that won't receive card.) </p>
+      </td>
+     </tr>
+    </tbody>
+   </table>
+
+<p>
+The total count of the distributions is 4*1 + 12*3 + 4*6 = 64, that is the expected number.
+</p>
+
+<p>
+The generic case with 4 players is: <code>(x,y,z,w)</code> has \( R \) repetitions, with \( D \) distribution per repetition, where
+</p>
+<ul>
+  <li> \( R = C_{p_x}^{4} \times C_{p_y}^{4 - p_x} \times C_{p_z}^{4 - p_x - p_y} \times C_{p_w}^{4 - p_x - p_y - p_z}    \)   </li>
+  <li>  \( p_x \) is the number of players that receive \( x \) cards, \( p_y \) the number of players that receive \( y \) cards if \( x \neq y \) or 0 elsewhere, ...</li>
+  <li> \( D = C_{x}^{x+y+z+w} \times C_{y}^{y+z+w} \times C_{z}^{z+w} \)  </li>
+  <li> \( C_k^n = \frac{n!}{k! (n-k)!} \) is the combination of \( k \) over \( n \). <i>Note: another formula is used in practice.</i> </li>
+  <li> \( x \ge y \ge z \ge w \) and \( x + y + z + w = N \)  </li>
+</ul>
+
+<h3>Constrained distribution of N cards over P players</h3>
+
+<p>
+I now consider that some players must receive a certain cards' count, or cannot receive more than a certain cards' count.
+With help of the result established above, we can easily discard invalid repetitions.
+</p>
+
+<h3>Probabilities of distributions</h3>
+
+<p>
+Given a distribution (like <code>(x,y,z,w)</code> with 4 players), its probability is given by \( \frac{D}{P^N} \).
+</p>
+
+
+    
+<h1>Implementation details</h1>
+    
+<p>Writing in progress...</p>
+
+
+    </div>
+
+</body></html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <title>Devlog: Impulse</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.01.08">
+    <meta name="description" content="XX">
+    <meta name="keywords" content="game, gamedev">
+    <meta name="author" content="Marc Landon">
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+    </style>
+    <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
+  </head>
+  
+  <body>
+    <div class="sidebar">
+      <h2>About</h2>
+      <p> 
+        <a href="index.html">Home page</a> <br>
+        <a href="devlog.html#AboutMe">About me</a> <br>
+      </p>
+      <h2>Other posts</h2>
+      <ul> 
+        <li> <a href="devlog_impulse.html">impulse response</a> </li>
+        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
+        <li> <a href="devlog_sky.html">render the sky</a> </li>
+        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+      </ul>
+    </div>
+    <div class="main">
+      <h1>Implementing a small physics engine for a platformer game</h1>
+      <p>
+The aim is to simulate the motion of a vessel, that evolves in an uniform gravity field and in a static world, in a <a href="https://en.wikipedia.org/wiki/Inertial_frame_of_reference">Newtonian frame</a>.
+I restrict this work on a 2D space, even if it stays valid in 3D with some adaptations.<br>
+Skip the math and <a href="#code1">go</a> directly to the pseudo-code!
+</p>
+
+      <h2>Equation of motion</h2>
+      <p>
+We define the state of a rigid body with the position of its center of inertia ( called \(\vec{C}\) ) and its rotation ( called \(\Omega\) ).
+Both parameters define a local frame attached to the rigid body.
+In the following, the velocity of the center of inertia is called \(\vec{v}\), while the rotational velocity is noted \(\omega\).<br>
+The equation is motion is:
+$$ m \dot{\vec{v}} = m \vec{g} + \sum \vec{F} $$
+$$ I \dot{\omega} = \sum \vec{p} \times \vec{F} $$
+where \(m\) is the mass of the body, \(I\) its rotational inertia, \(\vec{g}\) the gravity action and \(\vec{F}\) a force applied at the point \(P = C + \vec{p}\) of the body. 
+      </p>
+      <h2>Computing a contact response</h2>
+      <p>
+When the body hits a fixed obstacle, a reaction force prevents penetrations.
+With the rigid body approximation, the velocity of the body has a gap at the hit time.
+Consequently, the contact response is defined by a velocity gap.
+      </p>
+   
+      <table>
+       <tbody>
+        <tr>
+         <td style="width:50%">
+          <img src="images/Dev-notes/impulse_soft.jpg" style="width:100%">
+         </td>
+         <td style="width:50%">
+          <img src="images/Dev-notes/impulse_hard.jpg" style="width:100%">
+         </td>
+        </tr>
+        <tr>
+         <td style="width:50%; text-align:center;">
+         <i>Soft reaction force, with a soft body.</i>
+         </td>
+         <td style="width:50%; text-align:center;">
+         <i>Impulse, with a rigid-body.</i>
+         </td>
+        </tr>
+       </tbody>
+      </table> 
+      
+      <img src="images/Dev-notes/body-contact.png" style="width:25%; padding: 10px; float:right;">
+      <p>
+During the contact, the contact action is predominant compared with other actions, such as the gravity.
+Therefore, I use the approximation of a single force, with a constant direction.
+From the integration of the equation of motion, I obtain:
+      </p>
+      <p style="clear: right;">
+$$ m \vec{\delta v} = \int_{\delta t} { \vec{F} } $$
+$$ I \delta \omega = \vec{p} \times \int_{\delta t} { \vec{F} } $$
+This yields to:
+$$ \delta \omega = \frac{m}{I} \vec{p} \times \vec{\delta v} $$
+We can remark that the variation of the velocity is parallel with the overall force direction.
+The goal is to compute the variation of both the velocity \(\vec{\delta v}\) and the angular-velocity \(\delta \omega\).
+The velocity delta of the contact point \(P\) verifies two relations.
+The first is the rigid body cinematic relation,
+$$ \vec{\delta v_P} = \vec{\delta v} - \vec{p} \times \vec{\delta \omega} $$
+and the second is ruled by the contact properties, that only depends on the known velocity of the contact point before the hit:
+$$ \vec{\delta v_P} = - v^{\star}_r \vec{n} - v^{\star}_f \vec{t} $$
+where \( \vec{n} \) is the normal of the surface of the obstacle, \( \vec{t} \) is a tangent to this surface,
+and \( v^{\star}_r \), \( v^{\star}_f \) respectively the rebound velocity and friction velocity.
+After some computations, I obtain:
+$$ (\delta \vec{v} \cdot \vec{n}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{n} ) \cdot \vec{n} \right)  = - v^{\star}_r $$
+$$ (\delta \vec{v} \cdot \vec{t}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{t} ) \cdot \vec{t} \right)  = - v^{\star}_f $$
+      </p>
+
+      <h2>Resolution of the penetration</h2>
+      <img src="images/Dev-notes/body-penetration.png" style="width:25%; padding: 5px; float:right;">
+
+      <p>
+There are 2 methods to compute the penetration.
+      </p>
+      <ul>
+        <li> The first method is to compute the exact time when the body enters in contact, and to split the time-frame simulation in two parts, before and after the contact. </li>
+        <li> The second method is to work with the penetration at the end of the time-frame, so basically after at a little while of the contact. </li>
+      </ul>
+<p>
+I decided to go with the second method, because it allows to easily work with multiple contacts and its stability when the body is on the ground.
+However, the drawbacks are that the penetration resolution should be precise, the penetration may fail to be resolved if the time-step or the velocity is too high, and the body should be moved out-of-penetration at the end.
+<br>
+To resolve the penetration, I compute the intersection of the body area with the obstacle area.
+I use a conjecture to compute the virtual contact-point in which the resultant contact force is applied from: 
+the virtual contact-point is at the barycenter of the intersecting area.
+This conjecture is similar with the Archimedes force if we consider the obstacle made in water.
+Another similarity is to average the elastic-force on the intersecting area if all of its matter is displaced on the obstacle surface.
+<br>
+After this, the body must be moved to cancel the penetration.
+I choose the simplest way: translate the body along the obstacle normal vector, such that it no longer penetrates the obstacle.
+</p>
+
+      <h2 id="code1">Pseudo-code</h2>
+
+      <pre>const float moverI = 0.20f; <span class="code-comment">// (depends on the object geometry)</span>
+
+void simulate(vec2 bodyPos, float bodyRot, vec2 bodyVel, float bodyRotVel, float dt)
+{
+  <span class="code-comment">// Motion integration</span>
+  bodyPos += dt * bodyVel;
+  bodyRot += dt * bodyRotVel;
+
+  <span class="code-comment">// Gravity</span>
+  bodyPos += 0.5 * dt * dt * gravity;
+  bodyVel += gravity * dt;
+
+  <span class="code-comment">// Contact</span>
+  for (auto contact in compute_contacts())
+  {
+    <span class="code-comment">// Rebound</span>
+    const float reboundCoef = 1.2f;
+    float alpha = cnt.normal.x * (   cnt.pt.y*cnt.pt.x*cnt.normal.y - cnt.pt.y*cnt.pt.y*cnt.normal.x ) +
+                  cnt.normal.y * ( - cnt.pt.x*cnt.pt.x*cnt.normal.y + cnt.pt.x*cnt.pt.y*cnt.normal.x );
+    alpha = 1.f - moverI * alpha;
+
+    dvel.x -= dot(bodyVel,cnt.normal) * reboundCoef / alpha * cnt.normal.x;
+    dvel.y -= dot(bodyVel,cnt.normal) * reboundCoef / alpha * cnt.normal.y;
+    const float fmoment =  cnt.pt.x * cnt.normal.y - cnt.pt.y * cnt.normal.x;
+    drotvel -= moverI * dot(bodyVel,cnt.normal) * reboundCoef / alpha * fmoment;
+
+    <span class="code-comment">// Friction</span>
+    const float frictionCoef = 0.01f;
+    float alphaT = cnt.tangent.x * (   cnt.pt.y*cnt.pt.x*cnt.tangent.y - cnt.pt.y*cnt.pt.y*cnt.tangent.x ) +
+                   cnt.tangent.y * ( - cnt.pt.x*cnt.pt.x*cnt.tangent.y + cnt.pt.x*cnt.pt.y*cnt.tangent.x );
+    alphaT = 1.f - moverI * alphaT;
+
+    dvel.x -= dot(bodyVel,cnt.tangent) * 0.01f / alphaT * cnt.tangent.x;
+    dvel.y -= dot(bodyVel,cnt.tangent) * 0.01f / alphaT * cnt.tangent.y;
+    const float fmomentT =  (cnt.pt.x * cnt.tangent.y - cnt.pt.y * cnt.tangent.x) * 0.5f; <span class="code-comment">// (0.5f: for stability)</span>
+    drotvel -= moverI * dot(bodyVel,cnt.tangent) * frictionCoef / alphaT * fmomentT;
+
+    <span class="code-comment">// Compute variation of displacement - only translation</span>
+    dpos.x += cnt.penet * cnt.normal.x;
+    dpos.y += cnt.penet * cnt.normal.y;
+  }
+  bodyPos += dpos;
+  bodyVel += dvel;
+  bodyRotVel += drotvel;
+} 
+</pre>
+      
+      
+      <h1>Faking the landing feet</h1>
+      <img src="images/Dev-notes/body-with-feet.png" style="width:15%; padding: 5px; float:right;">
+      <p>
+Adding landing feet with dampers greatly improves the feeling of the contact response.
+The coupling between the vessel and the feet is not obvious to determine.
+However, I use a conjectured method to keep it simple and compatible with the kinetic relations established above.
+      </p>
+
+      <p>
+      Writing in progress ...
+      </p>
+
+
+    </div>
+</body></html>

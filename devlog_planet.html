@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    
+    <title>Devlog: planet rendering</title>
+
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.01.08">
+    
+    <meta name="description" content="planet rendering at multiple scales">
+    <meta name="keywords" content="game, gamedev, planet, moon, rendering, multiscale">
+    <meta name="author" content="Marc Landon">
+
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+    </style>
+    <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
+  </head>
+  
+  <body>
+
+    <div class="sidebar">
+      <h2>About</h2>
+      <p> 
+        <a href="index.html">Home page</a> <br>
+        <a href="devlog.html#AboutMe">About me</a> <br>
+      </p>
+      <h2>Other posts</h2>
+      <ul> 
+        <li> <a href="devlog_impulse.html">impulse response</a> </li>
+        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
+        <li> <a href="devlog_sky.html">render the sky</a> </li>
+        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+      </ul>
+    </div>
+
+    <div class="main">
+
+    <div>
+    <img src="images/Dev-notes/planet-elevation.png" style="width=30%; padding: 5px; float: right;">
+        
+    <h1>What data do we need to model the Moon ?</h1>
+    <p>
+To model the Moon, or a planet or spherical objects, 
+we need the elevation on each point of the surface,
+and the lighting data on each point of the surface. <br>
+The first one defines a displacement along the normal of the surface, 
+and allow to obtain the bumped surface and compute the normal-map. <br>
+The second one defines how the light is absorbed and reflected.
+The Albedo color can be measured by aggregating the reflectance on multiple light wave-length. <br>
+Those data are often projected in a 2D-space, using a spherical projection.
+    </p>
+    </div>
+
+    <h1>Where to find realistic/scientific data of the Moon ?</h1>
+    <p>
+Since the Apollo missions, the Moon has been mapped with more and more precision, thanks to some satellites.
+In particular, the NASA has collected user-friendly maps of the Moon, that can be found at <a href="https://svs.gsfc.nasa.gov/4720">https://svs.gsfc.nasa.gov/4720</a>. High resolution maps are free to download:
+    </p>
+    <ul>
+      <li> Albedo map: up to 27360*13680 (~500Mo) </li>
+      <li> Elevation map: up to 23040*11520 (~1Go) </li>
+    </ul>
+    <p>
+These maps cannot be used directly in a game, we need to process them.
+    </p>
+   
+   <table>
+    <tbody>
+     <tr>
+      <td style="width:50%">
+       <img src="images/Dev-notes/color_1024p.jpg" style="width:100%">
+      </td>
+      <td style="width:50%">
+       <img src="images/Dev-notes/elevation_uint_720p.jpg" style="width:100%">
+      </td>
+     </tr>
+     <tr>
+      <td style="width:50%; text-align:center;">
+      <i>Albedo color map</i>
+      </td>
+      <td style="width:50%; text-align:center;">
+      <i>Elevation map.
+      Dark zones represent low elevation (seas and holes), bright zone represent high elevation (mountains)</i>
+      </td>
+     </tr>
+    </tbody>
+   </table> 
+    
+    <h1>How to process the data ?</h1>
+
+    <h2>Choose the topology</h2>
+    <div>
+    <img src="images/Dev-notes/sphere_topology_from_cube.jpg" style="float: right; margin: 5px; width: 30%">
+    
+    <p>
+The main idea is to cut a sphere into countable parts. 
+Any regular polyhedron can approximate a sphere with a finite number of faces. 
+So a portion of the sphere's surface can be addressed with a face identifier. <br>
+A cube (which is a regular polyhedron) lets us to have a direct mapping:
+    </p>
+    <ul>
+      <li> the face -X will have a (-1, 0, 0) identifier, </li>
+      <li> the face +X will have a (1, 0, 0) identifier, </li>
+      <li> the face -Y will have a (0, -1, 0) identifier, </li>
+      <li> the face +Y will have a (0, 1, 0) identifier, </li>
+      <li> the face -Z will have a (0, 0, -1) identifier, </li>
+      <li> the face +Z will have a (0, 0, 1) identifier. </li>
+    </ul>
+    <p>
+Each faces can now be subdivided into smaller parts.
+A ratio is 3 has been selected.
+    </p>
+
+    </div>
+
+    <h2>Construct the mesh</h2>
+    <p>
+The mesh is constructed from a cube subdivision, for which vertices are projected on the unit sphere.
+Each subdivision is similar to a 2D surface, that can be refined independently.
+To do a projection on the unit sphere, it simply consists to normalize the vector constructed by any points with the center of the sphere.
+    </p>
+
+   <table>
+   <tbody>
+<tr>
+   <td style="width:50%">
+   <img src="images/Dev-notes/sphere_LOD0-0.jpg" style="width:100%">
+   </td>
+   <td style="width:50%">
+   <img src="images/Dev-notes/sphere_LOD0-2.jpg" style="width:100%">
+   </td>
+   </tr>
+   <tr>
+   <td style="width:50%; text-align:center;">
+   <i>Wire-frame of the mesh, with LOD level 0</i>
+   </td>
+   <td style="width:50%; text-align:center;">
+   <i>Wire-frame of the mesh, with LOD levels from 0 to 2</i>
+   </td>
+   </tr>
+   </tbody></table> 
+
+    
+    <h2>Re-sample the maps</h2>
+    <p>
+Now that we have a subdivision of a sphere (that we call 'tiles'), we can associate textures on each tile.
+The needed textures are the albedo-map (color-map) and normal-map.
+The height could be, either encoded in a map and the application will use a vertex displacement technique, either applied to the mesh. I prefer the second option because it will require less workload in the final application.
+<br>
+Each pixel of a texture is a small rectangle. This rectangle is projected on the origin map with the inverse equirectangular spherical projection.
+    </p>
+    
+    </div>
+        
+  
+  
+
+
+</body></html>

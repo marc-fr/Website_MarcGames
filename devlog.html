@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Dev Log</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
+    <meta name="description" content="Technical details">
+    <meta name="keywords" content="game, gamedev, cpp, devlog">
+    <meta name="author" content="Marc Landon">
+    <meta name="generator" content="BlueGriffon wysiwyg editor">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* local style ...*/
+.main {
+  margin: 20px 0px; 
+  padding: 4px 10px; 
+  background: #222;
+}
+    
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Marc Games</h1>
+      <p> ( only in <img src="images/flag-en.png" alt="english" style="width:auto; height: 0.8em; filter: brightness(50%)">
+        ) </p>
+    </div>
+    <div class="navbar">
+      <table style="width: 100%" border="0">
+        <tbody>
+          <tr>
+            <td style="width: 20%;"><a href="index.html">Home</a></td>
+            <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding
+                project</a></td>
+            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
+            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships
+                in sight</a></td>
+            <td style="width: 20%;" class="active"><a href="#">Dev log </a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="main">
+      <h2>Posts</h2>
+      <p>
+        Here is some technical details about how the games are made and what is behind the scene.
+        I choose to not use an existing game engine, such as Unity or Unreal. 
+        Indeed, I like to program, within all aspects. <br>
+        These posts are amied to help game developers to implement the described features.
+      </p>
+      <ul>
+        <li> <a href="devlog_impulse.html">Compute the impulse-response of a rigid-body in 2D</a> </li>
+        <li> <a href="devlog_planet.html">Efficiently render the Moon at any scales</a> </li>
+        <li> <a href="devlog_ISMCST.html">Build the A.I of a card-game, using IS-MCST</a> </li>
+        <li> <a href="devlog_sky.html">Procedural render of the sky (and ocean)</a> </li>
+        <li> <a href="devlog_webgl.html">Porting guide to web-assembly using Emscripten</a> </li>
+      </ul>
+    </div>
+    <div class="main">
+      <h2>Behind the scene</h2>
+      <p>
+        TRE (Tiny-Render Engine) is a toolkit built on the top of SDL2 and OpenGL.
+        This is the basement of my games.
+        This is not a game-engine, but it helps with mesh operations, UI, shaders (tiny material library), contact algorithms and sound thread.
+      </p>
+      <p>
+        TRE is open-source and hosted on GitHub: <a href="https://github.com/marc-fr/TinyRenderEngine">TinyRenderEngine</a>
+      </p>
+      <h3>Some though about C++ feature-sets for games</h3>
+      <p>
+        TRE is using the STL, that uses exceptions for error handling.
+        This has no noticeable impact on the performances, since c++ has a nice paradigm that says: "don't pay for what you don't use".
+        As far as exceptions are considered as nonrecoverable fatal errors,
+        it is not relevant (in a solo-developer point of view) to not use the STL.
+      </p>
+      <h3>Rendering API: modern OpenGL vs. Vulkan</h3>
+      <p>
+        Even though OpenGL is a pretty old rendering API, it is still used in legacy applications and small projects.
+        Using Vulkan gives a great opportunity to work on the CPU code that submits commands to the GPU.
+        For example, Vulkan allows commands to be generated from multiple threads, while OpenGL does not.
+        While my games won't be limited by the rendering CPU thread, OpenGL will still be the default rendering API.
+      </p>
+      <h3>Oriented-Object vs. Data-Driven paradigm for games</h3>
+      <p>
+        The oriented-object paradigm is often adopted by software developers.
+        For generic game engines, this paradigm implies to have an "entity" oriented architecture.
+        It is demonstrated for example in the following talk:
+        <a href="https://www.youtube.com/watch?v=tONOW7Luln8">Data Driven Entity Component System in C++17</a>.
+        But, at a coarse level, a game is basically a software that transforms data into rendering of frames (video and sound).
+        The data can be split by the usage:
+      </p>
+      <ul>
+        <li> User data (mouse, keyboard, joystick, ...) </li>
+        <li> Game data (game state, game logic, physic, ...) </li>
+        <li> Render data (geometry, textures, lighting, ...) </li>
+      </ul>
+      The data-driven paradigm allows better scopes for data, and facilitates parallelism (and noticeable with the rendering thread(s)).
+      For more details, find here some references about data-oriented design in C++:
+      <ul>
+        <li> <a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">CppCon 2014: Mike Acton "Data-Oriented Design and C++"</a> </li>
+        <li> <a href="https://www.youtube.com/watch?v=yy8jQgmhbAU">CppCon 2018: Stoyan Nikolov “OOP Is Dead, Long Live Data-oriented Design”</a> </li>
+      </ul>
+      <p></p>
+    </div>
+    <div class="main">
+      <h2 id="AboutMe">About me</h2>
+      <p> ... </p>
+      <p>
+        <img src="images/Tools/IcoMail2.png" alt="Email:" style="height: 1em;">
+        <a href="mailto:marcgames@orange.fr">marcgames@orange.fr</a>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>Marc Landon - 2023</p>
+    </div>
+
+  </body>
+</html>
