@@ -3,6 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+
     
     <title>Devlog: Impulse</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
@@ -38,21 +39,55 @@
       <h1>Implementing a small physics engine for a platformer game</h1>
       <p>
 The aim is to simulate the motion of a vessel, that evolves in an uniform gravity field and in a static world, in a <a href="https://en.wikipedia.org/wiki/Inertial_frame_of_reference">Newtonian frame</a>.
-I restrict this work on a 2D space, even if it stays valid in 3D with some adaptations.<br>
-Skip the math and <a href="#code1">go</a> directly to the pseudo-code!
-</p>
+I restrict this work on a 2D space, even if it stays valid in 3D with some adaptations.
+      </p>
+      <p>
+After the equation of motion begin recalled,
+the impulse response from a single contact is resolved.
+A simple model is proposed, from which some limitations are discussed.
+Then, the penetration resolution is determined.
+Finally, the model is extended such as the vessel has feet with dampers.
+      </p>
 
-      <h2>Equation of motion</h2>
+      <video autoplay loop muted inline style="display: block; margin: auto;">
+        <source src="images/devnote_impulse/anim_WithFoot_case4.mp4" type="video/mp4">
+      </video>
+
+      <h2>1. Equation of motion</h2>
       <p>
 We define the state of a rigid body with the position of its center of inertia ( called \(\vec{C}\) ) and its rotation ( called \(\Omega\) ).
 Both parameters define a local frame attached to the rigid body.
 In the following, the velocity of the center of inertia is called \(\vec{v}\), while the rotational velocity is noted \(\omega\).<br>
-The equation is motion is:
+The equation of motion is:
 $$ m \dot{\vec{v}} = m \vec{g} + \sum \vec{F} $$
 $$ I \dot{\omega} = \sum \vec{p} \times \vec{F} $$
-where \(m\) is the mass of the body, \(I\) its rotational inertia, \(\vec{g}\) the gravity action and \(\vec{F}\) a force applied at the point \(P = C + \vec{p}\) of the body. 
+where
       </p>
-      <h2>Computing a contact response</h2>
+<ul>
+  <li> \(m\) is the mass of the body, </li>
+  <li> \(I\) its rotational inertia, </li>
+  <li> \(\vec{g}\) the gravity action, </li>
+  <li> \(\vec{F}\) a force applied at the point \(P = C + \vec{p}\) of the body. </li>
+</ul>
+
+      <p>
+With only the gravity, the motion can be integrated with the exact integration scheme:
+      </p>
+
+      <pre>void simulate_1(float dt)
+{
+  <span class="code-comment">// Motion integration</span>
+  bodyPos += dt * bodyVel;
+  bodyRot += dt * bodyRotVel;
+
+  <span class="code-comment">// Gravity</span>
+  bodyPos += 0.5 * dt * dt * gravity;
+  bodyVel += gravity * dt;
+
+  <span class="code-comment">// [...]</span>
+}</pre>
+
+      <h2>2. Computing a contact response</h2>
       <p>
 When the body hits a fixed obstacle, a reaction force prevents penetrations.
 With the rigid body approximation, the velocity of the body has a gap at the hit time.
@@ -63,10 +98,10 @@ Consequently, the contact response is defined by a velocity gap.
        <tbody>
         <tr>
          <td style="width:50%">
-          <img src="images/Dev-notes/impulse_soft.jpg" style="width:100%">
+          <img src="images/devnote_impulse/impulse_soft.jpg" style="width:100%">
          </td>
          <td style="width:50%">
-          <img src="images/Dev-notes/impulse_hard.jpg" style="width:100%">
+          <img src="images/devnote_impulse/impulse_hard.jpg" style="width:100%">
          </td>
         </tr>
         <tr>
@@ -79,8 +114,8 @@ Consequently, the contact response is defined by a velocity gap.
         </tr>
        </tbody>
       </table> 
-      
-      <img src="images/Dev-notes/body-contact.png" style="width:25%; padding: 10px; float:right;">
+
+      <img src="images/devnote_impulse/body-contact.png" style="width:25%; padding: 10px; float:right;">
       <p>
 During the contact, the contact action is predominant compared with other actions, such as the gravity.
 Therefore, I use the approximation of a single force, with a constant direction.
@@ -105,8 +140,85 @@ $$ (\delta \vec{v} \cdot \vec{n}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p
 $$ (\delta \vec{v} \cdot \vec{t}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{t} ) \cdot \vec{t} \right)  = - v^{\star}_f $$
       </p>
 
-      <h2>Resolution of the penetration</h2>
-      <img src="images/Dev-notes/body-penetration.png" style="width:25%; padding: 5px; float:right;">
+      <h3>The pseudo-code:</h3>
+
+<pre>const float moverI = 0.20f; <span class="code-comment">// (depends on the object geometry)</span>
+
+void simulate_2(float dt)
+{
+  <span class="code-comment">// [...] Motion integration + Gravity</span>
+
+  <span class="code-comment">// Contact</span>
+  dvel = vec2(0.f, 0.f);
+  drotvel = 0.f;
+  for (auto contact in compute_contacts())
+  {
+    <span class="code-comment">// Rebound</span>
+    const float reboundCoef = 1.2f; <span class="code-comment">// (depends on the surface's type)</span>
+    float alpha = cnt.normal.x * ( cnt.pt.y*cnt.pt.x*cnt.normal.y - cnt.pt.y*cnt.pt.y*cnt.normal.x) +
+                  cnt.normal.y * (-cnt.pt.x*cnt.pt.x*cnt.normal.y + cnt.pt.x*cnt.pt.y*cnt.normal.x);
+    alpha = 1.f - moverI * alpha;
+
+    dvel.x -= dot(cnt.vit,cnt.normal) * reboundCoef / alpha * cnt.normal.x;
+    dvel.y -= dot(cnt.vit,cnt.normal) * reboundCoef / alpha * cnt.normal.y;
+    const float fmoment =  cnt.pt.x * cnt.normal.y - cnt.pt.y * cnt.normal.x;
+    drotvel -= moverI * dot(cnt.vit,cnt.normal) * reboundCoef / alpha * fmoment;
+
+    <span class="code-comment">// Friction</span>
+    const float frictionCoef = 0.1f; <span class="code-comment">// (depends on the surface's type)</span>
+    float alphaT = cnt.tangent.x * ( cnt.pt.y*cnt.pt.x*cnt.tangent.y - cnt.pt.y*cnt.pt.y*cnt.tangent.x) +
+                   cnt.tangent.y * (-cnt.pt.x*cnt.pt.x*cnt.tangent.y + cnt.pt.x*cnt.pt.y*cnt.tangent.x);
+    alphaT = 1.f - moverI * alphaT;
+
+    dvel.x -= dot(cnt.vit,cnt.tangent) * frictionCoef / alphaT * cnt.tangent.x;
+    dvel.y -= dot(cnt.vit,cnt.tangent) * frictionCoef / alphaT * cnt.tangent.y;
+    const float fmomentT =  (cnt.pt.x * cnt.tangent.y - cnt.pt.y * cnt.tangent.x);
+    drotvel -= moverI * dot(cnt.vit,cnt.tangent) * frictionCoef / alphaT * fmomentT;
+  }
+  bodyVel += dvel;
+  bodyRotVel += drotvel;
+}</pre>
+
+      <h3>Results and discussion:</h3>
+
+      <p>
+This method is producing good results, while there is one single simultaneous contact.
+It will produce over-reaction with multiple simultaneous contacts.
+Let's take an example of a body with two feet that will rebound on its two feet.
+For both feet, the contact algorithm will compute a velocity, from the same configuration.
+Let denote \( \vec{p_1} = (-L, h) \) and \( \vec{p_2} = (L, h) \) with \( \vec{n} = (0, 1) \).
+This leads to:
+$$ \delta \vec{v} \cdot \vec{n} = \frac{-2}{ 1 + \frac{m}{I} L^2 } \vec{v_r} $$
+This is over-reaction when the velocity gab ( \( \delta \vec{v} \) ) is higher than the rebound velocity ( \( \vec{v_r} \) ). The good news is that the condition only depends on the geometry and mass repartition.
+      </p>
+
+      <table>
+       <tbody>
+        <tr>
+         <td style="width:50%">
+      <video autoplay loop muted inline style="display: block; margin: auto;">
+        <source src="images/devnote_impulse/anim_NoFoot_case2.mp4" type="video/mp4">
+      </video>
+         </td>
+         <td style="width:50%">
+      <video autoplay loop muted inline style="display: block; margin: auto;">
+        <source src="images/devnote_impulse/anim_NoFoot_case1.mp4" type="video/mp4">
+      </video>
+         </td>
+        </tr>
+        <tr>
+         <td style="width:50%; text-align:center;">
+         <i>Rebound with one contact point with low friction.</i>
+         </td>
+         <td style="width:50%; text-align:center;">
+         <i>Over-reaction with two contact points.</i>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+
+      <h2>3. Resolution of the penetration</h2>
+      <img src="images/devnote_impulse/body-penetration.png" style="width:25%; padding: 5px; float:right;">
 
       <p>
 There are 2 methods to compute the penetration.
@@ -129,67 +241,106 @@ After this, the body must be moved to cancel the penetration.
 I choose the simplest way: translate the body along the obstacle normal vector, such that it no longer penetrates the obstacle.
 </p>
 
-      <h2 id="code1">Pseudo-code</h2>
+      <h3>The pseudo-code:</h3>
 
-      <pre>const float moverI = 0.20f; <span class="code-comment">// (depends on the object geometry)</span>
-
-void simulate(vec2 bodyPos, float bodyRot, vec2 bodyVel, float bodyRotVel, float dt)
+      <pre>void simulate_3(float dt)
 {
-  <span class="code-comment">// Motion integration</span>
-  bodyPos += dt * bodyVel;
-  bodyRot += dt * bodyRotVel;
-
-  <span class="code-comment">// Gravity</span>
-  bodyPos += 0.5 * dt * dt * gravity;
-  bodyVel += gravity * dt;
+  <span class="code-comment">// [...] Motion integration + Gravity</span>
 
   <span class="code-comment">// Contact</span>
+  dpos = vec2(0.f, 0.f);
   for (auto contact in compute_contacts())
   {
-    <span class="code-comment">// Rebound</span>
-    const float reboundCoef = 1.2f;
-    float alpha = cnt.normal.x * (   cnt.pt.y*cnt.pt.x*cnt.normal.y - cnt.pt.y*cnt.pt.y*cnt.normal.x ) +
-                  cnt.normal.y * ( - cnt.pt.x*cnt.pt.x*cnt.normal.y + cnt.pt.x*cnt.pt.y*cnt.normal.x );
-    alpha = 1.f - moverI * alpha;
+    <span class="code-comment">// [...] Rebound</span>
 
-    dvel.x -= dot(bodyVel,cnt.normal) * reboundCoef / alpha * cnt.normal.x;
-    dvel.y -= dot(bodyVel,cnt.normal) * reboundCoef / alpha * cnt.normal.y;
-    const float fmoment =  cnt.pt.x * cnt.normal.y - cnt.pt.y * cnt.normal.x;
-    drotvel -= moverI * dot(bodyVel,cnt.normal) * reboundCoef / alpha * fmoment;
-
-    <span class="code-comment">// Friction</span>
-    const float frictionCoef = 0.01f;
-    float alphaT = cnt.tangent.x * (   cnt.pt.y*cnt.pt.x*cnt.tangent.y - cnt.pt.y*cnt.pt.y*cnt.tangent.x ) +
-                   cnt.tangent.y * ( - cnt.pt.x*cnt.pt.x*cnt.tangent.y + cnt.pt.x*cnt.pt.y*cnt.tangent.x );
-    alphaT = 1.f - moverI * alphaT;
-
-    dvel.x -= dot(bodyVel,cnt.tangent) * 0.01f / alphaT * cnt.tangent.x;
-    dvel.y -= dot(bodyVel,cnt.tangent) * 0.01f / alphaT * cnt.tangent.y;
-    const float fmomentT =  (cnt.pt.x * cnt.tangent.y - cnt.pt.y * cnt.tangent.x) * 0.5f; <span class="code-comment">// (0.5f: for stability)</span>
-    drotvel -= moverI * dot(bodyVel,cnt.tangent) * frictionCoef / alphaT * fmomentT;
+    <span class="code-comment">// [...] Friction</span>
 
     <span class="code-comment">// Compute variation of displacement - only translation</span>
     dpos.x += cnt.penet * cnt.normal.x;
     dpos.y += cnt.penet * cnt.normal.y;
   }
   bodyPos += dpos;
-  bodyVel += dvel;
-  bodyRotVel += drotvel;
-} 
-</pre>
+}</pre>
+
+      <h3>Results and discussion:</h3>
       
-      
-      <h1>Faking the landing feet</h1>
-      <img src="images/Dev-notes/body-with-feet.png" style="width:15%; padding: 5px; float:right;">
+      <p>
+Like with the velocity compute, the displacement method will produce over-displacement when there are multiple contacts.
+But because the displacements are likely not noticeable, it will still produce good results.
+However, the rotational velocity and velocity-gap are ignored.
+Then the scheme tends to produce an unwanted forward motion when the body has contact-points that last several time frames.
+      </p>
+      <p>
+I'm still working to improve the model, by properly taking account of the rotational velocity.
+      </p>
+
+
+      <table>
+       <tbody>
+        <tr>
+         <td style="width:50%">
+      <video autoplay loop muted inline style="display: block; margin: auto;">
+        <source src="images/devnote_impulse/anim_NoFoot_case3.mp4" type="video/mp4">
+      </video>
+         </td>
+         <td style="width:50%">
+      <video autoplay loop muted inline style="display: block; margin: auto;">
+        <source src="images/devnote_impulse/anim_NoFoot_case4.mp4" type="video/mp4">
+      </video>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+
+      <h2>4. Faking the landing feet</h2>
+      <img src="images/devnote_impulse/body-with-feet.png" style="width:15%; padding: 5px; float:right;">
       <p>
 Adding landing feet with dampers greatly improves the feeling of the contact response.
 The coupling between the vessel and the feet is not obvious to determine.
-However, I use a conjectured method to keep it simple and compatible with the kinetic relations established above.
+However, I use a conjectured method to keep it simple and compatible with the kinetic relations established above.<br>
+The principle is to use what I call a "transmittance" factor between the foot and the body.
+When the foot's spring is no stressed,
+the contact force is completely received by the foot, and the body does not see any contact force.
+On the opposite, the contact force is fully transmitted to the body when the foot reach its maximal displacement.
+Additionally, each foot has its own motion equation, in which I ignore the inertia forces from the body motion.
       </p>
 
+      <h3>The pseudo-code:</h3>
+
       <p>
-      Writing in progress ...
+Not yet! I'm still working to improve the model.
       </p>
+
+      <h3>Results and discussion:</h3>
+
+      <p>
+Despite some jitters, the results are good enough.
+      </p>
+
+      <table>
+       <tbody>
+        <tr>
+         <td style="width:50%">
+      <video autoplay loop muted inline style="display: block; margin: auto;">
+        <source src="images/devnote_impulse/anim_WithFoot_case3.mp4" type="video/mp4">
+      </video>
+         </td>
+         <td style="width:50%">
+      <video autoplay loop muted inline style="display: block; margin: auto;">
+        <source src="images/devnote_impulse/anim_WithFoot_case1.mp4" type="video/mp4">
+      </video>
+         </td>
+        </tr>
+        <tr>
+         <td style="width:50%; text-align:center;">
+         <i>Rebound with horizontal velocity</i>
+         </td>
+         <td style="width:50%; text-align:center;">
+         <i>Rebound with vertical motion only</i>
+         </td>
+        </tr>
+       </tbody>
+      </table>
 
 
     </div>
