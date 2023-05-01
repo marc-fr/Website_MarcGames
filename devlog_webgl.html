@@ -44,32 +44,28 @@
 <h1>Porting a C++/OpenGL game to web browsers</h1>
 
 <p>
-The web-assembly platform allows to create and run game embedded in web browsers.
-My starting point is a C++ desktop application using <a href="https://www.libsdl.org/">SDL2</a> and <a href="https://www.opengl.org/">OpenGL</a>.
-I found the <a href="https://emscripten.org/">Emscripten</a> toolchain that offers a way to port such applications to web browsers.
-<br>
-In this post, I will detail some difficulties I had when I started to port my games on web browsers:
-<ul>
-  <li>Using Emscripten</li>
-  <li>Support of OpenGL ES - WebGL</li>
-</ul>
-Most of the code is available in <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a>, a toolkit that I created and that I use as basement of my games.  
+The web-assembly platform allows to run application inside web browsers.
+From a C++ desktop application using SDL2 and OpenGL,
+I found the <a href="https://emscripten.org/">Emscripten</a> toolchain that offers a way to port them on web browsers.
+In this post, I will detail steps to port my games on web browsers.
+Most of the code is available in <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a>, a toolkit that I created and that I use as basement of my games.
 </p>
     
 <h2>Using Emscripten</h2>
 
 <p>
-The <a href="https://emscripten.org/">Emscripten</a> web site already has good documentation.
-The <a href="https://emscripten.org/docs/porting/guidelines/portability_guidelines.html">portability guidelines</a> page is useful to understand the limitations of the code being executed by web browsers.
-In fact, some code logic should be adapted.
+<a href="https://emscripten.org/docs/porting/index.html">Porting</a> section
+from the Emscripten web site is a good starting point.
+It helps to understand the limitations of the code being executed by web browsers.
+I will detail the some part of the code that should be adapted.
 </p>
 
-<h3>The main entry points</h3>
+<h3>The main entry point</h3>
 
 <p>
 If it is not already the case, the game init/update/quit should be seperated in specific functions.
 With Emscripten, the "main()" entry-point is run once,
-and a java script is setup such that the web-brower will run a callback at each frame.
+and a java script is setup such that the web-brower will execute a callback at each frame.
 Consequently, the "main.cpp" will have this skeleton:
 </p>
 
@@ -104,7 +100,7 @@ int main(int argc, char **argv)
 
 <p>
 Because the <code>app_update()</code> method may not be called immediately after a previous call, 
-the handling of the timing needs to be changed accordingly:
+the compute of time should have this pattern:
 </p>
 
 <pre>
@@ -134,57 +130,137 @@ void app_update()
 <h3>Reading files</h3>
 
 <p>
-Web browsers don't allow (or heavily restrict) to access to the disk. The Emscripten toolchain can emulate the reading of files, by embedding them into the binary. Therefore, I advice to keep the total amount of read file under 100 MB. <br>
-On the other hand, to keep the game loading smoothly, it's a good practice to "bake" the game resources into an optimized and specialized binary file. <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a> implements a baker.
+Web browsers don't allow (or heavily restrict) to access to the disk.
+The Emscripten toolchain can emulate the reading of files, by embedding them into the binary itself.
+Therefore, I advice to use coarser resources, and keep the total amount as low as possible.
+On the other hand, to keep the game loading smoothly, it's a good practice to "bake" the game resources into an optimized and specialized binary file.
 </p>
 
 <p>
-Writing in progress ...
+An example of implemention of a "baker" is avaliable in <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a>.
+It uses a hand-made file format, that defines containers (called "blocks") from which the data can be accessed directly.
+If you need more features, such as versionning or safety, you can have a look on existing file formats, like HDF5.
 </p>
 
 <h3>Performance considerations</h3>
 
-<p>
 <ul>
   <li>Avoid allocations during the <code>app_update()</code>. Pre-allocate as much as possible in <code>app_int()</code>. Unlike desktop applications, the available memory is preconfigured during the compilation, thus be aware of the amount of memory needed.</li>
   <li>I didn't try the multi-threading yet. For simplicity, the web-version of my game will stay single threaded.</li>
   <li>Other listed on the Emscripten documentation <a href="https://emscripten.org/docs/optimizing/Optimizing-Code.html">here</a> </li>
 </ul>
-</p>
-
 
 <h2>Support of OpenGL ES - WebGL</h2>
 
 <p>
-Compared with a desktop application, there are additional limitations and API specific stuff.
-For more details, the readers can refer to the official specifications
-(<a href="https://registry.khronos.org/OpenGL-Refpages/es3/">OpenGL ES 3</a>,
- <a href="https://registry.khronos.org/webgl/specs/latest/2.0/">WebGL 2.0</a>)
-<br>
-Here some of the modifications required to handle both OpenGL-3.3 and OpenGL-ES-3 with WebGL-2.
+Compared with a desktop application, there are additional limitations with graphics API.
+The "OpenGL-ES" flavor must be used
+(see <a href="https://registry.khronos.org/OpenGL-Refpages/es3/">OpenGL ES 3</a> specifications).
+Moreover, the web-assembly binary can only use the "WebGL" API
+(see <a href="https://registry.khronos.org/webgl/specs/latest/2.0/">WebGL 2.0</a> specifications).
 </p>
 
 <h3>Texture compression</h3>
 
 <p>
-The OpenGL-ES API does not permit to compress texture on the fly.
+OpenGL-ES does not permit to compress texture on the fly.
 Hence, the compression must be done on the software level.
 A vastly used compression format is the Ericsson Texture Compression (ETC).
 An implementation is available at the github's <a href="https://github.com/Ericsson/ETCPACK">Ericsson/ETCPACK</a> repository.
-<a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a> implements compression algorithms for the AEC, ETC2, DXT1, DXT3 formats.
 </p>
+
 <p>
-Here some details about the ETC texture compression<br>
-Writing in progress ...
+<a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a> implements its own compression algorithms for the AEC, ETC2, DXT1, DXT3 formats.
+These formats are treating the (r,g,b) channels in the same time, but the alpha channel is always treated independently.
+The images is partitioned by 4x4 pixels squares, and each square is compressed independently.
 </p>
+
+<p>
+The ETC2 compression is part of the OpenGL-ES specifications.
+It handles (r,b,g) channels.
+It compresses 4x4 pixels squares to 8-bytes sequence.
+If the source format is RGB8 (1 byte per channel), the compression ratio is <code>8 / (16 * 3)</code>.
+The 8-bytes sequence is split in 2 parts:
+the lower-significant part is the color palette (or color plane),
+the high-significant part is encoding pixel look-up informations.
+</p>
+<pre>
+Bit | 63-34          | 33   | 32 | 31-0          |
+    | Color-palette  | Mode | FP | Look-up table |
+</pre>
+<ul>
+<li>The bit <code>Mode</code> encodes the mode: '0' is the individual mode and '1' is the differential mode.
+    Other modes are defined in some circonstances, but I decided to only implement the two first modes.</li>
+<li>The bit <code>FP</code> encodes the flip direction, either horizontally (4x2), either vertically (4x2).
+    In fact, the color-palette defines 2 base colors, 
+    and the pixel encoding table will depend on which side of the split the pixel belongs to.</li>
+<li>The bits <code>63-40</code> encode the base colors of the palette:
+    <code>r0(4bits)|r1(4bits)|g0(4bits)|g1(4bits)|b0(4bits)|b1(4bits)</code> for the individual mode,
+    <code>r0(5bits)|dr(3bits)|g0(5bits)|dg(3bits)|b0(5bits)|db(3bits)</code> for the differential mode.</li>
+<li>The bits <code>39-37</code> encode the table index for the first 8 pixels (depending on the flip direction).</li>
+<li>The bits <code>36-34</code> encode the table index for the last 8 pixels (depending on the flip direction).</li>
+<li>The bits <code>31,15</code> encode the look-up index of the pixel 0,
+    the bits <code>30,14</code> the pixel 1,
+    ...</li>
+</ul>
+
+<p>
+The AEC compression is also part of the OpenGL-ES specifications, but it handles the alpha channel.
+It compresses 4x4 pixels squares to 8-bytes sequency.
+If the source format is A8 (1 byte per pixel), the compression ratio is <code>8 / 16</code>.
+</p>
+<pre>
+Bit | 63-56      | 55-52      | 51-48       | 47-0          |
+    | Base-alpha | Multiplier | Table-index | Look-up table |
+</pre>
+<ul>
+<li>The alpha of each pixel is computed with <code>alpha = clamp(Base-alpha + Multiplier * Table[Table-index][pixel-idx], 0, 255)</code>.</li>
+<li>The bits <code>47,46,45</code> encode the look-up index of the pixel 0,
+    the bits <code>44,43,42</code> the pixel 1,
+    ...</li>
+</ul>
+
+      <table>
+       <tbody>
+        <tr>
+         <td style="width:33%">
+          <img src="images/devnote_webgl/texture1_origin.jpg" style="width:100%">
+         </td>
+         <td style="width:33%">
+          <img src="images/devnote_webgl/texture2_origin.jpg" style="width:100%">
+         </td>
+         <td style="width:33%">
+          <img src="images/devnote_webgl/texture3_origin.jpg" style="width:100%">
+         </td>
+        </tr>
+        <tr>
+         <td style="width:33%">
+          <img src="images/devnote_webgl/texture1_compressed.jpg" style="width:100%">
+         </td>
+         <td style="width:33%">
+          <img src="images/devnote_webgl/texture2_compressed.jpg" style="width:100%">
+         </td>
+         <td style="width:33%">
+          <img src="images/devnote_webgl/texture3_compressed.jpg" style="width:100%">
+         </td>
+        </tr>
+        <tr>
+         <td colspan="3" style="text-align:center;">
+         <i>Test textures (up: original, down: compressed with ETC2)</i>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+
 
 <h3>Render targets</h3>
 
 <p>
-The support of the render-target formats varies between the OpenGL-Core and OpenGL-ES standards.<br>
-Writing in progress ...
+The render targets are objects from which rendering can be done.
+The screen is a render target, that is builtin and automatically created by the driver.
+For example, render targets can be created to implement the shadows or various post-effects.
+The support of the render-target formats varies between the OpenGL-Core and OpenGL-ES standards.
 </p>
-
 
     </div>
 </body></html>
