@@ -9,13 +9,6 @@ body {
   color: #AAA;
 }
 
-#encadrement {
-  width: fit-content;
-  margin: 22px auto;
-  padding: 12px;
-  border: 4px ridge;
-}
-
 pre, code {
   font-family: monospace;
 }
@@ -27,6 +20,29 @@ a:link {
 a:visited {
   color: #998866;
 }
+
+/* index pages */
+
+.indexPage
+{
+  text-align: center;
+}
+
+#encadrement
+{
+  width: fit-content;
+  margin: 22px auto;
+  padding: 12px;
+  border: 4px ridge;
+  color: red;
+}
+
+.bigPicture
+{
+  width:70%;
+  height: auto;
+}
+
 
 /* Header */
 
