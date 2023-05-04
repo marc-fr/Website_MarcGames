@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
     
     <title>Devlog: Impulse</title>
+
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.01.08">
-    <meta name="description" content="XX">
-    <meta name="keywords" content="game, gamedev">
+    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.05.03">
+
+    <meta name="description" content="Impulse response of a rigid body">
+    <meta name="keywords" content="game, gamedev, physics, impulse, rigid, body, 2D">
     <meta name="author" content="Marc Landon">
+
     <meta name="generator" content="BlueGriffon wysiwyg editor">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    /* local style ...*/
-    </style>
+
     <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
   </head>
   
   <body>
+
     <div class="sidebar">
       <h2>About</h2>
       <p> 
@@ -35,10 +35,13 @@
         <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
       </ul>
     </div>
+
     <div class="main">
       <h1>Implementing a small physics engine for a platformer game</h1>
       <p>
-The aim is to simulate the motion of a vessel, that evolves in an uniform gravity field and in a static world, in a <a href="https://en.wikipedia.org/wiki/Inertial_frame_of_reference">Newtonian frame</a>.
+The aim is to simulate the motion of a vessel,
+that evolves in an uniform gravity field and in a static world,
+in a <a href="https://en.wikipedia.org/wiki/Inertial_frame_of_reference">Newtonian frame</a>.
 I restrict this work on a 2D space, even if it stays valid in 3D with some adaptations.
       </p>
       <p>
@@ -50,7 +53,7 @@ Finally, the model is extended such as the vessel has feet with dampers.
       </p>
 
       <video autoplay loop muted inline style="display: block; margin: auto;">
-        <source src="images/devnote_impulse/anim_WithFoot_case4.mp4" type="video/mp4">
+        <source src="images/devnote_impulse/anim_GameExample.mp4" type="video/mp4">
       </video>
 
       <h2>1. Equation of motion</h2>
@@ -269,8 +272,6 @@ Like with the velocity compute, the displacement method will produce over-displa
 But because the displacements are likely not noticeable, it will still produce good results.
 However, the rotational velocity and velocity-gap are ignored.
 Then the scheme tends to produce an unwanted forward motion when the body has contact-points that last several time frames.
-      </p>
-      <p>
 I'm still working to improve the model, by properly taking account of the rotational velocity.
       </p>
 
@@ -302,7 +303,15 @@ The principle is to use what I call a "transmittance" factor between the foot an
 When the foot's spring is no stressed,
 the contact force is completely received by the foot, and the body does not see any contact force.
 On the opposite, the contact force is fully transmitted to the body when the foot reach its maximal displacement.
-Additionally, each foot has its own motion equation, in which I ignore the inertia forces from the body motion.
+Additionally, each foot has its own motion equation, in which I ignore the inertia forces from the body motion.<br>
+The foot motion is governed by the well-known damped-oscillator equation:
+$$ m_f \ddot{y} + h_f \dot{y} + k_f y = 0 $$
+where \( y \) is the foot vertical position. With active contact, we have the additionnal equations:
+$$ \delta y = t_r p $$
+$$ p_{vessel} = (1 - t_r) p $$
+where \( t_r \) is transmision factor,
+      \( p \) the contact penetration and
+      \( p_{vessel} \) the penetration transmitted to the vessel.
       </p>
 
       <h3>The pseudo-code:</h3>

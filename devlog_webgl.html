@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    
     <title>Devlog: Porting to web browser</title>
 
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.01.08">
+    <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.05.03">
     
     <meta name="description" content="porting a C++/OpenGL game to web browsers">
     <meta name="keywords" content="game, gamedev, C++, OpenGL, emscripten, webGL, webassembly">
@@ -15,9 +14,7 @@
 
     <meta name="generator" content="BlueGriffon wysiwyg editor">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    /* local style ...*/
-    </style>
+
     <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
   </head>
   
@@ -54,8 +51,7 @@ Most of the code is available in <a href="https://github.com/marc-fr/TinyRenderE
 <h2>Using Emscripten</h2>
 
 <p>
-<a href="https://emscripten.org/docs/porting/index.html">Porting</a> section
-from the Emscripten web site is a good starting point.
+The Emscripten web site is a good starting point.
 It helps to understand the limitations of the code being executed by web browsers.
 I will detail the some part of the code that should be adapted.
 </p>
@@ -144,11 +140,15 @@ If you need more features, such as versionning or safety, you can have a look on
 
 <h3>Performance considerations</h3>
 
-<ul>
-  <li>Avoid allocations during the <code>app_update()</code>. Pre-allocate as much as possible in <code>app_int()</code>. Unlike desktop applications, the available memory is preconfigured during the compilation, thus be aware of the amount of memory needed.</li>
-  <li>I didn't try the multi-threading yet. For simplicity, the web-version of my game will stay single threaded.</li>
-  <li>Other listed on the Emscripten documentation <a href="https://emscripten.org/docs/optimizing/Optimizing-Code.html">here</a> </li>
-</ul>
+<p>
+Avoid allocations during the <code>app_update()</code>.
+Pre-allocate as much as possible in <code>app_int()</code>.
+Unlike desktop applications, the available memory is preconfigured during the compilation, thus be aware of the amount of memory needed.
+</p>
+
+<p>
+I didn't try the multi-threading yet. For simplicity, the web-version of my game will stay single threaded.
+</p>
 
 <h2>Support of OpenGL ES - WebGL</h2>
 
@@ -165,35 +165,27 @@ Moreover, the web-assembly binary can only use the "WebGL" API
 <p>
 OpenGL-ES does not permit to compress texture on the fly.
 Hence, the compression must be done on the software level.
-A vastly used compression format is the Ericsson Texture Compression (ETC).
-An implementation is available at the github's <a href="https://github.com/Ericsson/ETCPACK">Ericsson/ETCPACK</a> repository.
-</p>
-
-<p>
+A vastly used compression format is the Ericsson Texture Compression (<a href="https://github.com/Ericsson/ETCPACK">Ericsson/ETCPACK</a>).
 <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a> implements its own compression algorithms for the AEC, ETC2, DXT1, DXT3 formats.
-These formats are treating the (r,g,b) channels in the same time, but the alpha channel is always treated independently.
-The images is partitioned by 4x4 pixels squares, and each square is compressed independently.
+Those formoats are part of the OpenGL-ES specifications.
 </p>
 
 <p>
-The ETC2 compression is part of the OpenGL-ES specifications.
-It handles (r,b,g) channels.
+The ETC2 compression format handles (r,b,g) channels.
 It compresses 4x4 pixels squares to 8-bytes sequence.
 If the source format is RGB8 (1 byte per channel), the compression ratio is <code>8 / (16 * 3)</code>.
-The 8-bytes sequence is split in 2 parts:
-the lower-significant part is the color palette (or color plane),
-the high-significant part is encoding pixel look-up informations.
+The 8-bytes sequence is defined as following:
 </p>
 <pre>
 Bit | 63-34          | 33   | 32 | 31-0          |
     | Color-palette  | Mode | FP | Look-up table |
 </pre>
 <ul>
-<li>The bit <code>Mode</code> encodes the mode: '0' is the individual mode and '1' is the differential mode.
+<li>The bit <code>Mode</code> encodes the switch between the individual mode or the differential mode.
     Other modes are defined in some circonstances, but I decided to only implement the two first modes.</li>
 <li>The bit <code>FP</code> encodes the flip direction, either horizontally (4x2), either vertically (4x2).
     In fact, the color-palette defines 2 base colors, 
-    and the pixel encoding table will depend on which side of the split the pixel belongs to.</li>
+    and the pixel encoding will depend on which side of the split the pixel belongs to.</li>
 <li>The bits <code>63-40</code> encode the base colors of the palette:
     <code>r0(4bits)|r1(4bits)|g0(4bits)|g1(4bits)|b0(4bits)|b1(4bits)</code> for the individual mode,
     <code>r0(5bits)|dr(3bits)|g0(5bits)|dg(3bits)|b0(5bits)|db(3bits)</code> for the differential mode.</li>
@@ -205,7 +197,7 @@ Bit | 63-34          | 33   | 32 | 31-0          |
 </ul>
 
 <p>
-The AEC compression is also part of the OpenGL-ES specifications, but it handles the alpha channel.
+The AEC compression format handles the alpha channel.
 It compresses 4x4 pixels squares to 8-bytes sequency.
 If the source format is A8 (1 byte per pixel), the compression ratio is <code>8 / 16</code>.
 </p>
@@ -256,9 +248,9 @@ Bit | 63-56      | 55-52      | 51-48       | 47-0          |
 <h3>Render targets</h3>
 
 <p>
-The render targets are objects from which rendering can be done.
+The render targets are objects from which rendering can be drawn.
 The screen is a render target, that is builtin and automatically created by the driver.
-For example, render targets can be created to implement the shadows or various post-effects.
+For example, render targets can be created to implement the shadows and post-effects.
 The support of the render-target formats varies between the OpenGL-Core and OpenGL-ES standards.
 </p>
 
