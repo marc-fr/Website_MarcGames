@@ -17,7 +17,7 @@
 
     <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
   </head>
-  
+
   <body>
 
     <div class="sidebar">
@@ -132,15 +132,13 @@ $$ \delta \omega = \frac{m}{I} \vec{p} \times \vec{\delta v} $$
 We can remark that the variation of the velocity is parallel with the overall force direction.
 The goal is to compute the variation of both the velocity \(\vec{\delta v}\) and the angular-velocity \(\delta \omega\).
 The velocity delta of the contact point \(P\) verifies two relations.
-The first is the rigid body cinematic relation,
+The first is the rigid body cinematic relation
 $$ \vec{\delta v_P} = \vec{\delta v} - \vec{p} \times \vec{\delta \omega} $$
-and the second is ruled by the contact properties, that only depends on the known velocity of the contact point before the hit:
-$$ \vec{\delta v_P} = - v^{\star}_r \vec{n} - v^{\star}_f \vec{t} $$
-where \( \vec{n} \) is the normal of the surface of the obstacle, \( \vec{t} \) is a tangent to this surface,
-and \( v^{\star}_r \), \( v^{\star}_f \) respectively the rebound velocity and friction velocity.
-After some computations, I obtain:
-$$ (\delta \vec{v} \cdot \vec{n}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{n} ) \cdot \vec{n} \right)  = - v^{\star}_r $$
-$$ (\delta \vec{v} \cdot \vec{t}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{t} ) \cdot \vec{t} \right)  = - v^{\star}_f $$
+and the second is ruled by the contact properties (rebound and friction coefficients), that only depends on the known velocity of the contact point before the hit
+$$ \vec{\delta v_P} = - \vec{v}^{\star} $$
+With \( \vec{n} \) being the normal of the surface of the obstacle and \( \vec{t} \) the tangent, I obtain:
+$$ (\delta \vec{v} \cdot \vec{n}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{n} ) \cdot \vec{n} \right)  = - \vec{v}^{\star} \cdot \vec{n} $$
+$$ (\delta \vec{v} \cdot \vec{t}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{t} ) \cdot \vec{t} \right)  = - \vec{v}^{\star} \cdot \vec{t} $$
       </p>
 
       <h3>The pseudo-code:</h3>
@@ -188,11 +186,12 @@ void simulate_2(float dt)
 This method is producing good results, while there is one single simultaneous contact.
 It will produce over-reaction with multiple simultaneous contacts.
 Let's take an example of a body with two feet that will rebound on its two feet.
-For both feet, the contact algorithm will compute a velocity, from the same configuration.
-Let denote \( \vec{p_1} = (-L, h) \) and \( \vec{p_2} = (L, h) \) with \( \vec{n} = (0, 1) \).
+For each foot, the contact algorithm will compute a velocity-gap from the same initial state.
+Let denote the contact points \( \vec{p_1} = (-L, h) \) and \( \vec{p_2} = (L, h) \) 
+and the contact normal \( \vec{n} = (0, 1) \).
 This leads to:
-$$ \delta \vec{v} \cdot \vec{n} = \frac{-2}{ 1 + \frac{m}{I} L^2 } \vec{v_r} $$
-This is over-reaction when the velocity gab ( \( \delta \vec{v} \) ) is higher than the rebound velocity ( \( \vec{v_r} \) ). The good news is that the condition only depends on the geometry and mass repartition.
+$$ \delta \vec{v} \cdot \vec{n} = \frac{-2}{ 1 + \frac{m}{I} L^2 } \vec{v}^{\star} \cdot \vec{n} $$
+There is over-reaction when the velocity gab ( \( \delta \vec{v} \) ) is higher than the rebound velocity ( \( \vec{v}^{\star} \) ). The good news is that the over-reaction condition only depends on the body's geometry and mass repartition.
       </p>
 
       <table>
@@ -230,19 +229,22 @@ There are 2 methods to compute the penetration.
         <li> The first method is to compute the exact time when the body enters in contact, and to split the time-frame simulation in two parts, before and after the contact. </li>
         <li> The second method is to work with the penetration at the end of the time-frame, so basically after at a little while of the contact. </li>
       </ul>
-<p>
-I decided to go with the second method, because it allows to easily work with multiple contacts and its stability when the body is on the ground.
-However, the drawbacks are that the penetration resolution should be precise, the penetration may fail to be resolved if the time-step or the velocity is too high, and the body should be moved out-of-penetration at the end.
-<br>
+      <p>
+I decided to go with the second method, because it allows to easily work with multiple contacts and its good stability when the body is on the ground.
+However, the drawbacks are that the penetration resolution should be precise.
+The penetration resolution may fail to be resolved if the time-step or the velocity is too high.
+However, it can still be solved by doing one or two steps of the first method.
+      </p>
+      <p>
 To resolve the penetration, I compute the intersection of the body area with the obstacle area.
-I use a conjecture to compute the virtual contact-point in which the resultant contact force is applied from: 
-the virtual contact-point is at the barycenter of the intersecting area.
+A virtual contact-point, in which the resultant contact force is applied from, is defined the barycenter of the intersecting area.
 This conjecture is similar with the Archimedes force if we consider the obstacle made in water.
 Another similarity is to average the elastic-force on the intersecting area if all of its matter is displaced on the obstacle surface.
-<br>
+      </p>
+      <p>
 After this, the body must be moved to cancel the penetration.
 I choose the simplest way: translate the body along the obstacle normal vector, such that it no longer penetrates the obstacle.
-</p>
+      </p>
 
       <h3>The pseudo-code:</h3>
 
@@ -266,7 +268,7 @@ I choose the simplest way: translate the body along the obstacle normal vector, 
 }</pre>
 
       <h3>Results and discussion:</h3>
-      
+
       <p>
 Like with the velocity compute, the displacement method will produce over-displacement when there are multiple contacts.
 But because the displacements are likely not noticeable, it will still produce good results.
@@ -275,56 +277,87 @@ Then the scheme tends to produce an unwanted forward motion when the body has co
 I'm still working to improve the model, by properly taking account of the rotational velocity.
       </p>
 
-
-      <table>
-       <tbody>
-        <tr>
-         <td style="width:50%">
       <video autoplay loop muted inline style="display: block; margin: auto;">
         <source src="images/devnote_impulse/anim_NoFoot_case3.mp4" type="video/mp4">
       </video>
-         </td>
-         <td style="width:50%">
-      <video autoplay loop muted inline style="display: block; margin: auto;">
-        <source src="images/devnote_impulse/anim_NoFoot_case4.mp4" type="video/mp4">
-      </video>
-         </td>
-        </tr>
-       </tbody>
-      </table>
 
       <h2>4. Faking the landing feet</h2>
-      <img src="images/devnote_impulse/body-with-feet.png" style="width:15%; padding: 5px; float:right;">
       <p>
 Adding landing feet with dampers greatly improves the feeling of the contact response.
 The coupling between the vessel and the feet is not obvious to determine.
-However, I use a conjectured method to keep it simple and compatible with the kinetic relations established above.<br>
+However, I use a conjectured method to keep it simple and compatible with the kinetic relations established above.
+      </p>
+      <p>
 The principle is to use what I call a "transmittance" factor between the foot and the body.
 When the foot's spring is no stressed,
-the contact force is completely received by the foot, and the body does not see any contact force.
-On the opposite, the contact force is fully transmitted to the body when the foot reach its maximal displacement.
-Additionally, each foot has its own motion equation, in which I ignore the inertia forces from the body motion.<br>
+the contact force is completely received by the foot, and the vessel does not see the contact force.
+At the opposite, the contact force is fully transmitted to the vessel when the foot reach its maximal displacement.
+The coupling is made by forcing the vertical position of the foot:
+$$ \delta y = t_r p $$
+where \( y \) is the foot vertical position,
+      \( t_r \) is transmision factor and
+      \( p \) the contact penetration.
+Additionally, each foot has its own motion, in which the inertia forces from the body motion are ignored.
 The foot motion is governed by the well-known damped-oscillator equation:
 $$ m_f \ddot{y} + h_f \dot{y} + k_f y = 0 $$
-where \( y \) is the foot vertical position. With active contact, we have the additionnal equations:
-$$ \delta y = t_r p $$
-$$ p_{vessel} = (1 - t_r) p $$
-where \( t_r \) is transmision factor,
-      \( p \) the contact penetration and
-      \( p_{vessel} \) the penetration transmitted to the vessel.
       </p>
 
       <h3>The pseudo-code:</h3>
 
-      <p>
-Not yet! I'm still working to improve the model.
-      </p>
+      <pre>void simulate_4(float dt)
+{
+  <span class="code-comment">// [...] Motion integration + Gravity</span>
+
+  <span class="code-comment">// Foot motion (left)</span>
+  foot.vel += dt * ( -16.f * foot.pos - 3.1f * m_foot.vel);
+  foot.pos += dt * foot.vel;
+  foot.pos = clamp(foot.pos, -1, 1);
+
+  <span class="code-comment">// Foot motion (right)</span>
+  <span class="code-comment">// [...]</span>
+
+  <span class="code-comment">// Contact</span>
+  for (auto contact in compute_contacts())
+  {
+    const float dvproj = dot(cnt.vit,vesselup);
+    const float dyproj = dot(cnt.normal,vesselup);
+
+    if (is_foot)
+    {
+      float footpart = 1.f; <span class="code-comment">// Transmission factor</span>
+      footpart = 1.f - max(foot.pos, 0.f) * 1.f; <span class="code-comment">// (foot amplitude is [-1,1] around equilibrum)</span>
+      footpart = 1.f - (1.f - footpart) * (1.f - footpart); <span class="code-comment">// arbitrary law</span>
+
+      footNew.pos += footpart * dyproj * cnt.penet;
+      footNew.vel -= footpart * dvproj * (reboundCoef - 1.f); <span class="code-comment">// this helps for stability</span>
+
+      <span class="code-comment">// remaining part is passed to the vessel</span>
+      cnt.penet -= footpart * dyproj * cnt.penet;
+      cnt.vit   -= footpart * dvproj * vesselup;
+    }
+
+    <span class="code-comment">// [...] Rebound</span>
+
+    <span class="code-comment">// [...] Friction</span>
+
+    <span class="code-comment">// [...] Displacement</span>
+  }
+  footNew = foot;
+}</pre>
 
       <h3>Results and discussion:</h3>
 
       <p>
-Despite some jitters, the results are good enough.
+Despite this simple and naive approach, the results are good enough.
       </p>
+
+<!--
+      <p>
+Let's consider a case where the vessel stands on the ground.
+The motion equations should have a staitonnary state.
+Let's verify this: ...
+      </p>
+-->
 
       <table>
        <tbody>
@@ -350,7 +383,6 @@ Despite some jitters, the results are good enough.
         </tr>
        </tbody>
       </table>
-
 
     </div>
 </body></html>
