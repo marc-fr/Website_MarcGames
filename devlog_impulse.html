@@ -42,14 +42,14 @@
 The aim is to simulate the motion of a vessel,
 that evolves in an uniform gravity field and in a static world,
 in a <a href="https://en.wikipedia.org/wiki/Inertial_frame_of_reference">Newtonian frame</a>.
-I restrict this work on a 2D space, even if it stays valid in 3D with some adaptations.
+I restrict this work on a 2D space, even if the present work stays valid in 3D with some adaptations.
       </p>
       <p>
 After the equation of motion begin recalled,
 the impulse response from a single contact is resolved.
 A simple model is proposed, from which some limitations are discussed.
 Then, the penetration resolution is determined.
-Finally, the model is extended such as the vessel has feet with dampers.
+Finally, the model is extended to take account of the dampers on the vessel's feet.
       </p>
 
       <video autoplay loop muted inline style="display: block; margin: auto;">
@@ -134,7 +134,7 @@ The goal is to compute the variation of both the velocity \(\vec{\delta v}\) and
 The velocity delta of the contact point \(P\) verifies two relations.
 The first is the rigid body cinematic relation
 $$ \vec{\delta v_P} = \vec{\delta v} - \vec{p} \times \vec{\delta \omega} $$
-and the second is ruled by the contact properties (rebound and friction coefficients), that only depends on the known velocity of the contact point before the hit
+and the second is ruled by the contact properties (rebound and friction coefficients) and the impact velocity before the hit
 $$ \vec{\delta v_P} = - \vec{v}^{\star} $$
 With \( \vec{n} \) being the normal of the surface of the obstacle and \( \vec{t} \) the tangent, I obtain:
 $$ (\delta \vec{v} \cdot \vec{n}) \left( 1 - \frac{m}{I} \vec{p} \times ( \vec{p} \times \vec{n} ) \cdot \vec{n} \right)  = - \vec{v}^{\star} \cdot \vec{n} $$
@@ -152,7 +152,7 @@ void simulate_2(float dt)
   <span class="code-comment">// Contact</span>
   dvel = vec2(0.f, 0.f);
   drotvel = 0.f;
-  for (auto contact in compute_contacts())
+  for (cnt in compute_contacts())
   {
     <span class="code-comment">// Rebound</span>
     const float reboundCoef = 1.2f; <span class="code-comment">// (depends on the surface's type)</span>
@@ -184,14 +184,8 @@ void simulate_2(float dt)
 
       <p>
 This method is producing good results, while there is one single simultaneous contact.
-It will produce over-reaction with multiple simultaneous contacts.
-Let's take an example of a body with two feet that will rebound on its two feet.
-For each foot, the contact algorithm will compute a velocity-gap from the same initial state.
-Let denote the contact points \( \vec{p_1} = (-L, h) \) and \( \vec{p_2} = (L, h) \) 
-and the contact normal \( \vec{n} = (0, 1) \).
-This leads to:
-$$ \delta \vec{v} \cdot \vec{n} = \frac{-2}{ 1 + \frac{m}{I} L^2 } \vec{v}^{\star} \cdot \vec{n} $$
-There is over-reaction when the velocity gab ( \( \delta \vec{v} \) ) is higher than the rebound velocity ( \( \vec{v}^{\star} \) ). The good news is that the over-reaction condition only depends on the body's geometry and mass repartition.
+Indeed, it can produce over-reaction with multiple simultaneous contacts,
+because the body's velocity is not updated between each contact resolution.
       </p>
 
       <table>
@@ -219,27 +213,45 @@ There is over-reaction when the velocity gab ( \( \delta \vec{v} \) ) is higher 
        </tbody>
       </table>
 
+      <p>
+Let's take an example of a body that will rebound on its two feet.
+Let denote the contact points \( \vec{p_1} = (-L, h) \) and \( \vec{p_2} = (L, h) \)
+and the contact normal \( \vec{n} = (0, 1) \).
+This leads to:
+$$ \delta \vec{v} \cdot \vec{n} = \frac{-2}{ 1 + \frac{m}{I} L^2 } \vec{v}^{\star} \cdot \vec{n} $$
+There is over-reaction when the velocity gab ( \( \delta \vec{v} \) ) is higher than the rebound velocity ( \( \vec{v}^{\star} \) ). The good news is that the over-reaction condition only depends on the body's geometry and mass repartition.
+      </p>
+
+      <p>
+Let's now condider a static case when a body stands on the floor.
+The scheme admits a stationnary point with:
+$$ \vec{v} = \left( \frac{1}{C_r} - 1 \right) \delta t \vec{g} $$
+where \( C_r \) is the rebound coefficient such that \( C_r \ge 1 \).
+This stationnary state depends on \( \delta t \), so the scheme can produce spurious upward motion when the time-step varies a lot.
+      </p>
+
       <h2>3. Resolution of the penetration</h2>
       <img src="images/devnote_impulse/body-penetration.png" style="width:25%; padding: 5px; float:right;">
 
       <p>
 There are 2 methods to compute the penetration.
+The first method is to compute the exact time when the body enters in contact,
+and to split the time-frame simulation in two parts, before and after the contact.
+The second method is to work with the penetration at the end of the time-frame,
+so after a little while of the hit time.
       </p>
-      <ul>
-        <li> The first method is to compute the exact time when the body enters in contact, and to split the time-frame simulation in two parts, before and after the contact. </li>
-        <li> The second method is to work with the penetration at the end of the time-frame, so basically after at a little while of the contact. </li>
-      </ul>
       <p>
-I decided to go with the second method, because it allows to easily work with multiple contacts and its good stability when the body is on the ground.
+I decided to go with the second method,
+because it allows to easily work with multiple contacts and its good stability when the body stands on the ground.
 However, the drawbacks are that the penetration resolution should be precise.
 The penetration resolution may fail to be resolved if the time-step or the velocity is too high.
-However, it can still be solved by doing one or two steps of the first method.
+In this case, one or two steps of the first method can be applied to have a state that is closer to the hit.
       </p>
       <p>
 To resolve the penetration, I compute the intersection of the body area with the obstacle area.
 A virtual contact-point, in which the resultant contact force is applied from, is defined the barycenter of the intersecting area.
 This conjecture is similar with the Archimedes force if we consider the obstacle made in water.
-Another similarity is to average the elastic-force on the intersecting area if all of its matter is displaced on the obstacle surface.
+Another similarity is to average the elastic-force if the matter of the intersecting area is displaced on the obstacle surface.
       </p>
       <p>
 After this, the body must be moved to cancel the penetration.
@@ -254,7 +266,7 @@ I choose the simplest way: translate the body along the obstacle normal vector, 
 
   <span class="code-comment">// Contact</span>
   dpos = vec2(0.f, 0.f);
-  for (auto contact in compute_contacts())
+  for (cnt in compute_contacts())
   {
     <span class="code-comment">// [...] Rebound</span>
 
@@ -267,6 +279,10 @@ I choose the simplest way: translate the body along the obstacle normal vector, 
   bodyPos += dpos;
 }</pre>
 
+      <p>
+Concerning the contact algorithm, the code is available in <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a>.
+      </p>
+
       <h3>Results and discussion:</h3>
 
       <p>
@@ -274,7 +290,7 @@ Like with the velocity compute, the displacement method will produce over-displa
 But because the displacements are likely not noticeable, it will still produce good results.
 However, the rotational velocity and velocity-gap are ignored.
 Then the scheme tends to produce an unwanted forward motion when the body has contact-points that last several time frames.
-I'm still working to improve the model, by properly taking account of the rotational velocity.
+I may work in the future to improve the scheme, by properly taking account of the rotational velocity.
       </p>
 
       <video autoplay loop muted inline style="display: block; margin: auto;">
@@ -299,7 +315,7 @@ where \( y \) is the foot vertical position,
       \( p \) the contact penetration.
 Additionally, each foot has its own motion, in which the inertia forces from the body motion are ignored.
 The foot motion is governed by the well-known damped-oscillator equation:
-$$ m_f \ddot{y} + h_f \dot{y} + k_f y = 0 $$
+$$ \ddot{y} + h \dot{y} + k y = 0 $$
       </p>
 
       <h3>The pseudo-code:</h3>
@@ -309,15 +325,15 @@ $$ m_f \ddot{y} + h_f \dot{y} + k_f y = 0 $$
   <span class="code-comment">// [...] Motion integration + Gravity</span>
 
   <span class="code-comment">// Foot motion (left)</span>
-  foot.vel += dt * ( -16.f * foot.pos - 3.1f * m_foot.vel);
   foot.pos += dt * foot.vel;
+  foot.vel += dt * ( -16.f * foot.pos - 3.1f * m_foot.vel);
   foot.pos = clamp(foot.pos, -1, 1);
 
   <span class="code-comment">// Foot motion (right)</span>
   <span class="code-comment">// [...]</span>
 
   <span class="code-comment">// Contact</span>
-  for (auto contact in compute_contacts())
+  for (cnt in compute_contacts())
   {
     const float dvproj = dot(cnt.vit,vesselup);
     const float dyproj = dot(cnt.normal,vesselup);
@@ -351,14 +367,6 @@ $$ m_f \ddot{y} + h_f \dot{y} + k_f y = 0 $$
 Despite this simple and naive approach, the results are good enough.
       </p>
 
-<!--
-      <p>
-Let's consider a case where the vessel stands on the ground.
-The motion equations should have a staitonnary state.
-Let's verify this: ...
-      </p>
--->
-
       <table>
        <tbody>
         <tr>
@@ -383,6 +391,38 @@ Let's verify this: ...
         </tr>
        </tbody>
       </table>
+
+      <p>
+Let denote \( p \) the vessel vertical position, \( v \) its vertical velocity and
+ \( f \) the foot vertical relative position, \( w \) its vertical (relative) velocity.
+Let's consider the case where the vessel stands on the ground.
+With \( f \in [0,1] \), the scheme admits stationnary points when the following system admits solutions:
+$$
+\begin{cases}
+v = \delta t g \left( \frac{1}{C_r f^2} - 1 \right)
+\\
+p = \delta t ^2 g \frac{1 - f^2}{f^2} \left( \frac{1}{C_r f^2} - \frac{1}{2} \right)
+\\
+0 = \delta t w - (1 - f^2) (p + f)
+\\
+0 = \delta t ( - k f - h w ) - v (C_r - 1) (1 - f^2)
+\end{cases}
+$$
+where
+\( C_r \) is the rebound coefficient such that \( C_r \ge 1 \) and
+\( g \) the gravity (projected on the up-axis, so the value is negative).
+This leads to find a root within \( [0,1] \) of the expression:
+$$ - k f^3 - h (1-f^2) f - h \delta t g (1-f^2)^2 \left( \frac{1}{C_r f^2} - \frac{1}{2} \right) - g \frac{1 - f^2 C_r}{C_r} (1 - f^2) (C_r - 1) = 0 $$
+From the obtained expression, we can observe that there is unique solution within \( [0,1] \)
+as long as there is a stiffness ( \( k \ne 0 \) ).
+Moreover, the term introduced by the code commented by "<code class="code-comment">this helps for stability</code>"
+helps to maintain the solution far from \( f = 0 \) when the damping is weak ( \( h \rightarrow 0 \) )
+or when the time-step is zero.
+Indeed, the solution \( f = 0 \) does not feel right regarding the expected stationnary state.
+Higher damping/stiffness tends to make the stationnary point closer to 0,
+while higher time-step tends to make the stationnary point closer to 1.
+The stationnary state depends on the time-step, so the scheme can produce spurious motion when the time-step varies a lot.
+      </p>
 
     </div>
 </body></html>
