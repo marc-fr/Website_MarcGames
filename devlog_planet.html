@@ -17,7 +17,7 @@
 
     <script type="text/javascript" async="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"> </script>
   </head>
-  
+
   <body>
 
     <div class="sidebar">
@@ -38,43 +38,49 @@
 
     <div class="main">
 
-    <div>
-    <img src="images/Dev-notes/planet-elevation.png" style="width=30%; padding: 5px; float: right;">
-        
-    <h1>What data do we need to model the Moon ?</h1>
-    <p>
-To model the Moon, or a planet or spherical objects, 
-we need the elevation on each point of the surface,
-and the lighting data on each point of the surface. <br>
-The first one defines a displacement along the normal of the surface, 
-and allow to obtain the bumped surface and compute the normal-map. <br>
-The second one defines how the light is absorbed and reflected.
-The Albedo color can be measured by aggregating the reflectance on multiple light wave-length. <br>
-Those data are often projected in a 2D-space, using a spherical projection.
-    </p>
-    </div>
+    <h1>Modeling the Moon at different scales</h1>
 
-    <h1>Where to find realistic/scientific data of the Moon ?</h1>
+    <p>
+The aim is to draw the Moon, or a planet, from different point of views,
+that vary from an in-orbit space view to a ground view.
+    </p>
+    <video autoplay loop muted controls style="display: block; width: 760px; margin: auto;" poster="images/devnote_planet/main_thumbnail.png" >
+      <source src="images/devnote_planet/main.mp4" type="video/mp4">
+    </video>
+
+    <h2>Input resources</h2>
+
+    <p>
+To model the Moon, we need the elevation on each point of the surface,
+and the lighting data on each point of the surface.
+The first one, called "elevation map", defines a displacement along the normal of the surface.
+It allows to obtain the bumped surface.
+The second one, called "albedo map" defines how the light is absorbed and reflected.
+It allows to have the color of the surface.
+    </p>
+
     <p>
 Since the Apollo missions, the Moon has been mapped with more and more precision, thanks to some satellites.
-In particular, the NASA has collected user-friendly maps of the Moon, that can be found at <a href="https://svs.gsfc.nasa.gov/4720">https://svs.gsfc.nasa.gov/4720</a>. High resolution maps are free to download:
+In particular, the NASA has collected user-friendly maps of the Moon.
+Indeed, the maps cover all the surface in a single texture, using a spherical projection.
+    </p>
+
+    <p>
+High resolution maps are free to download from <a href="https://svs.gsfc.nasa.gov/4720">https://svs.gsfc.nasa.gov/4720</a>:
     </p>
     <ul>
       <li> Albedo map: up to 27360*13680 (~500Mo) </li>
       <li> Elevation map: up to 23040*11520 (~1Go) </li>
     </ul>
-    <p>
-These maps cannot be used directly in a game, we need to process them.
-    </p>
-   
+
    <table>
     <tbody>
      <tr>
       <td style="width:50%">
-       <img src="images/Dev-notes/color_1024p.jpg" style="width:100%">
+       <img src="images/devnote_planet/color_1024p.jpg" style="width:100%">
       </td>
       <td style="width:50%">
-       <img src="images/Dev-notes/elevation_uint_720p.jpg" style="width:100%">
+       <img src="images/devnote_planet/elevation_uint_720p.jpg" style="width:100%">
       </td>
      </tr>
      <tr>
@@ -88,18 +94,26 @@ These maps cannot be used directly in a game, we need to process them.
      </tr>
     </tbody>
    </table> 
-    
-    <h1>How to process the data ?</h1>
 
-    <h2>Choose the topology</h2>
+    <p>
+The full-resolution maps cannot be used directly in a game, so we need to process them.
+    </p>
+
+    <h2>Multi-scale method</h2>
+
+    <p>
+One of the main methods to have multi-scale is to use tiles, that are refined at some places.
+The tile refinement level is also called <abbr title="Level Of Details">LOD</abbr>.
+    </p>
+
+    <h3>Step 1: Define the topology</h3>
     <div>
-    <img src="images/Dev-notes/sphere_topology_from_cube.jpg" style="float: right; margin: 5px; width: 30%">
+    <img src="images/devnote_planet/cube.jpg" style="float: right; margin: 5px; width: 30%">
     
     <p>
-The main idea is to cut a sphere into countable parts. 
+The main idea is to cut the sphere into countable parts. 
 Any regular polyhedron can approximate a sphere with a finite number of faces. 
-So a portion of the sphere's surface can be addressed with a face identifier. <br>
-A cube (which is a regular polyhedron) lets us to have a direct mapping:
+But a cube (which is also a regular polyhedron) lets us to have a trivial mapping:
     </p>
     <ul>
       <li> the face -X will have a (-1, 0, 0) identifier, </li>
@@ -110,53 +124,109 @@ A cube (which is a regular polyhedron) lets us to have a direct mapping:
       <li> the face +Z will have a (0, 0, 1) identifier. </li>
     </ul>
     <p>
-Each faces can now be subdivided into smaller parts.
-A ratio is 3 has been selected.
+The cube is projected on the unit sphere.
+This projection is simple to compute because it consists to normalize the vector constructed by any points with the center of the sphere.
+Each faces can now be subdivided into tiles.
+A constant ratio is 3 has been selected.
+    </p>
+    </div>
+
+    <video autoplay loop muted controls style="display: block; width: 760px; margin: auto;" poster="images/devnote_planet/tiles_thumbnail.png" >
+      <source src="images/devnote_planet/tiles.mp4" type="video/mp4">
+    </video>
+
+    <p>
+Here an example of the computation of the tile identifier, from a 3D position.
+    </p>
+<details>
+<summary>(Click to expand.)</summary>
+<pre>ivec3 getTileIdentifier(vec3 pos, int level)
+{
+  unsigned adressAbsMax = 1;
+  while (level-- != 0) adressAbsMax *= 3;
+  adressAbsMax = (adressAbsMax - 1) / 2;
+
+  const vec3 posAbs = abs(pos);
+  int   id_cube = pos.x > 0.f ? 0 : 1;
+  float maxValue = posAbs.x;
+  if (posAbs.y > maxValue)
+  {
+    id_cube = pos.y > 0.f ? 2 : 3;
+    maxValue = posAbs.y;
+  }
+  if (posAbs.z > maxValue)
+  {
+    id_cube = pos.z > 0.f ? 4 : 5;
+    maxValue = posAbs.z;
+  }
+
+  const vec3  uvw_f = 0.5f + 0.5f * pos / maxValue;
+  const ivec3 uvw = glm::ivec3(uvw_f * float(adressAbsMax * 2 - 1)) - (adressAbsMax - 1);
+
+  ivec3 ret;
+  switch (id_cube)
+  {
+    case 0: ret = ivec3( adressAbsMax,  uvw.y, -uvw.z); break;
+    case 1: ret = ivec3(-adressAbsMax,  uvw.y, -uvw.z); break;
+    case 2: ret = ivec3(uvw.x,  adressAbsMax, -uvw.z); break;
+    case 3: ret = ivec3(uvw.x, -adressAbsMax, -uvw.z); break;
+    case 4: ret = ivec3( uvw.x, uvw.y, -adressAbsMax); break;
+    case 5: ret = ivec3( uvw.x, uvw.y,  adressAbsMax); break;
+  }
+  return ret;
+}</pre>
+</details>
+
+    <h3>Step 2: Texturing the tiles</h3>
+    <div>
+    <img src="images/devnote_planet/project_tile_sphere.png" style="float:right; width:200px; margin: 10px 10px 10px 30px;">
+
+    <p>
+We can associate textures on each tile.
+In my case, I need the albedo-texture and normal-texture.
+The height could be, either encoded in a map and the application will use a vertex displacement technique, either applied to the mesh.
+I prefer the second option because it will require less workload in the final application.
+While the computation of the albedo-texture is a re-sample operation,
+the computation of the normal-texture implies to get the derivative of the elevation,
+along the texture local coordinates.
+A re-sampling code is available in <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a>, 
+with the function <code>tre::textureSampler::resample_toCubeMap</code>.
+Doing the sampling on CPU is a costly operation.
+In fact, the texturing is made offline, and the final application is only loading these textures for rendering.
     </p>
 
     </div>
 
-    <h2>Construct the mesh</h2>
+    <h2>Lighting and self-shadowing</h2>
+
     <p>
-The mesh is constructed from a cube subdivision, for which vertices are projected on the unit sphere.
-Each subdivision is similar to a 2D surface, that can be refined independently.
-To do a projection on the unit sphere, it simply consists to normalize the vector constructed by any points with the center of the sphere.
+With the albedo and normal textures, you can use your favorite lighting model.
+The self-shadowing requires a bit of work, because the relief is obtained from the elevation-map,
+but not from the geometry.
+    </p>
+    <p>
+Soon ...
     </p>
 
-   <table>
-   <tbody>
-<tr>
-   <td style="width:50%">
-   <img src="images/Dev-notes/sphere_LOD0-0.jpg" style="width:100%">
-   </td>
-   <td style="width:50%">
-   <img src="images/Dev-notes/sphere_LOD0-2.jpg" style="width:100%">
-   </td>
-   </tr>
-   <tr>
-   <td style="width:50%; text-align:center;">
-   <i>Wire-frame of the mesh, with LOD level 0</i>
-   </td>
-   <td style="width:50%; text-align:center;">
-   <i>Wire-frame of the mesh, with LOD levels from 0 to 2</i>
-   </td>
-   </tr>
-   </tbody></table> 
+    <h2>Adding details on the ground</h2>
 
-    
-    <h2>Re-sample the maps</h2>
     <p>
-Now that we have a subdivision of a sphere (that we call 'tiles'), we can associate textures on each tile.
-The needed textures are the albedo-map (color-map) and normal-map.
-The height could be, either encoded in a map and the application will use a vertex displacement technique, either applied to the mesh. I prefer the second option because it will require less workload in the final application.
-<br>
-Each pixel of a texture is a small rectangle. This rectangle is projected on the origin map with the inverse equirectangular spherical projection.
+Even with high-resolution maps, the ground details are poor.
+Indeed, from these maps, a texel fits with up to 500m-size squares on the ground.
+To improve the looking when the viewer is on the ground,
+we can use noise-textures and we can procedurally put the 3D objects (such as rocks).
     </p>
-    
+
+    <h3>Details: Noise-texture</h3>
+    <p>
+Soon ...
+    </p>
+
+    <h3>Details: Placing rocks</h3>
+    <p>
+Soon ...
+    </p>
+
+
     </div>
-        
-  
-  
-
-
 </body></html>
