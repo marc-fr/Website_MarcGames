@@ -66,6 +66,10 @@ pre, code {
   background-color: #e1e1e1;  
 }
 
+.sidebar a {
+  text-decoration: none;
+}
+
 /* Main */
 
 .main {
