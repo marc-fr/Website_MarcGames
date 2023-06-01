@@ -22,17 +22,17 @@
 
     <div class="sidebar">
       <h2>About</h2>
-      <p> 
-        <a href="index.html">Home page</a> <br>
-        <a href="devlog.html#AboutMe">About me</a> <br>
-      </p>
+      <ul>
+        <li> <a href="index.html">Home page</a> </li>
+        <li> <a href="devlog.html#AboutMe">About me</a> </li>
+      </ul>
       <h2>Other posts</h2>
       <ul> 
-        <li> <a href="devlog_impulse.html">impulse response</a> </li>
-        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_impulse.html">Impulse response</a> </li>
+        <li> <a href="devlog_planet.html">Multi-scale planet rendering</a> </li>
         <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
-        <li> <a href="devlog_sky.html">render the sky</a> </li>
-        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+        <li> <a href="devlog_sky.html">Sky rendering</a> </li>
+        <li> <a href="devlog_webgl.html">Porting to web-assembly</a> </li>
       </ul>
     </div>
 
@@ -80,8 +80,8 @@ Before dealing with the IS-MCTS, let's dive into some probabilities!
 
 <p>
 The goal is to compute the distribution of N un-ordered cards, over P distinguished players.
-We already know that the total count of the distributions is \( P^N  \). 
-Indeed, for each card, we choose a player to give to.
+I already know that the total count of the distributions is \( P^N  \).
+Indeed, for each card, I choose a player to give to.
 </p>
 <p>
 Let's take an example, with 3 cards over 4 players:
@@ -134,14 +134,14 @@ The generic case with 4 players is:<br>
 
 <p>
 Given a distribution (like <code>(x,y,z,w)</code> with 4 players), its probability is given by \( \frac{D}{P^N} \).
-If we consider that some players must receive a certain number of cards or cannot receive more than a certain cards' count,
-Then we can easily compute the distributions by discarding invalid repetitions.
+If some players must receive a certain number of cards or cannot receive more than a certain cards' count,
+Then the distributions can be easily computed by discarding invalid repetitions.
 </p>
 
 <h2>Walking the game tree</h2>
 
 <p>
-With the IS-MCT method, and other tree-based methods, we need to walk the game tree.
+The IS-MCT method and other tree-based methods are requiring to walk the game tree.
 The game states are the nodes of the tree, and the possible "moves" are the edge of the tree.
 There are 3 kind of moves:
 the first is the "opening" where a player is the first to fold a card,

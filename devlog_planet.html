@@ -22,17 +22,17 @@
 
     <div class="sidebar">
       <h2>About</h2>
-      <p> 
-        <a href="index.html">Home page</a> <br>
-        <a href="devlog.html#AboutMe">About me</a> <br>
-      </p>
+      <ul>
+        <li> <a href="index.html">Home page</a> </li>
+        <li> <a href="devlog.html#AboutMe">About me</a> </li>
+      </ul>
       <h2>Other posts</h2>
       <ul> 
-        <li> <a href="devlog_impulse.html">impulse response</a> </li>
-        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_impulse.html">Impulse response</a> </li>
+        <li> <a href="devlog_planet.html">Multi-scale planet rendering</a> </li>
         <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
-        <li> <a href="devlog_sky.html">render the sky</a> </li>
-        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+        <li> <a href="devlog_sky.html">Sky rendering</a> </li>
+        <li> <a href="devlog_webgl.html">Porting to web-assembly</a> </li>
       </ul>
     </div>
 
@@ -51,8 +51,8 @@ that vary from an in-orbit space view to a ground view.
     <h2>Input resources</h2>
 
     <p>
-To model the Moon, we need the elevation on each point of the surface,
-and the lighting data on each point of the surface.
+To model the Moon, the elevation on each point of the surface is needed,
+as well as the lighting data on each point of the surface.
 The first one, called "elevation map", defines a displacement along the normal of the surface.
 It allows to obtain the bumped surface.
 The second one, called "albedo map" defines how the light is absorbed and reflected.
@@ -96,7 +96,7 @@ High resolution maps are free to download from <a href="https://svs.gsfc.nasa.go
    </table> 
 
     <p>
-The full-resolution maps cannot be used directly in a game, so we need to process them.
+The full-resolution maps cannot be used directly in a game.
     </p>
 
     <h2>Multi-scale method</h2>
@@ -182,7 +182,7 @@ Here an example of the computation of the tile identifier, from a 3D position.
     <img src="images/devnote_planet/project_tile_sphere.png" style="float:right; width:200px; margin: 10px 10px 10px 30px;">
 
     <p>
-We can associate textures on each tile.
+Different textures are created for each tile.
 In my case, I need the albedo-texture and normal-texture.
 The height could be, either encoded in a map and the application will use a vertex displacement technique, either applied to the mesh.
 I prefer the second option because it will require less workload in the final application.
@@ -214,7 +214,7 @@ Soon ...
 Even with high-resolution maps, the ground details are poor.
 Indeed, from these maps, a texel fits with up to 500m-size squares on the ground.
 To improve the looking when the viewer is on the ground,
-we can use noise-textures and we can procedurally put the 3D objects (such as rocks).
+noise-textures can be used and 3D objects (such as rocks) can be paced on the ground.
     </p>
 
     <h3>Details: Noise-texture</h3>

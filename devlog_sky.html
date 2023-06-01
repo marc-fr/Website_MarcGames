@@ -22,17 +22,17 @@
 
     <div class="sidebar">
       <h2>About</h2>
-      <p> 
-        <a href="index.html">Home page</a> <br>
-        <a href="devlog.html#AboutMe">About me</a> <br>
-      </p>
+      <ul>
+        <li> <a href="index.html">Home page</a> </li>
+        <li> <a href="devlog.html#AboutMe">About me</a> </li>
+      </ul>
       <h2>Other posts</h2>
       <ul> 
-        <li> <a href="devlog_impulse.html">impulse response</a> </li>
-        <li> <a href="devlog_planet.html">multi-scale planet rendering</a> </li>
+        <li> <a href="devlog_impulse.html">Impulse response</a> </li>
+        <li> <a href="devlog_planet.html">Multi-scale planet rendering</a> </li>
         <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
-        <li> <a href="devlog_sky.html">render the sky</a> </li>
-        <li> <a href="devlog_webgl.html">porting to web-assembly</a> </li>
+        <li> <a href="devlog_sky.html">Sky rendering</a> </li>
+        <li> <a href="devlog_webgl.html">Porting to web-assembly</a> </li>
       </ul>
     </div>
 
@@ -66,7 +66,7 @@ There are two main scattering types:
 <p>
 The scattering effect is locally defined by a phase function,
 that expresses the ratio between the incoming and the outcoming light at a certain angle.
-This ratio depends on the density of the particles present in the atmosphere.
+It is assumed that the Rayleigh and Mie scatterings do not interfere, thus their effect is additive.
 With \( h \) being the altitude and \( \theta \) the angle between the incoming and outcoming light direction,
 the scattering is computed as following:
 $$ L_P = \beta_R(h) \; \phi_R(\theta) + \beta_M(h) \; \phi_M(\theta) $$
@@ -81,9 +81,7 @@ where
 </ul>
 
 <p>
-As you can see, we assumed that the Rayleigh and Mie scatterings do not interfere, so their effect is additive.
-From this, we can compute the light extinction, which is the part of the light being absorbed between two points.
-The extinction is computed as following:
+From this, I can compute the light extinction, which is the part of the light being absorbed between two points:
 $$ \alpha(path) = \exp \left( - \alpha_c \beta_R \int_{path} { e^{-h/h0_R} dl }  - \alpha_c \beta_M \int_{path} { e^{-h/h0_M} dl } \right) $$
 where \( \alpha_c = 0.037 \) is the extinction coefficient, taken from empirical observation of the results.
 The term inside the first exponential is called the optical-distance.
@@ -116,7 +114,7 @@ I could use the same technique, but I decided to use a math approximation instea
 </p>
 </p>
 Because the Earth radius is large compared with the altitude of the viewer and the characteristic altitudes of the scattering effect,
-we can express the optical-distance to the sun with:
+I can express the optical-distance to the sun with:
 
 $$ d_{optic,sun} = \int_{path} { e^{-h/h0} dl } = \int_{x=0}^{+\infty} { e^{ - ( a x^2 + b x + c ) } dx } $$
 
@@ -261,7 +259,7 @@ for (int iStep = 0; iStep &lt; rayIntg_total; ++iStep)
 <h2>3. Multiple scattering methods</h2>
 
 <p>
-To improve the global looking, we need to take of account of the indirect scattering but not only of a single-event scattering.
+To improve the global looking, the indirect scattering needs to be taken account.
 I choose to explore two ideas: to determine better local scattering phase function and to consider multiple scattering events.
 </p>
 
@@ -319,7 +317,6 @@ Consequently, higher extinction coefficient may be used in future.
 <img src="images/devnote_sky/sketch-multi-rays.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
 
 <p>
-We can take account into multiple scattering events.
 Handling two scattering events is already a decent try.
 Indeed, the amount of light quick falls when going through successive scattering events.
 To implement the 2-events scattering,
@@ -346,7 +343,7 @@ Soon...
 
 <p>
 To perform the lighting computation to render the objects in our scene, like with PBR methods, 
-we often need to get the sky incoming light at many directions.
+the sky incoming light at many directions is often needed.
 Then, to save performance while keeping good looking, either a coarser sky model should be used, either pre-computed models can be evaluated.
 I choose to use pre-computed models.
 Because the viewer stays at the low altitude, there are few parameters that impacts the sky rendering, which are:

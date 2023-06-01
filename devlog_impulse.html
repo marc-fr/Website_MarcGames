@@ -22,10 +22,10 @@
 
     <div class="sidebar">
       <h2>About</h2>
-      <p> 
-        <a href="index.html">Home page</a> <br>
-        <a href="devlog.html#AboutMe">About me</a> <br>
-      </p>
+      <ul>
+        <li> <a href="index.html">Home page</a> </li>
+        <li> <a href="devlog.html#AboutMe">About me</a> </li>
+      </ul>
       <h2>Other posts</h2>
       <ul> 
         <li> <a href="devlog_impulse.html">Impulse response</a> </li>
@@ -117,7 +117,7 @@ Consequently, the contact response is defined by a velocity gap.
        </tbody>
       </table> 
 
-      <img src="images/devnote_impulse/body-contact.png" style="width:25%; padding: 10px; float:right;">
+      <img src="images/devnote_impulse/body-contact.png" style="width:25%; padding: 15px; float:right;">
       <p>
 When the contact is made, the reaction force will prevail on other actions, such as gravity.
 I therefore use the approximation of a single force, with a constant direction.
@@ -128,8 +128,7 @@ $$ m \vec{\delta v} = \int_{\delta t} { \vec{F} } $$
 $$ I \delta \omega = \vec{p} \times \int_{\delta t} { \vec{F} } $$
 This yields to:
 $$ \delta \omega = \frac{m}{I} \vec{p} \times \vec{\delta v} $$
-We can remark that the variation of the velocity is parallel to the overall force direction.
-The goal is to compute the variation of both the velocity \(\vec{\delta v}\) and the angular-velocity \(\delta \omega\).
+The goal is now to compute the variation of both the velocity \(\vec{\delta v}\) and the angular-velocity \(\delta \omega\).
 The velocity delta of the contact point \(P\) verifies two relations.
 The first is the rigid body cinematic relation
 $$ \vec{\delta v_P} = \vec{\delta v} - \vec{p} \times \vec{\delta \omega} $$
@@ -230,7 +229,6 @@ This stationnary state depends on \( \delta t \), so the scheme can produce spur
       </p>
 
       <h2>3. Resolution of the penetration</h2>
-      <img src="images/devnote_impulse/body-penetration.png" style="width:25%; padding: 5px; float:right;">
 
       <p>
 There are 2 methods to compute the penetration.
@@ -245,11 +243,14 @@ because it allows to easily work with multiple contacts and its good stability w
 However, the penetration resolution may fail to be resolved if the time-step or the velocity is too high.
 As such one or two steps of the first method can be applied to have a state that is closer to the hit, and therefore obtain more precision.
       </p>
+
+      <img src="images/devnote_impulse/body-penetration.png" style="width:25%; padding: 15px; float:right;">
       <p>
-To resolve the penetration, I compute the intersection of the body area with the obstacle area.
-A virtual contact-point is calculated by the barycenter of the intersecting area. The contact force is thus applied from it.
+Unfortunately, the contact location is not a single point but a surface,
+thus a virtual contact-point must be determined. (The contact force is applied from it.)
+This point is calculated by the barycenter of the intersecting area.
 This conjecture is similar to the Archimedes force if we consider the obstacle made out of water.
-Another similarity is to compute the resultant elastic-force if the matter of the intersecting area is displaced on the surface of the obstacle.
+Another similarity is to consider the resultant elastic-force if the matter of the intersecting area is displaced on the surface of the obstacle.
       </p>
       <p>
 After this, the body must be moved to cancel the penetration.
@@ -322,13 +323,10 @@ $$ \ddot{y} + h \dot{y} + k y = 0 $$
 {
   <span class="code-comment">// [...] Motion integration + Gravity</span>
 
-  <span class="code-comment">// Foot motion (left)</span>
+  <span class="code-comment">// Foot motion (left/right)</span>
   foot.pos += dt * foot.vel;
   foot.vel += dt * ( -16.f * foot.pos - 3.1f * m_foot.vel);
   foot.pos = clamp(foot.pos, -1, 1);
-
-  <span class="code-comment">// Foot motion (right)</span>
-  <span class="code-comment">// [...]</span>
 
   <span class="code-comment">// Contact</span>
   for (cnt in compute_contacts())
@@ -411,8 +409,7 @@ where
 \( g \) the gravity (projected on the up-axis, so the value is negative).
 This leads to find a root within \( [0,1] \) of the expression:
 $$ - k f^3 - h (1-f^2) f - h \delta t g (1-f^2)^2 \left( \frac{1}{C_r f^2} - \frac{1}{2} \right) - g \frac{1 - f^2 C_r}{C_r} (1 - f^2) (C_r - 1) = 0 $$
-From the obtained expression, we can observe that there is a unique solution within \( [0,1] \)
-as long as there is a stiffness ( \( k \ne 0 \) ).
+It fortuitously admits a single root within \( [0,1] \) as long as there is a stiffness ( \( k \ne 0 \) ).
 Moreover, the term introduced by the code commented by "<code class="code-comment">this helps for stability</code>"
 helps to maintain the solution far from \( f = 0 \) when the damping is weak ( \( h \rightarrow 0 \) )
 or when the time-step is zero.
