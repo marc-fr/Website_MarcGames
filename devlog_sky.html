@@ -45,7 +45,7 @@ This post demonstrates how the sky can be fully procedural rendered in real-time
 I will describe some of the methods that I found relevant for my case,
 which is to render the sky being at low altitude and above the ocean (flat land, highly reflective).
 A naive implemention is firstly detailed,
-then the computation is gradually complexified to obtain more convincing sky.
+then the computation is gradually complexified to obtain a more convincing sky.
 </p>
 
 <h2>1. Atmospheric scattering</h2>
@@ -66,7 +66,7 @@ There are two main scattering types:
 <p>
 The scattering effect is locally defined by a phase function,
 that expresses the ratio between the incoming and the outcoming light at a certain angle.
-It is assumed that the Rayleigh and Mie scatterings do not interfere, thus their effect is additive.
+It is assumed that the Rayleigh and Mie scatterings do not interfere, their effect is therefore additive.
 With \( h \) being the altitude and \( \theta \) the angle between the incoming and outcoming light direction,
 the scattering is computed as following:
 $$ \sigma(h,\theta) = \beta_R(h) \; \phi_R(\theta) + \beta_M(h) \; \phi_M(\theta) $$
@@ -80,7 +80,7 @@ where
 </ul>
 <p>
 with \( h0_R = 8 km \) and \( h0_M = 1.2 km \) being the characteristic altitude of the Rayleigh and Mie scattering,
-and \( \beta_{R0} \) and \( \beta_{M0} \) two coefficients that control the strength of the scattering.
+and \( \beta_{R0} \) and \( \beta_{M0} \) two coefficients that control the breadth of the scattering.
 From this, I can compute the light extinction, which is the part of the light being absorbed between two points:
 $$ \alpha(path) = \exp ( - \alpha_c \; d_{optic} ) $$
 where \( d_{optic} \) is the optical distance and \( \alpha_c = 0.037 \) is the extinction coefficient, taken from empirical observation of the results.
@@ -96,13 +96,13 @@ $$ d_{optic} = \beta_{R0} \int_{path} { e^{-h/h0_R} dl } + \beta_{M0} \int_{path
 <img src="images/devnote_sky/sketch-single-event.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
 <p>
 The single scattering is often detailed and implemented in online resources.
-It is quick to implement, and it allows real-time rendering with the help of few trade-offs.
+It is quick to implement and with a few tricks it allows real-time rendering.
 The single scattering method consists in the discretization of the view ray in multiple points,
 and to compute the light being scattered at all of those points.
 Then, there are two light segments, one from the viewer to the point (VP), one from the point to the source (PS).
 The received light by the viewer V is defined by:
 $$ \overline{L} = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \; \alpha(P \rightarrow Sun) \; \sigma(P) \; dl } $$
-where \( \alpha(path) \) is the extinction along the path and \( \sigma(P) \) the scattering at the point P.
+where \( \alpha(path) \) is the light extinction along the path and \( \sigma(P) \) the scattering at the point P.
 </p>
 </div>
 
@@ -111,15 +111,15 @@ where \( \alpha(path) \) is the extinction along the path and \( \sigma(P) \) th
 <p>
 The extinction is an integral that is costly to evaluate by summation.
 To prevent this, many resources are using a pre-computed lookup texture.
-I could use the same technique, but I decided to use a math approximation instead.
-Because the Earth radius is large compared with the altitude of the viewer and the characteristic altitudes of the scattering effect,
-I can express the optical-distance to the sun with:
+Since the altitude of the viewer and the characteristic altitudes of the scattering effect are too negligeable compared
+to the scale of the Earth's radius, I decided to use a math approximation instead of the lookup texture.
+I thus express the optical-distance to the sun with:
 $$ d_{optic,sun} = \int_{path} { e^{-h/h0} dl }
             \simeq \int_{x=0}^{+\infty} { e^{ - ( a x^2 + b x + c ) } dx }
                  = \frac{\sqrt{\pi}}{2\sqrt{a}} e^{-c} e^{\frac{b^2}{4a}} \left( 1 - \mathrm{erf} \left( \frac{b}{2\sqrt{a}} \right) \right) $$
 where \( a = \frac{1-cos^2 \theta}{2 R h0} \) ,  \( b = \frac{cos \theta}{h0} \) , \( c = \frac{h_{start}}{h0} \) .
 This approximation is fairly good while the ray does not travel towards the ground (while \(b\) is positive).
-I also use asymptotic approximations of the <code>erf</code> function to have more friendly expression to compute.
+I also use asymptotic approximations of the <code>erf</code> function to have a friendlier expression to compute.
 When \(b\) is negative, I consider that the ray starts at its lowest altitude point.
 Finally, the optical distance to the sun is expressed with:
 $$ d_{optic,sun} = 
@@ -136,9 +136,8 @@ $$
 <h4>Results</h4>
 
 <p>
-This implementation of the sky scattering gives a plausible result with low effort.
-But I was not able to reproduce skies with enough consistency.
-In short terms, at midday, the sky looks too dark compared with the horizon light intensity.
+This implementation of the sky scattering gives a plausible result with low effort, however the resulting sky isn't realistic enough.
+In short terms, at midday, the sky looks too dark compared with the horizon light's intensity.
 To increase the extinction coefficient may appear as a solution, but the sky will appear yellowed even at midday.
 The overall light intensity behaves weirdly, with a maximal intensity not at midday.
 The light intensity is lower on the sides, producing spurious pattern. This comes from the Rayleigh phase function.
@@ -232,8 +231,8 @@ vec3 skyColor(vec3 rayView)
 
 <p>
 I did some tests with various count of discretization points (<code>rayIntg_nsteps</code>).
-Having less scattering points gives a sky as if the extinction coefficient is higher.
-Indeed, it leads to a brighter and more uniform sky, but more yellowished near the horizon.
+Having less scattering points renders the sky as if the extinction coefficient was higher.
+Indeed, it leads to a brighter and more uniform sky, but more yellowish near the horizon.
 As expected, the number of discretization points strongly impacts the performances.
 </p>
 
@@ -242,14 +241,15 @@ As expected, the number of discretization points strongly impacts the performanc
 <h4>Two steps discretization with both Rayleigh and Mie scattering</h4>
 
 <p>
-Because the Mie scattering has a 8-times lower characteristic altitude than the Rayleigh scattering characteristic altitude, 
+Because the Mie scattering has an 8-times lower characteristic altitude than the Rayleigh scattering characteristic altitude, 
 the distribution of the discretization points significantly affects the output.
-To have a good sampling of the Mie scattering, the distance between two points should not exceed about 1 km.
-On other hand, the total distance traveled in the atmosphere varies from 80 km to nearly 200 km.
+To have a good sampling of the scattering, the distance between two points should be shorter than the characteristic altitude's one.
+Consequently, with the Mie scattering this distance should at most be about 1 km.
+As for the Rayleigh scattering, this distance should measure up to 8km, but given its magnitude in practice it can be higher while keeping a relatively high resolution.
 While keeping the reasonably low number of discretization points, the distribution of the points cannot be uniform anymore.
-I choose to split the view-ray in 2 parts:
-a first part with a short distance between 2 discretization points (so the Mie scattering will be correctly evaluated),
-and a second part with a long distance (so the Rayleigh scattering will be correctly evaluated).
+Since the total distance traveled in the atmosphere varies from 80 km to nearly 200 km, I choose to split the view-ray in 2 parts:
+a first part with a short distance between 2 discretization points (so the Mie scattering will be accurately evaluated),
+and a second part with a long distance (so the Rayleigh scattering will be accurately evaluated).
 </p>
 
 <details>
@@ -270,8 +270,8 @@ for (int iStep = 0, stop = 2 * rayIntg_nsteps; iStep &lt; stop; ++iStep)
 <h2>3. Multiple scattering methods</h2>
 
 <p>
-To improve the results, the indirect scattering needs to be taken account.
-I choose to explore two ideas: to determine better local scattering phase function and to consider multiple scattering events.
+To improve the results, the indirect scattering needs to be taken into account.
+I hence decided to explore two different approaches: determining a better local scattering phase function and considering multiple scattering events.
 </p>
 
 <h3>3.1 Local scattering phase function</h3>
@@ -282,9 +282,9 @@ I choose to explore two ideas: to determine better local scattering phase functi
 <p>
 I start by considering a local small sphere around the point P.
 The goal is to determine the scattering induced by the sphere.
-At any points of the sphere, the amount of incoming light is assumed uniform.
+At any points of the sphere, the incoming light is assumed to be uniform.
 There are 2 scattering events, one at the center of the sphere (point P), one at the surface of the sphere (point Q).
-the total scattered light is the sum of the direct scattering event at the point P, plus the indirect scattering through the points P and Q:
+the total scattered light is the sum of the direct scattering event at the point P and the indirect scattering through the points P and Q:
 $$ \sigma^{(2)} (h,\theta) = \sigma(h,\theta) + \int_{y=0}^{2 \pi} \int_{x=0}^{\pi} \sigma(h,x) \; \sigma(h,z) \sin(x) dx dy $$
 where \( z \) is the angle such that:
 $$ \cos(z) = \cos(x) \cos(\theta) + \sin(x) \sin(\theta) \sin(y) $$
@@ -303,7 +303,7 @@ $$ \phi_{MM} (\theta) = \iint { \phi_M \phi_M dS } \simeq \frac{ k_6 + k_7 \frac
 
 </p>
 
-<table border="1px solid" style="border-collapse: collapse; margin:auto;">
+<table id="bordered-table">
  <tbody>
   <tr> <td> \( k_0 = 0.077713 \) </td>    <td> \( k_5 = 0.0494774 \) </td>  <td> \( k_{10} = 0.0559416 \) </td> </tr>
   <tr> <td> \( k_1 = -0.00207583 \) </td> <td> \( k_6 = 0.0775971 \) </td>  <td> \( k_{11} = 0.375561 \) </td> </tr>
@@ -321,9 +321,9 @@ $$ \phi_{MM} (\theta) = \iint { \phi_M \phi_M dS } \simeq \frac{ k_6 + k_7 \frac
 I replace \( \sigma \) by \( \sigma^{(2)} \) in the expression of the received light (see \( \overline{L} \) ).
 As expected, the local-scattering allows to have a better result near the horizon,
 where the density is higher (so where the scattering is stronger).
-It helps to reduce the yellowished horizon when the sun is high in the sky.
-Consequently, higher extinction coefficient may be used in future.
-This improvement does not impact significantly the performances.
+It helps to reduce the yellowish horizon when the sun is high in the sky.
+Consequently, higher extinction coefficient may be used in the future.
+This improvement does not significantly impact the performances.
 </p>
 
 <img src="images/devnote_sky/sky-1way-local-phase.png" style="clear:right; width:80%; display: block; margin: auto;">
@@ -335,18 +335,17 @@ This improvement does not impact significantly the performances.
 
 <p>
 Handling two scattering events is already a decent try.
-Indeed, the amount of light quick falls when going through successive scattering events.
+Indeed, the light's intensity declines drastically when going through successive scattering events.
 To implement the 2-events scattering,
-a secondary ray is emmited at the first scattering event location,
-then the light gathered by the secondary ray is taken as a source light
-for the scattering at the first event location.
+a second ray is emmited from the first scattering event location,
+then the light gathered by the second ray contributes to the scattering of the incoming light at the first event location.
 </p>
 <p>
-The received light by the viewer V is the sum of the already known direct scattered light from the sun light
+The received light by the viewer V is the sum of the already known single-scattering light from the sun
 $$ \overline{L} = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \; \alpha(P \rightarrow Sun) \; \sigma(P) \; dl } $$
-and the scattered light from the secondary rays
+and the multi-events scattered light from the second rays
 $$ \overline{L}^{(2)} = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \int_{ray2 \in sphere} { \int_{Q \in ray2} { \alpha(P \rightarrow Q) \alpha(Q \rightarrow Sun) \; \sigma(P) \sigma(Q) \; dl } \; dS } \; dl } $$
-I now consider to select a finite number of secondary rays.
+I now consider selecting a finite number of second rays.
 However, the scattering phase function should still be integrated to cover all directions.
 It leads to:
 $$ \overline{L}^{(2)} \simeq L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \sum_{ray2} { \Psi^{ray2}(P) } \; dl } $$
@@ -356,13 +355,13 @@ $$ \Psi^{ray2}(P) = \int_{Q \in ray2} { \alpha(P \rightarrow Q) \; \alpha(Q \rig
 
 </div>
 
-<h4>Vertical secondary ray</h4>
+<h4>Vertical second ray</h4>
 
 <p>
-For the secondary rays, I select only the two vertical direction (down and up).
+For the second rays, I only select the two vertical directions (down and up).
 Even if it is a rough approximation, to have these two rays will allow to catch interesting visual effects.
-It mimics that a part of the scattered light source is constant either from the ground direction either from the up direction.
-Given the vertical direction, some terms can be simplified.
+It entails that a part of the scattered light source is constant either from the ground direction or from the up direction.
+Given the vertical axis, some terms can be simplified.
 Nevertheless, the partial-sphere integrals should be pre-computed.
 Especially:
 $$ \iint^{half} { \phi_R \phi_R dS } = \frac{ 3 \cos(\theta_v-\theta_s)^2 + 39 }{ 320 \pi} $$
@@ -374,16 +373,16 @@ $$ \iint^{down} { \phi_R \phi_M dS } \simeq ... $$
 $$ ... $$
 </p>
 
-<h4>Results with the vertical secondary ray</h4>
+<h4>Results with the vertical second ray</h4>
 
 <p>
-With the up and down secondary rays, the results are greatly improved, but at the cost of performance.
-Because the blue color is getting scattered much stronger,
-the extinction coefficient should be modified with an higher value.
-The sky is more uniform at midday, without the yellowished honziron,
-and so the results are closer to real life observations.
-The results at sunset are still not so convincing.
-Noticeably, the model still fails to obtain the dark-blue fading at the opposite direction of the sun.
+With the up and down second rays, the results are greatly improved, but at the cost of performance.
+Since the blue color is getting scattered much stronger,
+the extinction coefficient should be modified with a higher value.
+The sky is more uniform at midday, without the yellowish horizon,
+as such the results are closer to real life observations.
+The results at sunset are however still not so convincing.
+The model still noticeably fails to obtain the dark-blue fading at the opposite direction of the sun.
 </p>
 
 <img src="images/devnote_sky/sky-2way-up-down.png" style="clear:right; width:80%; display: block; margin: auto;">
@@ -393,9 +392,7 @@ Noticeably, the model still fails to obtain the dark-blue fading at the opposite
 <h3>Discrete atmosphere model</h3>
 
 <p>
-The discrete atmosphere model consists in partitionning the atmosphere into pieces,
-for which the received light is computed,
-and then from which the scattered light is emitted and thus will be received by other pieces.
+The discrete atmosphere model consists in partitionning the atmosphere into pieces and each piece would in turn receive and emit light.
 This way, the global scattered light is recursively refined.
 Such models are heavy to compute,
 but they can be used as reference data for other computations.
@@ -404,11 +401,10 @@ but they can be used as reference data for other computations.
 <h3>Pre-computed model</h3>
 
 <p>
-To perform the lighting computation to render the objects in our scene, like with PBR methods, 
-the sky incoming light at many directions is often needed.
-Then, to save performance while keeping good looking, either a coarser sky model should be used, either pre-computed models can be evaluated.
-I choose to use a pre-computed model.
-Because the viewer stays at the low altitude, there are few parameters that impacts the sky rendering, which are:
+To perform the lighting computation to render the objects in our scene, as it is the case with the PBR methods, 
+computing the incoming light from many directions is often needed.
+Now, to maintain both performance and realistic rendering, pre-computed models may be used.
+Since the viewer remains at a low altitude, there are a few parameters that impact the sky rendering. These are:
 </p>
 <ul>
   <li>The sun zenith angle (<code>cosSunZenith</code>)</li>
