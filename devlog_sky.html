@@ -240,6 +240,9 @@ As expected, the number of discretization points strongly impacts the performanc
 
 <h4>Two steps discretization with both Rayleigh and Mie scattering</h4>
 
+<div>
+<img src="images/devnote_sky/sketch-discretisation-2steps.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
+
 <p>
 Because the Mie scattering has an 8-times lower characteristic altitude than the Rayleigh scattering characteristic altitude, 
 the distribution of the discretization points significantly affects the output.
@@ -251,6 +254,8 @@ Since the total distance traveled in the atmosphere varies from 80 km to nearly 
 a first part with a short distance between 2 discretization points (so the Mie scattering will be accurately evaluated),
 and a second part with a long distance (so the Rayleigh scattering will be accurately evaluated).
 </p>
+
+</div>
 
 <details>
 <summary>Shader-code. (Click to expand.)</summary>
@@ -284,36 +289,32 @@ I start by considering a local small sphere around the point P.
 The goal is to determine the scattering induced by the sphere.
 At any points of the sphere, the incoming light is assumed to be uniform.
 There are 2 scattering events, one at the center of the sphere (point P), one at the surface of the sphere (point Q).
-the total scattered light is the sum of the direct scattering event at the point P and the indirect scattering through the points P and Q:
+The total scattered light is the sum of the direct scattering event at the point P and the indirect scattering through the points P and Q:
 $$ \sigma^{(2)} (h,\theta) = \sigma(h,\theta) + \int_{y=0}^{2 \pi} \int_{x=0}^{\pi} \sigma(h,x) \; \sigma(h,z) \sin(x) dx dy $$
-where \( z \) is the angle such that:
+where \( z \) is the angle such that
 $$ \cos(z) = \cos(x) \cos(\theta) + \sin(x) \sin(\theta) \sin(y) $$
 
-This leads to compute the integral of the product of the two phase functions,
-because the other terms are constant and they are put outside of the integration.
-Even if some integrals can be analytically expressed,
-others need approximated evaluators.
-So far, I have found that:
-
-$$ \phi_{RR} (\theta) = \iint { \phi_R \phi_R dS } = \frac{39 + 3 cos(\theta)^2}{160 \pi} $$
-
-$$ \phi_{RM} (\theta) = \iint { \phi_R \phi_M dS } \simeq (k_0 + k_1 g + k_2 g^2) + (k_3 + k_4 g + k_5 g^2) \cos(\theta)^2 $$
-
-$$ \phi_{MM} (\theta) = \iint { \phi_M \phi_M dS } \simeq \frac{ k_6 + k_7 \frac{g^3}{1-g} + \left( k_8 + g \frac{ k_9 + k_{10} g^2}{1-g} \right) \cos(\theta)^2 + \left( k_{11} g + k_{12} \frac{g}{1+g} \right) \cos(\theta) } { \sqrt { 1 + g^2 - 2 \cos(\theta) g } } $$
-
+This leads to compute the integral of the product of the two phase functions \( \phi_R \) and \( \phi_M \),
+because the other terms are constant and they are put outside of the integral.
+To speed up the computation, I used those approximated formula:
 </p>
 
-<table id="bordered-table">
- <tbody>
-  <tr> <td> \( k_0 = 0.077713 \) </td>    <td> \( k_5 = 0.0494774 \) </td>  <td> \( k_{10} = 0.0559416 \) </td> </tr>
-  <tr> <td> \( k_1 = -0.00207583 \) </td> <td> \( k_6 = 0.0775971 \) </td>  <td> \( k_{11} = 0.375561 \) </td> </tr>
-  <tr> <td> \( k_2 = -0.0166216 \) </td>  <td> \( k_7 = -0.0440173 \) </td> <td> \( k_{12} = -0.46816 \) </td> </tr>
-  <tr> <td> \( k_3 = 0.00560625 \) </td>  <td> \( k_8 = 0.00597702 \) </td> <td>   </td> </tr>
-  <tr> <td> \( k_4 = 0.00649282 \) </td>  <td> \( k_9 = 0.00403158 \) </td> <td>   </td> </tr>
- </tbody>
-</table>
+<pre>
+phaseRR(theta) = 0.07758803475729897 + 0.005968310365946076 * cos(theta)^2
 
-</div>
+phaseRM(theta, g) = (0.077713 + -0.00207583 * g + -0.0166216 * g^2) +
+                    (0.00560625 + 0.00649282 * g + 0.0494774 * g^2) * cos(theta)^2;
+
+phaseMM(theta, g) = ( (0.0775971 + -0.0440173 * g^3 / (1.f - g)) +
+                      (0.00597702 + (0.00403158 + 0.0559416 * g^2) * g / (1.f - g)) * cos(theta)^2 +
+                      (0.375561 * g + -0.46816 * g / (1.f + g)) * cos(theta) ) /
+                    sqrt(1 + g^2 - 2 * g * cos(theta)));
+</pre>
+
+<p>
+Still, the Rayleigh-Rayleigh phase integral can be analitically expressed:
+$$ \iint { \phi_R \phi_R dS } = \frac{39 + 3 cos(\theta)^2}{160 \pi} $$
+</p>
 
 <h4>Results</h4>
 
@@ -329,9 +330,6 @@ This improvement does not significantly impact the performances.
 <img src="images/devnote_sky/sky-1way-local-phase.png" style="clear:right; width:80%; display: block; margin: auto;">
 
 <h3>3.2 Multi-events scattering</h3>
-
-<div>
-<img src="images/devnote_sky/sketch-multi-rays.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
 
 <p>
 Handling two scattering events is already a decent try.
@@ -353,25 +351,47 @@ with
 $$ \Psi^{ray2}(P) = \int_{Q \in ray2} { \alpha(P \rightarrow Q) \; \alpha(Q \rightarrow Sun) \; \left( \int_{partial-sphere} { \sigma(P) \sigma(Q) \; dS } \right) dl } $$ 
 </p>
 
-</div>
-
 <h4>Vertical second ray</h4>
+
+<div>
+<img src="images/devnote_sky/sketch-second-ray-vertical.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
 
 <p>
 For the second rays, I only select the two vertical directions (down and up).
 Even if it is a rough approximation, to have these two rays will allow to catch interesting visual effects.
 It entails that a part of the scattered light source is constant either from the ground direction or from the up direction.
-Given the vertical axis, some terms can be simplified.
-Nevertheless, the partial-sphere integrals should be pre-computed.
-Especially:
-$$ \iint^{half} { \phi_R \phi_R dS } = \frac{ 3 \cos(\theta_v-\theta_s)^2 + 39 }{ 320 \pi} $$
-
-$$ \iint^{up} { \phi_R \phi_M dS } \simeq ... $$
-
-$$ \iint^{down} { \phi_R \phi_M dS } \simeq ... $$
-
-$$ ... $$
+Given the vertical axis, some terms of \( \Psi^{ray2} \) can be simplified.
+Also, the integral over the half sphere can be split in 4 integrals,
+involving the combination of the product of the two phase functions \( \phi_R \) and \( \phi_M \).
+These integrals can be pre-computed, and I decided to use analytic approximations:
 </p>
+
+<pre>
+float sgn = isUpRay ? 1.f : -1.f;
+float mt = (cos(theta_v) * sgn > 0.f) && (cos(theta_s) * sgn > 0.f) ?
+           cos(theta_v)^2 * cos(theta_s)^2 * cos(theta_s)^2 : 0.f;
+
+phaseRR_halfIntegral = 0.038794 + 0.00298415 * cos(theta_v - theta_s)^2
+
+phaseRM_halfIntegral = (0.038794 - 0.00950875 * g^2) +
+                       (0.0029862 + 0.028495 * g^2) * cos(theta_v - theta_s)^2 +
+                       (0.0770418 * g - 0.0198734 * g^2) * cos(theta_s) * sgn
+
+phaseMR_halfIntegral = (0.038794 - 0.00950875 * g^2) +
+                       (0.00298621 + 0.028495 * g^2) * cos(theta_v - theta_s)^2 +
+                       (0.0770418 * g - 0.0198734 * g^2) * cos(theta_s) * sgn
+
+phaseMM_halfIntegral = (0.038794 - 0.0166585 * g / (1.f - g)) +
+                       (0.00298612 + 0.042992 * g^2 / (1.f - g)) * cos(theta_v - theta_s)^2 +
+                       (0.331325 * g / (1 - g^2)) * mt
+</pre>
+
+<p>
+Still, the Rayleigh-Rayleigh phase half-integral can be analitically expressed:
+$$ \iint^{half} { \phi_R \phi_R dS } = \frac{ 3 \cos(\theta_v-\theta_s)^2 + 39 }{ 320 \pi} $$
+</p>
+
+</div>
 
 <h4>Results with the vertical second ray</h4>
 
@@ -403,14 +423,33 @@ but they can be used as reference data for other computations.
 <p>
 To perform the lighting computation to render the objects in our scene, as it is the case with the PBR methods, 
 computing the incoming light from many directions is often needed.
-Now, to maintain both performance and realistic rendering, pre-computed models may be used.
-Since the viewer remains at a low altitude, there are a few parameters that impact the sky rendering. These are:
+Now, to maintain both performance and realistic rendering, pre-computed models should be used.
+Since the viewer remains at a low altitude, there are a few parameters that impact the sky rendering.
+These are the sun zenith angle, the Mie scattering factor (<code>factorMie</code>), the Mie scattering forward-direction (<code>gMie</code>).
+However, both <code>factorMie</code> and <code>gMie</code> are corelated to the visibility distance.
+By trial and error, I found a decent formula in the 500m to 30km visiblity range:
 </p>
-<ul>
-  <li>The sun zenith angle (<code>cosSunZenith</code>)</li>
-  <li>The Mie scattering factor (<code>factorMie</code>)</li>
-  <li>The Mie scattering forward-direction (<code>gMie</code>)</li>
-</ul>
+<pre>
+factorMie = exp(- visibility / 5.2e3) * 11
+gMie = max(1 - exp(- visibility / 21.e3) * 1.2, 0)
+</pre>
+<p>
+I used coefficient fitting method to determine an approximation model of the sky, from this arbitrary model:
+$$ Color = k_0 + k_1 e^{-2 sin(p)} + k_2 e^{-10 sin(p)} + e^{-5 sin(p)} \left( k_3 cos(y) cos(p) + k_4 cos(y)^2 cos(p)^2 \right) + k_5 e^{5 \frac{s - 1}{1 - g}} $$
+</p>
+
+<img src="images/devnote_sky/sketch-dome-angles.png" style="float:right; width:242px; margin: 10px 10px 10px 30px;">
+
+<p>
+where the \( k_i \) are coefficients,
+      \( p \) is the pitch of the view ray (in blue),
+      \( y \) is the yaw of the view ray (in green),
+      \( s \) is the cosinus between the view ray and the sun.
+</p>
+
+<p>
+The \( k_i \) coefficients depends on the sun position (<code>cosSunZenith</code>, where the sun zenith is the evelation angle of the sun, in red) and the visibility (<code>visibility</code>).
+</p>
 
 <p>
 To be continued ...
