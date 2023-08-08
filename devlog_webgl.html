@@ -40,6 +40,8 @@
     
 <h1>Porting a C++/OpenGL game to web browsers</h1>
 
+<p><i>Created on 2022, last updated on May 2023</i></p>
+
 <p>
 The web-assembly platform allows to run application inside web browsers.
 From a C++ desktop application using SDL2 and OpenGL,
@@ -170,6 +172,7 @@ A vastly used compression format is the Ericsson Texture Compression (<a href="h
 Those formoats are part of the OpenGL-ES specifications.
 </p>
 
+<h4>Compression format: ETC2</h4>
 <p>
 The ETC2 compression format handles (r,b,g) channels.
 It compresses 4x4 pixels squares to 8-bytes sequence.
@@ -196,6 +199,7 @@ Bit | 63-34          | 33   | 32 | 31-0          |
     ...</li>
 </ul>
 
+<h4>Compression format: AEC</h4>
 <p>
 The AEC compression format handles the alpha channel.
 It compresses 4x4 pixels squares to 8-bytes sequency.
@@ -212,28 +216,30 @@ Bit | 63-56      | 55-52      | 51-48       | 47-0          |
     ...</li>
 </ul>
 
-      <table>
+<h4>Results:</h4>
+
+      <table style="width:80%; margin:auto;">
        <tbody>
         <tr>
          <td style="width:33%">
-          <img src="images/devnote_webgl/texture1_origin.jpg" style="width:100%">
+          <img src="images/devnote_webgl/texture1_origin.jpg" style="width:70%; display:block; margin:auto;">
          </td>
          <td style="width:33%">
-          <img src="images/devnote_webgl/texture2_origin.jpg" style="width:100%">
+          <img src="images/devnote_webgl/texture2_origin.jpg" style="width:70%; display:block; margin:auto;">
          </td>
          <td style="width:33%">
-          <img src="images/devnote_webgl/texture3_origin.jpg" style="width:100%">
+          <img src="images/devnote_webgl/texture3_origin.jpg" style="width:77%; display:block; margin:auto;">
          </td>
         </tr>
         <tr>
          <td style="width:33%">
-          <img src="images/devnote_webgl/texture1_compressed.jpg" style="width:100%">
+          <img src="images/devnote_webgl/texture1_compressed.jpg" style="width:70%; display:block; margin:auto;">
          </td>
          <td style="width:33%">
-          <img src="images/devnote_webgl/texture2_compressed.jpg" style="width:100%">
+          <img src="images/devnote_webgl/texture2_compressed.jpg" style="width:70%; display:block; margin:auto;">
          </td>
          <td style="width:33%">
-          <img src="images/devnote_webgl/texture3_compressed.jpg" style="width:100%">
+          <img src="images/devnote_webgl/texture3_compressed.jpg" style="width:77%; display:block; margin:auto;">
          </td>
         </tr>
         <tr>
@@ -243,7 +249,6 @@ Bit | 63-56      | 55-52      | 51-48       | 47-0          |
         </tr>
        </tbody>
       </table>
-
 
 <h3>Render targets</h3>
 
