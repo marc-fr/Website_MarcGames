@@ -40,15 +40,19 @@
 
 <h1>Real-time procedural sky rendering</h1>
 
-<p><i>Created on 2023, last updated on July 2023</i></p>
+<p><i>Created on 2023, last updated on August 2023</i></p>
 
 <p>
-This post demonstrates how the sky can be fully procedural rendered in real-time.
+This post demonstrates how a procedural sky can be rendered in real-time.
 I will describe some of the methods that I found relevant for my case,
 which is to render the sky being at low altitude and above the ocean (flat land, highly reflective).
 A naive implemention is firstly detailed,
 then the computation is gradually complexified to obtain a more convincing sky.
 </p>
+
+<video autoplay loop muted controls style="display: block; width: 760px; margin: auto;">
+  <source src="images/devnote_sky/front-clip-v1.mp4" type="video/mp4">
+</video>
 
 <h2>1. Atmospheric scattering</h2>
 
@@ -334,8 +338,9 @@ This improvement does not significantly impact the performances.
 <h3>3.2 Multi-events scattering</h3>
 
 <p>
-Handling two scattering events is already a decent try.
-Indeed, the light's intensity declines drastically when going through successive scattering events.
+The multi-events scattering allows to take account of more light paths.
+Handling two scattering events is already a decent try,
+that can still be computed in real-time.
 To implement the 2-events scattering,
 a second ray is emmited from the first scattering event location,
 then the light gathered by the second ray contributes to the scattering of the incoming light at the first event location.
@@ -398,7 +403,7 @@ $$ \iint^{half} { \phi_R \phi_R dS } = \frac{ 3 \cos(\theta_v-\theta_s)^2 + 39 }
 <h4>Results with the vertical second ray</h4>
 
 <p>
-With the up and down second rays, the results are greatly improved, but at the cost of performance.
+With the up and down rays, the results are greatly improved, but at the cost of performance.
 Since the blue color is getting scattered much stronger,
 the extinction coefficient should be modified with a higher value.
 The sky is more uniform at midday, without the yellowish horizon,
@@ -426,8 +431,8 @@ but they can be used as reference data for other computations.
 To perform the lighting computation to render the objects in our scene, as it is the case with the PBR methods, 
 computing the incoming light from many directions is often needed.
 Now, to maintain both performance and realistic rendering, pre-computed models should be used.
-Since the viewer remains at a low altitude, there are a few parameters that impact the sky rendering.
-These are the sun zenith angle, the Mie scattering factor (<code>factorMie</code>), the Mie scattering forward-direction (<code>gMie</code>).
+Since the viewer remains at a low altitude, few parameters impacts the sky rendering:
+the sun zenith angle, the Mie scattering factor (<code>factorMie</code>), the Mie scattering forward-direction (<code>gMie</code>).
 However, both <code>factorMie</code> and <code>gMie</code> are corelated to the visibility distance.
 By trial and error, I found a decent formula in the 500m to 30km visiblity range:
 </p>
@@ -436,7 +441,7 @@ factorMie = exp(- visibility / 5.2e3) * 11
 gMie = max(1 - exp(- visibility / 21.e3) * 1.2, 0)
 </pre>
 <p>
-I used coefficient fitting method to determine an approximation model of the sky, from this arbitrary model:
+I used a fitting method to determine the coefficients of this arbitrary approximation model:
 $$ Color = k_0 + k_1 e^{-2 sin(p)} + k_2 e^{-10 sin(p)} + e^{-5 sin(p)} \left( k_3 cos(y) cos(p) + k_4 cos(y)^2 cos(p)^2 \right) + k_5 e^{5 \frac{s - 1}{1 - g}} $$
 </p>
 
@@ -450,12 +455,23 @@ where the \( k_i \) are coefficients,
 </p>
 
 <p>
-The \( k_i \) coefficients depends on the sun position (<code>cosSunZenith</code>, where the sun zenith is the evelation angle of the sun, in red) and the visibility (<code>visibility</code>).
+The \( k_i \) coefficients depends on the sun position (<code>cosSunZenith</code>, where the sun zenith is the evelation angle of the sun, in red) and the visibility (<code>visibility</code>, expressed by a characteristic distance).
+Since the coefficients are constant given a sky condition, they can be computed on CPU and transmitted to the GPU shader for the rendering.
+Finally, I decided to tabulate the coefficients (6 * 16 * 6 float3 values), even if they could be asynchroneously computed by a background task.
 </p>
 
+<h4>Results</h4>
+
 <p>
-To be continued ...
+This model drastically reduces the cost of the rendering,
+but the resulting sky has less details.
+However, The model can still be improved with a better model's formula.
+Also, to have clouds would bring back high-frequency color gradients.
 </p>
+
+<video autoplay loop muted controls style="display: block; width: 600px; margin: auto;">
+  <source src="images/devnote_sky/compare-v1.mp4" type="video/mp4">
+</video>
 
 </div>
 
