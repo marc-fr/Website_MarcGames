@@ -17,7 +17,26 @@
   padding: 4px 10px; 
   background: #222;
 }
-    
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  grid-auto-rows: minmax(100px, auto);
+}
+
+.wrapper a {
+  text-decoration: none;
+  color: #7DD;
+}
+
+.postMain {
+  padding: 6px;
+  border: 1px solid #BBB;
+  background: #233;
+  text-align: center;
+}
+
     </style>
   </head>
   <body>
@@ -45,26 +64,53 @@
     <div class="main">
       <h2>Posts</h2>
       <p>
-        Here is some technical details about how the games are made and what is behind the scene.
-        I choose to not use an existing game engine, such as Unity or Unreal.
-        Indeed, I like to program, within all aspects. <br>
-        These posts are amied to help game developers to implement the described features.
+        Here is some technical details about various subjects.
+        These posts are amied to guide game developers to implement the described features.
       </p>
-      <ul>
-        <li> <a href="devlog_impulse.html">Compute the impulse-response of a rigid-body in 2D</a> </li>
-        <li> <a href="devlog_planet.html">Efficiently render the Moon at any scales</a> </li>
-        <li> <a href="devlog_ISMCST.html">Build the A.I of a card-game, using IS-MCST</a> </li>
-        <li> <a href="devlog_sky.html">Procedural render of the sky (and ocean)</a> </li>
-        <li> <a href="devlog_webgl.html">Porting guide to web-assembly using Emscripten</a> </li>
-      </ul>
+
+<div class="wrapper">
+  <a href="devlog_impulse.html">
+    <div class="postMain">
+      <img src="images/devnote_impulse/cover.png" style="width: 100%;">
+      Compute the impulse response of a rigid-body
+    </div>
+  </a>
+  <a href="devlog_planet.html">
+    <div class="postMain">
+      <img src="images/devnote_planet/cover.png" style="width: 100%;">
+      Efficiently render the Moon at any scales
+    </div>
+  </a>
+  <a href="devlog_ISMCST.html">
+    <div class="postMain">
+      <img src="images/devnote_ismcst/cover.png" style="width: 100%;">
+      Build the A.I for a card-game, using IS-MCST
+    </div>
+  </a>
+  <a href="devlog_sky.html">
+    <div class="postMain">
+      <img src="images/devnote_sky/cover.png" style="width: 100%;">
+      Render the sky from an atmosphere scaterring model
+    </div>
+  </a>
+  <a href="devlog_webgl.html">
+    <div class="postMain">
+      <img src="images/devnote_webgl/cover.png" style="width: 100%;">
+      Porting guide to web-assembly using Emscripten
+    </div>
+  </a>
+</div>
 
     </div>
     <div class="main">
       <h2>Behind the scene</h2>
       <p>
-        TRE (Tiny-Render Engine) is a toolkit built on the top of SDL2 and OpenGL.
+        I choose to not use an existing game engine, such as Unity or Unreal.
+        Indeed, I like to program, within all aspects.
+        Therefore, I created TRE (Tiny-Render Engine), which is a toolkit built on the top of SDL2 and OpenGL.
         This is the basement of my games.
-        This is not a game-engine, but it helps with mesh operations, UI, shaders (tiny material library), contact algorithms and sound thread.
+        However, TRE is not a game-engine.
+        It helps with mesh operations, UI, shaders (tiny material library), contact algorithms and sound thread.
       </p>
       <p>
         TRE is open-source and hosted on GitHub: <a href="https://github.com/marc-fr/TinyRenderEngine">TinyRenderEngine</a>
@@ -72,20 +118,21 @@
       <h3>Some though about C++ feature-sets for games</h3>
       <p>
         TRE is using the STL, that uses exceptions for error handling.
-        This has no noticeable impact on the performances, since c++ has a nice paradigm that says: "don't pay for what you don't use".
+        Exceptions have no impact on performances, while they are not triggered.
+        Indeed, c++ has a nice paradigm that says: "don't pay for what you don't use".
         As far as exceptions are considered as nonrecoverable fatal errors,
-        it is not relevant (in a solo-developer point of view) to not use the STL.
+        then the STL can still be used (in a solo-developer point of view).
       </p>
       <h3>Rendering API: modern OpenGL vs. Vulkan</h3>
       <p>
         Even though OpenGL is a pretty old rendering API, it is still used in legacy applications and small projects.
-        Using Vulkan gives a great opportunity to work on the CPU code that submits commands to the GPU.
+        Vulkan offers a great opportunity to tune the code that submits commands to the GPU.
         For example, Vulkan allows commands to be generated from multiple threads, while OpenGL does not.
-        While my games won't be limited by the rendering CPU thread, OpenGL will still be the default rendering API.
+        While my games won't be limited by the rendering CPU thread, OpenGL will stay the default rendering API.
       </p>
       <h3>Oriented-Object vs. Data-Driven paradigm for games</h3>
       <p>
-        The oriented-object paradigm is often adopted by software developers.
+        The oriented-object paradigm is often adopted by software engineers.
         For generic game engines, this paradigm implies to have an "entity" oriented architecture.
         It is demonstrated for example in the following talk:
         <a href="https://www.youtube.com/watch?v=tONOW7Luln8">Data Driven Entity Component System in C++17</a>.
