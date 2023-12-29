@@ -6,18 +6,6 @@ body {
   color: #555;
 }
 
-h1, .h1 {
-  font-size: 24pt; 
-  font-weight: 400; 
-  color: #333;
-}
-
-h2, .h2 {
-  font-size: 20pt; 
-  font-weight: 400; 
-  color: #333;
-}
-
 pre, code {
   font-family: monospace;
   font-size: 14px;
@@ -65,8 +53,21 @@ pre, code {
   border-right: 1px solid;
 }
 
+.main h1 {
+  font-size: 26pt;
+  font-weight: 400;
+  color: #333;
+}
+
+.main h2 {
+  margin-top: 2em;
+  font-size: 22pt;
+  font-weight: 400;
+  color: #333;
+}
+
 .main p + ul { 
-  margin-top: -0.8em; 
+  margin-top: -0.9em;
 } 
 
 /* Responsive */

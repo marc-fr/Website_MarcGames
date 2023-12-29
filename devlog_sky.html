@@ -40,12 +40,12 @@
 
 <h1>Real-time procedural sky rendering</h1>
 
-<p><i>Created on 2023, last updated on August 2023</i></p>
+<p><i>Created on 2023, last updated on December 2023</i></p>
 
 <p>
 This post demonstrates how a procedural sky can be rendered in real-time.
 I will describe some of the methods that I found relevant for my case,
-which is to render the sky being at low altitude and above the ocean (flat land, highly reflective).
+which is to render the sky being at low altitude and above the ocean.
 A naive implemention is firstly detailed,
 then the computation is gradually complexified to obtain a more convincing sky.
 </p>
@@ -65,7 +65,7 @@ that comes from the interaction of the particles in the atmosphere with the ligh
 There are two main scattering types:
 </p>
 <ul>
-  <li> the <a href="https://en.wikipedia.org/wiki/Rayleigh_scattering">Rayleigh scattering</a> that explains the color-gradient of the sky,</li>
+  <li> the <a href="https://en.wikipedia.org/wiki/Rayleigh_scattering">Rayleigh scattering</a> that explains the blue color of the sky,</li>
   <li> the <a href="https://en.wikipedia.org/wiki/Mie_scattering">Mie scattering</a> that makes the clouds visible.</li>
 </ul>
 
@@ -79,19 +79,18 @@ $$ \sigma(h,\theta) = \beta_R(h) \; \phi_R(\theta) + \beta_M(h) \; \phi_M(\theta
 where
 </p>
 <ul>
-  <li> \( \beta_R(h) = \beta_{R0} \{ 0.11, 0.32, 0.68 \}_{rgb} \; e^{-h/h0_R} \) is the Rayleigh scattering coefficient,</li>
-  <li> \( \beta_M(h) = \beta_{M0} \{ 0.5, 0.5, 0.5 \}_{rgb} \; e^{-h/h0_M} \) is the Mie scattering coefficient,</li>
+  <li> \( \beta_R(h) = \beta_{R0} \{ 0.11, 0.32, 0.68 \}_{rgb} \; e^{-h/h_{R0}} \) is the Rayleigh scattering strength,</li>
+  <li> \( \beta_M(h) = \beta_{M0} \{ 0.5, 0.5, 0.5 \}_{rgb} \; e^{-h/h_{M0}} \) is the Mie scattering strength,</li>
   <li> \( \phi_R(\theta) = \frac{3}{16 \pi} \left( 1+\cos(\theta)^2 \right) \) is the Rayleigh phase function,</li>
   <li> \( \phi_M(\theta) = \frac{3}{8 \pi} \left( \frac{1 - g^2}{2 + g^2} \right) \frac{1+\cos(\theta)^2}{ \left( 1 + g^2 - 2 g \cos(\theta) \right) ^{ \frac{3}{2} }} \) is the Mie phase function.</li>
 </ul>
 <p>
-with \( h0_R = 8 km \) and \( h0_M = 1.2 km \) being the characteristic altitude of the Rayleigh and Mie scattering,
-and \( \beta_{R0} \) and \( \beta_{M0} \) two coefficients that control the breadth of the scattering.
-From this, I can compute the light extinction, which is the part of the light being absorbed between two points:
+It is admitted that \( h_{R0} = 8 \) km and \( h_{M0} = 1.2 \).
+Both \( \beta_{R0} \) and \( \beta_{M0} \) are coefficients that control the breadth of the scattering.
+The scattering induces a light extinction, which is the part of the light being scattered away when following a straight path:
 $$ \alpha(path) = \exp ( - \alpha_c \; d_{optic} ) $$
-where \( d_{optic} \) is the optical distance and \( \alpha_c = 0.037 \) is the extinction coefficient, taken from empirical observation of the results.
-The optical distance is computed as following:
-$$ d_{optic} = \beta_{R0} \int_{path} { e^{-h/h0_R} dl } + \beta_{M0} \int_{path} { e^{-h/h0_M} dl } $$
+where \( \alpha_c \) is the extinction coefficient and \( d_{optic} \) is the optical distance:
+$$ d_{optic} = \beta_{R0} \int_{path} { e^{-h/h_{R0}} dl } + \beta_{M0} \int_{path} { e^{-h/h_{M0}} dl } $$
 </p>
 
 </div>
@@ -102,25 +101,23 @@ $$ d_{optic} = \beta_{R0} \int_{path} { e^{-h/h0_R} dl } + \beta_{M0} \int_{path
 <img src="images/devnote_sky/sketch-single-event.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
 <p>
 The single scattering is often detailed and implemented in online resources.
-It is quick to implement and with a few tricks it allows real-time rendering.
+It is quick to implement and it allows real-time rendering with a few tricks.
 The single scattering method consists in the discretization of the view ray in multiple points,
-and to compute the light being scattered at all of those points.
-Then, there are two light segments, one from the viewer to the point (VP), one from the point to the source (PS).
-The received light by the viewer V is defined by:
+and to sum the light being scattered at all of those points:
 $$ \overline{L} = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \; \alpha(P \rightarrow Sun) \; \sigma(P) \; dl } $$
-where \( \alpha(path) \) is the light extinction along the path and \( \sigma(P) \) the scattering at the point P.
+where \( \alpha(path) \) is the light extinction along a straight path and \( \sigma(P) \) the scattering at the point P.
 </p>
 </div>
 
-<h4>Extinction pre-computation</h4>
+<h4>Extinction pre-computation:</h4>
 
 <p>
 The extinction is an integral that is costly to evaluate by summation.
 To prevent this, many resources are using a pre-computed lookup texture.
 Since the altitude of the viewer and the characteristic altitudes of the scattering effect are too negligeable compared
-to the scale of the Earth's radius, I decided to use a math approximation instead of the lookup texture.
+to the scale of the Earth's radius, I decided to use a math approximation for the extinction towards the sun.
 I thus express the optical-distance to the sun with:
-$$ d_{optic,sun} = \int_{path} { e^{-h/h0} dl }
+$$ d_{optic,sun} = \int_{P}^{Sun} { e^{-h/h0} dl }
             \simeq \int_{x=0}^{+\infty} { e^{ - ( a x^2 + b x + c ) } dx }
                  = \frac{\sqrt{\pi}}{2\sqrt{a}} e^{-c} e^{\frac{b^2}{4a}} \left( 1 - \mathrm{erf} \left( \frac{b}{2\sqrt{a}} \right) \right) $$
 where \( a = \frac{1-cos^2 \theta}{2 R h0} \) ,  \( b = \frac{cos \theta}{h0} \) , \( c = \frac{h_{start}}{h0} \) .
@@ -139,7 +136,7 @@ e^{-c} \frac{\sqrt{\pi}}{2 \sqrt{a}} \left( 0.3480242 p - 0.0958798 p^2 + 0.7478
 $$
 </p>
 
-<h4>Results</h4>
+<h4>Results:</h4>
 
 <p>
 This implementation of the sky scattering gives a plausible result with low effort, however the resulting sky isn't realistic enough.
@@ -153,7 +150,7 @@ On the picture below, the sky is rendered with Rayleigh scattering only, from mi
 
 <img src="images/devnote_sky/sky-1way-domes.png" style="clear:right; width:100%;">
 
-<h4>The shader code</h4>
+<h4>The shader code:</h4>
 
 <details>
 <summary>Single scattering (Click to expand.)</summary>
@@ -161,13 +158,14 @@ On the picture below, the sky is rendered with Rayleigh scattering only, from mi
 uniform float factorMie;
 uniform float gMie;
 const float rE   = 6.3e3f; <span class="code-comment">// radius of Earth (km)</span>
-const vec2  h0   = vec2(8.f, 1.2f); <span class="code-comment">// ch. altitude (Rayleigh, Mie) (km)</span>
-const float extinctionCoef; <span class="code-comment">// extinction coefficient</span>
+const vec2  h0   = vec2(8., 1.2); <span class="code-comment">// ch. altitude (Rayleigh, Mie) (km)</span>
+const float extinctionCoef = 0.063; <span class="code-comment">// extinction coefficient</span>
 const float hMax = 50.f; <span class="code-comment">// max altitude for computations</span>
-const int   rayIntg_nsteps; <span class="code-comment">// nbr of integration points</span>
-const float rayIntg_norm = 1.f/float(rayIntg_nsteps);
+const int   rayIntg_nsteps = 30; <span class="code-comment">// nbr of integration points</span>
+const float rayIntg_norm = 1.f / float(rayIntg_nsteps);
 const vec3  scatteringCoefs_R = vec3(0.11f, 0.32f, 0.68f);
 const vec3  scatteringCoefs_M = vec3(0.50f, 0.50f, 0.50f);
+
 vec3 localScatteringLight(float h, float c)
 {
   vec3 fR = exp(-h / h0.x) * scatteringCoefs_R;
@@ -179,6 +177,7 @@ vec3 localScatteringLight(float h, float c)
   float phaseM = 0.1193662073189215f * (1.f - gg) * (1.f + cc) / (sqrt(den * den * den) * (2.f + gg));
   return fR * phaseR + fM * phaseM;
 }
+
 vec2 opticalDistanceGroundToSun(float csz)
 {
   csz = max(0.f, csz);
@@ -194,6 +193,7 @@ vec2 opticalDistanceGroundToSun(float csz)
   ret.y = (b.y > 7.f * sqrta.y) ? optInf.y : optMid.y;
   return ret;
 }
+
 vec3 skyColor(vec3 rayView)
 {
   vec3  ray = vec3(rayView.xy, abs(rayView.z));
@@ -225,7 +225,7 @@ vec3 skyColor(vec3 rayView)
     optD_VP += step * rhoP;
   }
   {
-    float sunDisk = min(exp(6.e4f * (cosRS-0.999962f)), 1.f); <span class="code-comment">// Note: the sun-disk is 0.25 degree radius</span>
+    float sunDisk = min(exp(6.e4f * (cosRS-0.999962f)), 1.f); <span class="code-comment">// the sun-disk is 0.25 degree radius</span>
     lightAcc += sunDisk * 5.f * vec3(1.f, 1.f, 1.f);
   }
   return lightAcc;
@@ -233,7 +233,7 @@ vec3 skyColor(vec3 rayView)
 </pre>
 </details>
 
-<h4>Impact of the number of discretized points</h4>
+<h4>Impact of the number of discretized points:</h4>
 
 <p>
 I did some tests with various count of discretization points (<code>rayIntg_nsteps</code>).
@@ -244,7 +244,7 @@ As expected, the number of discretization points strongly impacts the performanc
 
 <img src="images/devnote_sky/sky-1way-steps.png" style="clear:right; width:100%;">
 
-<h4>Two steps discretization with both Rayleigh and Mie scattering</h4>
+<h4>Two steps discretization with both Rayleigh and Mie scattering:</h4>
 
 <div>
 <img src="images/devnote_sky/sketch-discretisation-2steps.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
@@ -255,223 +255,297 @@ the distribution of the discretization points significantly affects the output.
 To have a good sampling of the scattering, the distance between two points should be shorter than the characteristic altitude's one.
 Consequently, with the Mie scattering this distance should at most be about 1 km.
 As for the Rayleigh scattering, this distance should measure up to 8km, but given its magnitude in practice it can be higher while keeping a relatively high resolution.
-While keeping the reasonably low number of discretization points, the distribution of the points cannot be uniform anymore.
-Since the total distance traveled in the atmosphere varies from 80 km to nearly 200 km, I choose to split the view-ray in 2 parts:
+While keeping the reasonably low number of discretization points, I choose to split the view-ray in 2 parts:
 a first part with a short distance between 2 discretization points (so the Mie scattering will be accurately evaluated),
 and a second part with a long distance (so the Rayleigh scattering will be accurately evaluated).
 </p>
 
 </div>
 
+<h2>3. Multiple scattering method</h2>
+
+<p>
+To improve the results, the indirect scattering needs to be taken into account.
+Badfully, the methods only based on ray-tracing would be too computationally intense to stay in real time.
+Therefore, an hybrid method will be described.
+A part of the computations will be issued asynchronuously on the CPU,
+while the GPU shader takes the rest of the computations, being real time.
+Moreover, this allows to use the atmosphere lighting in other shaders,
+for example in the lighting equations for the objects in the scene.
+</p>
+
+<h3> 3.Preambule: Multiple scattering with a full ray-tracing method</h3>
+
+<p>
+While keeping all the computations on the GPU, I found some ways to improve the ray-tracing method.
+However, the method is too expensive, and the obatined results are still not enough convincing.
+<b>This section can be skip, as it does not contribute to the final method.</b>
+</p>
+
+<p>
+I start by considering a local small sphere around the point P.
+The goal is to determine the scattering induced by this local sphere.
+At any points of the sphere, the incoming light is assumed to be uniform.
+There are 2 scattering events, one at the center of the sphere and one at the surface of the sphere.
+The total scattered light is:
+$$ \sigma^{(2)} (h,\theta) = \sigma(h,\theta) + \int_{y=0}^{2 \pi} \int_{x=0}^{\pi} \sigma(h,x) \; \sigma(h,z) \sin(x) dx dy $$
+where \( z \) is the angle such that
+$$ \cos(z) = \cos(x) \cos(\theta) + \sin(x) \sin(\theta) \sin(y) $$
+The obatined integral can be split into pieces that are pre-computable with analytic approximations (available in the shader code below).
+</p>
+
+<p>
+I continue by emmiting a secondary ray from the first scattering event location along the primary ray.
+It results to accumulate light from 2 scattering events, which is:
+$$ \overline{L}^{(2)} = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \int_{ray2 \in sphere} { \sigma(P) \int_{Q \in ray2} { \alpha(P \rightarrow Q) \sigma(Q) \alpha(Q \rightarrow Sun) \; dl } \; dS } \; dl } $$
+It appears that the secondary rays should cover all directions for each event location (P).
+For the secondary rays, I only select the two vertical directions (down and up).
+Even if it is a rough approximation, to have these two rays will allow to catch interesting visual effects.
+It entails that a part of the scattered light source is constant either from the ground direction or from the up direction.
+This expression can be split into pieces that are pre-computable with analytic approximations (available in the shader code below).
+</p>
+
+<p>
+And finally, the shader code:
+</p>
+
 <details>
-<summary>Shader-code. (Click to expand.)</summary>
-<pre>[...]
-float stepxA = 5.f               * 0.5f * rayIntg_norm;
-float stepxB = (rayLength - 5.f) * 0.5f * rayIntg_norm;
-for (int iStep = 0, stop = 2 * rayIntg_nsteps; iStep &lt; stop; ++iStep)
+<summary>(Click to expand.)</summary>
+<pre><span class="code-comment">// Constants - see the shader above</span>
+
+vec2 opticalDistanceGroundToSun(float csz); <span class="code-comment">// See the shader above</span>
+
+vec3 localScatteringLight(float h, float c, float factorMie, float g)
 {
-  float stepx = (iStep &lt; rayIntg_nsteps) ? stepxA : stepxB;
-  float x     = (iStep &lt; rayIntg_nsteps) ? (0.5f + float(iStep)) * stepxA : 
-                                           5.f + (0.5f + float(iStep - rayIntg_nsteps)) * stepxB;
-  [...]
+  vec3 fR = exp(-h / h0.x) * scatteringCoefs_R;
+  vec3 fM = exp(-h / h0.y) * scatteringCoefs_M * factorMie;
+  float cc = c * c;
+  float gg = g * g;
+  float den = 1.f / sqrt(1.f + gg - 2.f * c * g);
+  float phaseR = 0.05968310365946075f  * (1.f + cc);
+  float phaseM = 0.1193662073189215f * (1.f - gg) * (1.f + cc) * den * den * den / (2.f + gg);
+  float phaseRR = 0.07758803475729897f + 0.005968310365946076f /* 3 / (160 pi) */ * cc;
+  float phaseRM = (0.077713f + g * -0.00207583f + gg * -0.0166216f) +
+                  (0.00560625f + g * 0.00649282f + gg * 0.0494774f) * cc;
+  float ginvomg = g / (1.f - g);
+  float phaseMM = ((0.0775971f + -0.0440173f * gg * ginvomg) +
+                   (0.00597702f + (0.00403158f + 0.0559416f * gg) * ginvomg) * c * c +
+                   (0.375561f * g + -0.46816f * g / (1.f + g)) * c) * den;
+  return fR * phaseR + fM * phaseM + fR * fR * phaseRR + fR * fM * phaseRM + fM * fM * phaseMM;
+}
+
+vec3 twoEventScattering(float hP, float hQ, float ctvs, float ctv, float cts,
+                        float factorMie, float g, bool isUp)
+{
+  vec3 fR_P = exp(-hP / h0.x) * scatteringCoefs_R;
+  vec3 fM_P = exp(-hP / h0.y) * scatteringCoefs_M * factorMie;
+  vec3 fR_Q = exp(-hQ / h0.x) * scatteringCoefs_R;
+  vec3 fM_Q = exp(-hQ / h0.y) * scatteringCoefs_M * factorMie;
+  float ctvs2 = ctvs * ctvs;
+  float gg = g * g;
+  float goomg = g / (1.f - g);
+  float sgn = isUp ? 1.f : -1.f;
+  float mt = (ctv * sgn > 0.f) && (cts * sgn > 0.f) ? ctv * ctv * cts * cts : 0.f;
+  float phaseRR_halfIntegral = 0.038794f + 0.00298415f * ctvs2;
+  float phaseRM_halfIntegral = (0.038794f - 0.00950875f * gg) +
+                               (0.00298621f + 0.028495f * gg) * ctvs2 +
+                               (0.0770418f * g - 0.0198734f * gg) * cts * sgn;
+  float phaseMR_halfIntegral = (0.038794f - 0.00950875f * gg) +
+                               (0.00298621f + 0.028495f * gg) * ctvs2 +
+                               (0.0770418f * g - 0.0198734f * gg) * ctv * sgn;
+  float phaseMM_halfIntegral = (0.038794f - 0.0166585f * goomg) +
+                               (0.00298612f + 0.042992f * g * goomg) * ctvs2 +
+                               (0.331325 * g / (1.f-gg)) * mt;
+  return fR_P * fR_Q * phaseRR_halfIntegral + fR_P * fM_Q * phaseRM_halfIntegral +
+         fM_P * fR_Q * phaseMR_halfIntegral + fM_P * fM_Q * phaseMM_halfIntegral;
+}
+
+vec3 skyColorScattering(vec3 rayView)
+{
+  int   rayIntg_nsteps    = _nstepMain;
+  float rayIntg_norm      = 1.f / float(rayIntg_nsteps);
+  vec3  ray   = vec3(rayView.xy, abs(rayView.z));
+  float cosViewZenith = max(rayView.z, 0.f);
+  float rayLength = rE * (sqrt(cosViewZenith*cosViewZenith + 2.f * hMaxOverR + hMaxOverR*hMaxOverR)
+                          - cosViewZenith);
+  float stepxA = 5.f               * 0.5f * rayIntg_norm;
+  float stepxB = (rayLength - 5.f) * 0.5f * rayIntg_norm;
+  float cosRS = dot(-sunDirectionIncoming, ray); <span class="code-comment">// cos of angle between the ray and the sunlight</span>
+  vec3 lightAcc = vec3(0.f);
+  vec2  optD_VP = vec2(0.f, 0.f);
+  for (int iStep = 0, stop = 2 * rayIntg_nsteps; iStep < stop; ++iStep)
+  {
+    float stepx = (iStep < rayIntg_nsteps) ? stepxA : stepxB;
+    float x     = (iStep < rayIntg_nsteps) ? (0.5f + float(iStep)) * stepxA :
+                                             5.f + (0.5f + float(iStep - rayIntg_nsteps)) * stepxB;
+    vec3  pt    = vec3(0.f, 0.f, rE) + x * ray;
+    float rP    = length(pt);
+    float hP    = rP - rE; // elevation
+    vec3 rayUp  = pt / rP;    float csz   = clamp(dot(rayUp, -sunDirectionIncoming), -1.f, 1.f);
+    vec2  optD_GroundSun = opticalDistanceGroundToSun(csz);
+    vec2  rhoP = exp(-hP/h0);
+    optD_VP += 0.3f * stepx * rhoP;
+    float cszNeg = min(0.f, csz);
+    float hOffset = cszNeg * cszNeg * rE;
+    vec2  optD_PS = optD_GroundSun * exp(-(hP - hOffset)/h0);
+    <span class="code-comment">// direct scattering</span>
+    if (true)
+    {
+      vec3 globalOptD = (optD_VP.x + optD_PS.x) * scatteringCoefs_R +
+                        factorMie * (optD_VP.y + optD_PS.y) * scatteringCoefs_M;
+      vec3 scatteringPS = localScatteringLight(hP, cosRS, factorMie, gMie);
+      lightAcc += stepx * exp(-extinctionCoef * globalOptD) * scatteringPS;
+    }
+    <span class="code-comment">// indirect scattering (secondary ray up & down)</span>
+    if (_nstepsub != 0)
+    {
+      float stepy = hMax / float(_nstepsub);
+      float cosPQ = dot(ray, rayUp);
+      float cosQS = dot(rayUp, -sunDirectionIncoming);
+      float phaseRR_halfIntegral = 0.038794f + 0.00298415f * (cosPQ*cosPQ*cosQS*cosQS +
+                                                              (1.f-cosPQ*cosPQ)*(1.f-cosQS*cosQS));
+      vec3 accum = vec3(0.f, 0.f, 0.f);
+      for (int jStep = 0; jStep < _nstepsub; ++jStep)
+      {
+        float hQ = (0.5f + float(jStep)) * stepy;
+        vec2 rhoQ = exp(-hQ/h0);
+        vec2 optD_PQ = abs(rhoQ - rhoP) * h0;
+        vec2 optD_QS = optD_GroundSun * exp(-(hQ - hOffset)/h0);
+        vec3 globalOptD = (optD_VP.x + optD_PQ.x + optD_QS.x) * scatteringCoefs_R +
+                          factorMie * (optD_VP.y + optD_PQ.y + optD_QS.y) * scatteringCoefs_M;
+        vec3 scatteringPQS = twoEventScattering(hP, hQ, cosRS, cosPQ, cosQS, factorMie, gMie, (hQ > hP));
+        accum += exp(-extinctionCoef * globalOptD) * scatteringPQS;
+      }
+      lightAcc += stepx * stepy * accum;
+    }
+    optD_VP += 0.7f * stepx * rhoP;
+  }
+  {
+    vec3 tr = exp(-extinctionCoef * (optD_VP.x * scatteringCoefs_R +
+                                     factorMie * optD_VP.y * scatteringCoefs_M));
+    float sunDisk = min(exp(6.e4f * (cosRS-0.999962f)), 1.f); <span class="code-comment">// Note: the sun-disk is 0.25 degree radius</span>
+    lightAcc += sunDisk * tr * vec3(1.f, 1.f, 1.f);
+  }
+  return lightAcc;
 }
 </pre>
 </details>
 
-<h2>3. Multiple scattering methods</h2>
-
-<p>
-To improve the results, the indirect scattering needs to be taken into account.
-I hence decided to explore two different approaches: determining a better local scattering phase function and considering multiple scattering events.
-</p>
-
-<h3>3.1 Local scattering phase function</h3>
-
-<div style="clear:right;">
-<img src="images/devnote_sky/sketch-local-2-events.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
-
-<p>
-I start by considering a local small sphere around the point P.
-The goal is to determine the scattering induced by the sphere.
-At any points of the sphere, the incoming light is assumed to be uniform.
-There are 2 scattering events, one at the center of the sphere (point P), one at the surface of the sphere (point Q).
-The total scattered light is the sum of the direct scattering event at the point P and the indirect scattering through the points P and Q:
-$$ \sigma^{(2)} (h,\theta) = \sigma(h,\theta) + \int_{y=0}^{2 \pi} \int_{x=0}^{\pi} \sigma(h,x) \; \sigma(h,z) \sin(x) dx dy $$
-where \( z \) is the angle such that
-$$ \cos(z) = \cos(x) \cos(\theta) + \sin(x) \sin(\theta) \sin(y) $$
-
-This leads to compute the integral of the product of the two phase functions \( \phi_R \) and \( \phi_M \),
-because the other terms are constant and they are put outside of the integral.
-To speed up the computation, I used those approximated formula:
-</p>
-
-<pre>
-phaseRR(theta) = 0.07758803475729897 + 0.005968310365946076 * cos(theta)^2
-
-phaseRM(theta, g) = (0.077713 + -0.00207583 * g + -0.0166216 * g^2) +
-                    (0.00560625 + 0.00649282 * g + 0.0494774 * g^2) * cos(theta)^2;
-
-phaseMM(theta, g) = ( (0.0775971 + -0.0440173 * g^3 / (1.f - g)) +
-                      (0.00597702 + (0.00403158 + 0.0559416 * g^2) * g / (1.f - g)) * cos(theta)^2 +
-                      (0.375561 * g + -0.46816 * g / (1.f + g)) * cos(theta) ) /
-                    sqrt(1 + g^2 - 2 * g * cos(theta)));
-</pre>
-
-<p>
-Still, the Rayleigh-Rayleigh phase integral can be analitically expressed:
-$$ \iint { \phi_R \phi_R dS } = \frac{39 + 3 cos(\theta)^2}{160 \pi} $$
-</p>
-
-<h4>Results</h4>
-
-<p>
-I replace \( \sigma \) by \( \sigma^{(2)} \) in the expression of the received light (see \( \overline{L} \) ).
-As expected, the local-scattering allows to have a better result near the horizon,
-where the density is higher (so where the scattering is stronger).
-It helps to reduce the yellowish horizon when the sun is high in the sky.
-Consequently, higher extinction coefficient may be used in the future.
-This improvement does not significantly impact the performances.
-</p>
-
-<img src="images/devnote_sky/sky-1way-local-phase.png" style="clear:right; width:80%; display: block; margin: auto;">
-
-<h3>3.2 Multi-events scattering</h3>
-
-<p>
-The multi-events scattering allows to take account of more light paths.
-Handling two scattering events is already a decent try,
-that can still be computed in real-time.
-To implement the 2-events scattering,
-a second ray is emmited from the first scattering event location,
-then the light gathered by the second ray contributes to the scattering of the incoming light at the first event location.
-</p>
-<p>
-The received light by the viewer V is the sum of the already known single-scattering light from the sun
-$$ \overline{L} = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \; \alpha(P \rightarrow Sun) \; \sigma(P) \; dl } $$
-and the multi-events scattered light from the second rays
-$$ \overline{L}^{(2)} = L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \int_{ray2 \in sphere} { \int_{Q \in ray2} { \alpha(P \rightarrow Q) \alpha(Q \rightarrow Sun) \; \sigma(P) \sigma(Q) \; dl } \; dS } \; dl } $$
-I now consider selecting a finite number of second rays.
-However, the scattering phase function should still be integrated to cover all directions.
-It leads to:
-$$ \overline{L}^{(2)} \simeq L_{sun} \int_{P \in ray} { \alpha(V \rightarrow P) \sum_{ray2} { \Psi^{ray2}(P) } \; dl } $$
-with
-$$ \Psi^{ray2}(P) = \int_{Q \in ray2} { \alpha(P \rightarrow Q) \; \alpha(Q \rightarrow Sun) \; \left( \int_{partial-sphere} { \sigma(P) \sigma(Q) \; dS } \right) dl } $$ 
-</p>
-
-<h4>Vertical second ray</h4>
-
-<div>
-<img src="images/devnote_sky/sketch-second-ray-vertical.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
-
-<p>
-For the second rays, I only select the two vertical directions (down and up).
-Even if it is a rough approximation, to have these two rays will allow to catch interesting visual effects.
-It entails that a part of the scattered light source is constant either from the ground direction or from the up direction.
-Given the vertical axis, some terms of \( \Psi^{ray2} \) can be simplified.
-Also, the integral over the half sphere can be split in 4 integrals,
-involving the combination of the product of the two phase functions \( \phi_R \) and \( \phi_M \).
-These integrals can be pre-computed, and I decided to use analytic approximations:
-</p>
-
-<pre>
-float sgn = isUpRay ? 1.f : -1.f;
-float mt = (cos(theta_v) * sgn > 0.f) && (cos(theta_s) * sgn > 0.f) ?
-           cos(theta_v)^2 * cos(theta_s)^2 * cos(theta_s)^2 : 0.f;
-
-phaseRR_halfIntegral = 0.038794 + 0.00298415 * cos(theta_v - theta_s)^2
-
-phaseRM_halfIntegral = (0.038794 - 0.00950875 * g^2) +
-                       (0.0029862 + 0.028495 * g^2) * cos(theta_v - theta_s)^2 +
-                       (0.0770418 * g - 0.0198734 * g^2) * cos(theta_s) * sgn
-
-phaseMR_halfIntegral = (0.038794 - 0.00950875 * g^2) +
-                       (0.00298621 + 0.028495 * g^2) * cos(theta_v - theta_s)^2 +
-                       (0.0770418 * g - 0.0198734 * g^2) * cos(theta_s) * sgn
-
-phaseMM_halfIntegral = (0.038794 - 0.0166585 * g / (1.f - g)) +
-                       (0.00298612 + 0.042992 * g^2 / (1.f - g)) * cos(theta_v - theta_s)^2 +
-                       (0.331325 * g / (1 - g^2)) * mt
-</pre>
-
-<p>
-Still, the Rayleigh-Rayleigh phase half-integral can be analitically expressed:
-$$ \iint^{half} { \phi_R \phi_R dS } = \frac{ 3 \cos(\theta_v-\theta_s)^2 + 39 }{ 320 \pi} $$
-</p>
-
-</div>
-
-<h4>Results with the vertical second ray</h4>
-
-<p>
-With the up and down rays, the results are greatly improved, but at the cost of performance.
-Since the blue color is getting scattered much stronger,
-the extinction coefficient should be modified with a higher value.
-The sky is more uniform at midday, without the yellowish horizon,
-as such the results are closer to real life observations.
-The results at sunset are however still not so convincing.
-The model still noticeably fails to obtain the dark-blue fading at the opposite direction of the sun.
-</p>
-
-<img src="images/devnote_sky/sky-2way-up-down.png" style="clear:right; width:80%; display: block; margin: auto;">
-
-<h2>4. Offline computation</h2>
-
-<h3>Discrete atmosphere model</h3>
+<h3>3.1 Discrete atmosphere model (CPU)</h3>
 
 <p>
 The discrete atmosphere model consists in partitionning the atmosphere into pieces and each piece would in turn receive and emit light.
-This way, the global scattered light is recursively refined.
-Such models are heavy to compute,
-but they can be used as reference data for other computations.
+This way, the global scattered light is recursively refined, the indirect scattering being natively taken into account.
+Note that the related computations are heavy, and run asynchronously.
+The atmosphere illumination only depends on the atmosphere properties, which are
+the Mie scattering factor (<code>factorMie</code>) and
+the Mie scattering forward-direction (<code>gMie</code>).
+Therefore, the result of the computations would hopefully stay valid for some times.
 </p>
 
-<h3>Pre-computed model</h3>
+<img src="images/devnote_sky/sketch-atmosphere-model.png" style="float:right; width:242px; margin: 10px 10px 10px 30px;">
 
 <p>
-To perform the lighting computation to render the objects in our scene, as it is the case with the PBR methods, 
-computing the incoming light from many directions is often needed.
-Now, to maintain both performance and realistic rendering, pre-computed models should be used.
-Since the viewer remains at a low altitude, few parameters impacts the sky rendering:
-the sun zenith angle, the Mie scattering factor (<code>factorMie</code>), the Mie scattering forward-direction (<code>gMie</code>).
-However, both <code>factorMie</code> and <code>gMie</code> are corelated to the visibility distance.
-By trial and error, I found a decent formula in the 500m to 30km visiblity range:
+Each cell is defined by an altitude range and an angular range.
+Because the system composed by the atmosphere and the sun has a radial symmetry,
+a single cell represents a whole ring defined from a certain altitude and sun elevation.
+Each cell will emit scattered light.
+The emitted light is defined by:
+$$ L_{emit}(\vec{r}) = c_0 \phi_R(\theta_{r,sun}) + c_1 \phi_M(\theta_{r,sun}, g) + c_2 \vec{r}_r |\vec{r}_r| + c_3 \vec{r}_t |\vec{r}_t| + c_4 \vec{r}_s^2 $$
+where
 </p>
-<pre>
-factorMie = exp(- visibility / 5.2e3) * 11
-gMie = max(1 - exp(- visibility / 21.e3) * 1.2, 0)
-</pre>
+<ul>
+  <li> \( \phi_R \) and \( \phi_M \) are the Rayleigh and Mie phase functions,</li>
+  <li> \( \vec{r}_r \) is the radial component of the output direction vector (vertical up),</li>
+  <li> \( \vec{r}_t \) is its tangential component (horizontal opposite to the sun),</li>
+  <li> \( \vec{r}_s \) is its side component,</li>
+  <li> \( c_0 \), \( c_1 \), ... are coefficients.</li>
+</ul>
+
+<h4>Results:</h4>
+
 <p>
-I used a fitting method to determine the coefficients of this arbitrary approximation model:
+Even if this chosen expression of the emitted light will discard details,
+this form reduces color artifacts.
+Taking both Rayliegh and Mie phase functions in the expression allows to natively take into account of
+the direct scattering from the sun, which is dominant on the first iterations.
+This form also has a small number of coefficients.
+Since the atmosphere model is computed recursively, we can evaluate the impact of the number of recursions (or steps).
+</p>
+
+<img src="images/devnote_sky/cell-emit-3steps.jpg" style="clear:right; display: block; margin: auto;">
+
+<h3>3.2 Sky-dome illumination (CPU)</h3>
+
+<p>
+Even if the discretized atmosphere lighting could be uploaded and used by the GPU shader,
+we can continue to move computations down to the CPU (asynchronuously).
+In fact, the sky-dome illumination is fast to compute from sampling the atmosphere lighting.
+The downside is that the sky-dome illumination depends on an additionnal parameter: the sun elevation.
+</p>
+
+<img src="images/devnote_sky/sky-3steps.jpg" style="clear:right; display: block; width:80%; margin:auto;">
+
+<p>and with Mie scattering:</p>
+
+<img src="images/devnote_sky/sky-3steps-with-Mie.jpg" style="clear:right; display: block; width:80%; margin:auto;">
+
+
+<h3>3.3 Sky-dome illumination regression (CPU)</h3>
+
+<p>
+I went a step further by fitting the sky-dome illumination in an arbitrary model, with only few coefficients.
+Finally, I ended with few floats to send to the GPU shader.
+The GPU shader now needs to reconstruct the sky-dome illumination, with help of few arithmetic functions.
+I used this following model:
 $$ Color = k_0 + k_1 e^{-2 sin(p)} + k_2 e^{-10 sin(p)} + e^{-5 sin(p)} \left( k_3 cos(y) cos(p) + k_4 cos(y)^2 cos(p)^2 \right) + k_5 e^{5 \frac{s - 1}{1 - g}} $$
+where
 </p>
 
 <img src="images/devnote_sky/sketch-dome-angles.png" style="float:right; width:242px; margin: 10px 10px 10px 30px;">
 
-<p>
-where the \( k_i \) are coefficients,
-      \( p \) is the pitch of the view ray (in blue),
-      \( y \) is the yaw of the view ray (in green),
-      \( s \) is the cosinus between the view ray and the sun.
-</p>
+<ul>
+  <li> \( p \) is the pitch of the view ray (in blue), </li>
+  <li> \( y \) is the yaw of the view ray (in green), </li>
+  <li> \( s \) is the cosinus between the view ray and the sun, </li>
+  <li> and the \( k_i \) are coefficients. </li>
+</ul>
 
 <p>
-The \( k_i \) coefficients depends on the sun position (<code>cosSunZenith</code>, where the sun zenith is the evelation angle of the sun, in red) and the visibility (<code>visibility</code>, expressed by a characteristic distance).
-Since the coefficients are constant given a sky condition, they can be computed on CPU and transmitted to the GPU shader for the rendering.
-Finally, I decided to tabulate the coefficients (6 * 16 * 6 float3 values), even if they could be asynchroneously computed by a background task.
+Note that those coefficients can be tabulated if the final application wants to avoid the asynchrous computations.
+For example, I decided to tabulate the coefficients (6 * 16 * 6 float3 values) when targetting mobile devices.
 </p>
 
-<h4>Results</h4>
+<p><i>Work in progress regarding the dome regressions ....</i></p>
+
+
+<h3>3.4 Sky shader (GPU)</h3>
 
 <p>
-This model drastically reduces the cost of the rendering,
-but the resulting sky has less details.
-However, The model can still be improved with a better model's formula.
-Also, to have clouds would bring back high-frequency color gradients.
+This model drastically reduces the cost of the rendering.
+The obtained results are convincing too.
+<br>
+The shader code folds into few lines of code:
 </p>
-
-<video autoplay loop muted controls style="display: block; width: 600px; margin: auto;">
-  <source src="images/devnote_sky/compare-v1.mp4" type="video/mp4">
-</video>
+<pre>
+uniform vec3 skyCoefs[5];
+vec3 skyColor(vec3 ray)
+{
+  float sP = abs(ray.z);
+  float cYcP = dot(-sunDirectionIncoming.xy, ray.xy);
+  float cS = dot(-sunDirectionIncoming, ray);
+  float vpA = exp( -2.f*sP);
+  float vpB = exp(-10.f*sP);
+  float vpC = exp(- 5.f*sP);
+  vec3  color = skyCoefs[0] +
+                skyCoefs[1] * vpA +
+                skyCoefs[2] * vpB +
+                vpC * (skyCoefs[3] * cYcP + skyCoefs[4] * cYcP*cYcP);
+  float sunDisk = min(exp(6.e4f * (cS-0.999962f)), 1.f); <span class="code-comment">// the sun-disk is 0.25 degree radius</span>
+  color += sunDisk * skyCoefTr;
+  return max(vec3(0.f, 0.f, 0.f), color);
+}
+</pre>
 
 </div>
 
