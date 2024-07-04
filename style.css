@@ -97,3 +97,13 @@ a:visited {
 .navbar td.active {
   background-color: #222;
 }
+
+/* Back-log */
+
+.backlog td {
+  border-bottom: 1px solid #333;
+}
+
+.backlog  tr:hover {
+  filter: brightness(120%);
+}

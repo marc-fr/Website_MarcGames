@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
     <title>Devlog: Sky</title>
 
@@ -34,6 +32,7 @@
         <li> <a href="devlog_planet.html">Multi-scale planet rendering</a> </li>
         <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
         <li> <a href="devlog_sky.html">Sky rendering</a> </li>
+        <li> <a href="devlog_simulations.html">Physics simulations</a> </li>
         <li> <a href="devlog_webgl.html">Porting to web-assembly</a> </li>
       </ul>
     </div>
@@ -42,7 +41,7 @@
 
 <h1>Real-time procedural sky rendering</h1>
 
-<p><i>Created on 2023, last updated on April 2024</i></p>
+<p><i>Created on 2023, last updated on June 2024</i></p>
 
 <p>
 This post demonstrates how a procedural sky can be rendered in real-time.
@@ -89,7 +88,8 @@ where
 <p>
 It is admitted that \( h_{R0} = 8 \) km and \( h_{M0} = 1.2 \).
 Both \( \beta_{R0} \) and \( \beta_{M0} \) are coefficients that control the breadth of the scattering.
-The scattering induces a light extinction, which is the part of the light being scattered away when following a straight path:
+The scattering induces a light absortion, also called light extinction,
+which is the part of the light being scattered away when following a straight path:
 $$ \alpha(path) = \exp ( - d_{optic} ) $$
 with
 $$ d_{optic} = \beta_{R0} \int_{path} { e^{-h/h_{R0}} dl } + \beta_{M0} \int_{path} { e^{-h/h_{M0}} dl } $$
@@ -122,21 +122,56 @@ I thus express the optical-distance to the sun with:
 $$ d_{optic,sun} = \int_{P}^{Sun} { e^{-h/h0} dl }
             \simeq \int_{x=0}^{+\infty} { e^{ - ( a x^2 + b x + c ) } dx }
                  = \frac{\sqrt{\pi}}{2\sqrt{a}} e^{-c} e^{\frac{b^2}{4a}} \left( 1 - \mathrm{erf} \left( \frac{b}{2\sqrt{a}} \right) \right) $$
-where \( a = \frac{1-cos^2 \theta}{2 R h0} \) ,  \( b = \frac{cos \theta}{h0} \) , \( c = \frac{h_{start}}{h0} \) .
+where \( a = \frac{1-cos^2 \theta}{2 R h0} \) ,  \( b = \frac{cos \theta}{h0} \) , \( c = \frac{h_{start}}{h0} \) and \( R \) the Earth radius.
 This approximation is fairly good while the ray does not travel towards the ground (while \(b\) is positive).
 I also use asymptotic approximations of the <code>erf</code> function to have a friendlier expression to compute.
-When \(b\) is negative, I consider that the ray starts at its lowest altitude point.
+When the ray travels towards the ground, I compute a new starting location at the lowest altitude position:
+$$ h_{min} = (R + h_{start}) \sqrt{1 - cos \theta ^2} - R $$
+If this position is under the ground, then the extinction is infinite (the light is blocked by the ground).
+Otherwise, the optical distance between the starting point and the lower altitude position is approximated with:
+$$ d_{optic,sun,pre} = \frac{-\cos \theta}{2} \left( e^{-h_{start}/h0} + e^{-h_{min}/h0} \right) (R + h_{start}) $$
 Finally, the optical distance to the sun is expressed with:
-$$ d_{optic,sun} = 
+$$ d_{optic,sun} = d_{optic,sun,pre} + 
 \begin{cases}
-e^{-c} \frac{\sqrt{2 \pi R h0}}{2}  e^{\frac{R \cos^2{\theta}}{h0}} \; \; \; \mathrm{ when } \; b &lt; 0
-\\
 e^{-c} \frac{1}{b} \left(1 - \frac{2a}{b^2} + \frac{12a^2}{b^4} \right) \; \; \; \mathrm{ when } \; b &gt; 7 \sqrt{a}
 \\
 e^{-c} \frac{\sqrt{\pi}}{2 \sqrt{a}} \left( 0.3480242 p - 0.0958798 p^2 + 0.7478556 p^3 \right) \; \; \; \mathrm{ with } \; \; \; p = \frac{2 \sqrt{a}}{2 \sqrt{a} + 0.47047 b}
 \end{cases}
 $$
 </p>
+
+      <table style="display: block; width: 600px; margin: auto;">
+       <tbody>
+        <tr>
+         <td style="width:50%; text-align:center;">
+          <img src="images/devnote_sky/optical-distance-0km.jpg" style="width:100%;">
+         </td>
+         <td style="width:50%; text-align:center;">
+          <img src="images/devnote_sky/optical-distance-40km.jpg" style="width:100%;">
+         </td>
+        </tr>
+        <tr>
+         <td style="width:50%; text-align:center;">
+         <i>extinction visualization,<br>at surface (0 km)</i>
+         </td>
+         <td style="width:50%; text-align:center;">
+         <i>extinction visualization,<br>at 40 km altitude</i>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+
+
+<h4>Local extact extinction:</h4>
+
+<p>
+The view ray is integrated by several segments.
+But the scattered light is computed on a single point,
+and the position of this point for each segment has an impact on the amount of light received.
+The usual way is to have the point on the middle of the segment, and to keep small segments.
+However, the computation on each segment can be improved.
+</p>
+<!-- TODO -->
 
 <h4>Results:</h4>
 
@@ -152,8 +187,10 @@ On the picture below, the sky is rendered with Rayleigh scattering only, from mi
 
 <img src="images/devnote_sky/sky-1way-domes.png" style="clear:right; width:100%;">
 
+<h4>Shader code:</h4>
+
 <details>
-<summary>The shader code (click to expand).</summary>
+<summary>(click to expand).</summary>
 <pre>uniform vec3  sunDirectionIncoming;
 uniform float factorRayleigh;
 uniform float factorMie;
@@ -161,8 +198,6 @@ uniform float gMie;
 const float rE   = 6.3e3f; <span class="code-comment">// radius of Earth (km)</span>
 const vec2  h0   = vec2(8., 1.2); <span class="code-comment">// ch. altitude (Rayleigh, Mie) (km)</span>
 const float hMax = 50.f; <span class="code-comment">// max altitude for computations</span>
-const int   rayIntg_nsteps = 30; <span class="code-comment">// nbr of integration points</span>
-const float rayIntg_norm = 1.f / float(rayIntg_nsteps);
 const vec3  scatteringCoefs_R = vec3(0.11f, 0.32f, 0.68f);
 const vec3  scatteringCoefs_M = vec3(0.50f, 0.50f, 0.50f);
 
@@ -178,53 +213,67 @@ vec3 localScatteringLight(float h, float c)
   return fR * phaseR + fM * phaseM;
 }
 
-vec2 opticalDistanceGroundToSun(float csz)
+vec2 opticalDistanceToSun(float csz, float hStart, float h0)
 {
-  csz = max(0.f, csz);
-  vec2 a = 0.5f * (1.f - csz * csz) / h0 / rE;
-  vec2 b = csz / h0;
-  vec2 sqrta = sqrt(a);
-  vec2 ainvbb = a / (b * b);
-  vec2 p = (2.f * sqrta) / (2.f * sqrta + 0.47047f * b);
-  vec2 optInf = (1.f - 2.f*ainvbb + 12.f*ainvbb*ainvbb) / b;
-  vec2 optMid = 0.5f * sqrt(3.141592f / a) * p * (0.3480242f - 0.0958798f * p + 0.7478556f * p * p);
-  vec2 ret;
-  ret.x = (b.x &gt; 7.f * sqrta.x) ? optInf.x : optMid.x;
-  ret.y = (b.y &gt; 7.f * sqrta.y) ? optInf.y : optMid.y;
-  return ret;
+  float optD = 0.f;
+  if (csz < 0.f)
+  {
+    float hMin = (rE + hStart) * sqrt(1.f - csz * csz) - rE;
+    if (hMin < 0.f) return 1.e30f; <span class="code-comment">// + infinite</span>
+    optD += 0.5f * (exp(-hMin/h0) + exp(-hStart/h0)) * (rE + hStart) * (-csz);
+    hStart = hMin;
+    csz = 0.f;
+  }
+  float a = 0.5f * (1.f - csz * csz) / rE / h0;
+  float b = csz / h0;
+  float c = hStart / h0;
+  float sqrta = sqrt(a);
+  float expc = exp(-c);
+  if (b > 7.f*sqrta)
+  {
+    float ainvbb = a / (b * b);
+    optD += expc * (1.f - 2.f*ainvbb + 12.f*ainvbb*ainvbb) / b;
+  }
+  else
+  {
+    float p = (2.f * sqrta) / (2.f * sqrta + 0.47047f * b);
+    float ret = 0.5f * expc * sqrt(3.14159f / a) * p * (0.3480242f - 0.0958798f * p + 0.7478556f * p * p);
+    optD += min(ret, 1.e30f);
+  }
+  return optD;
 }
 
-vec3 skyColor(vec3 rayView)
+vec3 skyColor(vec3 ray)
 {
-  vec3  ray = vec3(rayView.xy, abs(rayView.z));
-  float cvz = max(rayView.z, 0.f); <span class="code-comment">// cos view zenith</span>
-  float hMaxOverR = hMax / rE;
-  float rayLength = rE * (sqrt(cvz*cvz + 2.f * hMaxOverR + hMaxOverR*hMaxOverR) - cvz);
-  float step = rayLength * rayIntg_norm;
-  float cosRS = dot(-sunDirectionIncoming, ray); <span class="code-comment">// cos of angle between the ray and the sunlight</span>
-  vec3 lightAcc = vec3(0.f);
-  vec2  optD_VP = vec2(0.f, 0.f);
-  for (int iStep = 0; iStep &lt; rayIntg_nsteps; ++iStep)
+  float dl = 1.f;
+  vec3  pt = vec3(0.f, 0.f, rE) + 0.5f * dl * ray; <span class="code-comment">// mid-point integration</span>
+  vec3  lightAcc = vec3(0.f);
+  vec2  optD_VP = vec2(0.f, 0.f); <span class="code-comment">// optical-distance: viewer - point</span>
+  while (true)
   {
-    float x     = (0.5f + float(iStep)) * step;
-    vec3  pt    = vec3(0.f, 0.f, rE) + x * ray;
-    float rP    = length(pt);
-    float hP    = rP - rE; <span class="code-comment">// elevation</span>
-    float csz   = clamp(dot(pt, -sunDirectionIncoming) / rP, -1.f, 1.f);
-    vec2  optD_GroundSun = opticalDistanceGroundToSun(csz);
-    vec2  rhoP = exp(-hP/h0);
-    float cszNeg = min(0.f, csz);
-    vec2  optD_PS = optD_GroundSun * exp(-(hP - cszNeg*cszNeg*rE)/h0);
+    float rP      = length(pt);
+    float hP      = rP - rE; <span class="code-comment">// elevation</span>
+    if (hP < 0.f)  return vec3(0.f); <span class="code-comment">// ground reflexion ?</span>
+    if (hP > hMax) break; <span class="code-comment">// we're done</span>
+    float csz     = clamp(dot(pt, -sunDirectionIncoming) / rP, -1.f, 1.f);
+    vec2  optD_PS = vec2(opticalDistanceToSun(csz, hP, h0.x) * factorRayleigh,
+                         opticalDistanceToSun(csz, hP, h0.y) * factorMie);
+    vec2  rhoP    = exp(-hP/h0) * vec2(factorRayleigh, factorMie);
     <span class="code-comment">// direct scattering</span>
     {
-      vec3 globalOptD = (optD_VP.x + optD_PS.x) * scatteringCoefs_R * factorRayleigh +
-                        (optD_VP.y + optD_PS.y) * scatteringCoefs_M * factorMie;
+      vec3 globalOptD = (optD_VP.x + optD_PS.x) * scatteringCoefs_R +
+                        (optD_VP.y + optD_PS.y) * scatteringCoefs_M;
+      vec3 tr0 = glm::exp(-globalOptD);
+      vec3 _localExtinct = rhoP.x * scatteringCoefs_R + rhoP.y * scatteringCoefs_M;
+      vec3 trSelf = (1.f - exp(-dl * _localExtinct)) / _localExtinct;
       vec3 localScatteringPS = localScatteringLight(hP, cosRS);
-      lightAcc += stepx * exp(-globalOptD) * localScatteringPS;
+      lightAcc += tr0 * trSelf * localScatteringPS;
     }
+    pt += dl * ray;
     optD_VP += step * rhoP;
   }
   {
+    float cosRS = dot(-sunDirectionIncoming, ray); <span class="code-comment">// cos of angle between the ray and the sunlight</span>
     float sunDisk = min(exp(6.e4f * (cosRS-0.999962f)), 1.f); <span class="code-comment">// the sun-disk is 0.25 degree radius</span>
     lightAcc += sunDisk * vec3(1.f, 1.f, 1.f);
   }
@@ -232,35 +281,6 @@ vec3 skyColor(vec3 rayView)
 }
 </pre>
 </details>
-
-<h4>Impact of the number of discretized points:</h4>
-
-<p>
-I did some tests with various count of discretization points (<code>rayIntg_nsteps</code>).
-Having less scattering points renders the sky as if the scattering coefficient was higher.
-Indeed, it leads to a brighter and more uniform sky, but more yellowish near the horizon.
-As expected, the number of discretization points strongly impacts the performances.
-</p>
-
-<img src="images/devnote_sky/sky-1way-steps.png" style="clear:right; width:100%;">
-
-<h4>Two steps discretization with both Rayleigh and Mie scattering:</h4>
-
-<div>
-<img src="images/devnote_sky/sketch-discretisation-2steps.png" style="float:right; width:256px; margin: 10px 10px 10px 30px;">
-
-<p>
-Because the Mie scattering has an 8-times lower characteristic altitude than the Rayleigh scattering characteristic altitude, 
-the distribution of the discretization points significantly affects the output.
-To have a good sampling of the scattering, the distance between two points should be shorter than the characteristic altitude's one.
-Consequently, with the Mie scattering this distance should at most be about 1 km.
-As for the Rayleigh scattering, this distance should measure up to 8km, but given its magnitude in practice it can be higher while keeping a relatively high resolution.
-While keeping the reasonably low number of discretization points, I choose to split the view-ray in 2 parts:
-a first part with a short distance between 2 discretization points (so the Mie scattering will be accurately evaluated),
-and a second part with a long distance (so the Rayleigh scattering will be accurately evaluated).
-</p>
-
-</div>
 
 <h2>3. Sky illumination with multiple atmospheric scattering</h2>
 
@@ -304,9 +324,10 @@ for (int step = 0; step &lt; 6; step += 1)
 {
   for (cell in atmModel)
   {
-    cell.emitIndirect = 0; 
+    emitIndirectNew = 0;
     for (direction in sphere)
-      cell.emitIndirect += scatterLight(atmModel.receivedLightFromCells(direction), direction);
+      emitIndirectNew += scatterLight(atmModel.receivedLightFromCells(direction), direction);
+    cell.emitIndirect = emitIndirectNew;
   }
 }
 </pre>
@@ -446,28 +467,24 @@ For example, I decided to tabulate with 6 * 16 table-points when targeting mobil
 We can go a step further by fitting the sky-dome illumination in an arbitrary model, with only few coefficients.
 Finally, only few floats will have to be sent to the GPU shader.
 The GPU shader now needs to reconstruct the sky-dome illumination, with help of few arithmetic functions.
-Here a candidate model:
-$$ Color = k_0 + k_1 e^{-2 sin(p)} + k_2 e^{-10 sin(p)} + e^{-5 sin(p)} \left( k_3 cos(y) cos(p) + k_4 cos(y)^2 cos(p)^2 \right) + k_5 e^{5 \frac{s - 1}{1 - g}} $$
 </p>
+
+<!-- TODO candidate model:
+$$ Color = k_0 + k_1 e^{-2 sin(p)} + k_2 e^{-10 sin(p)} + e^{-5 sin(p)} \left( k_3 cos(y) cos(p) + k_4 cos(y)^2 cos(p)^2 \right) + k_5 e^{5 \frac{s - 1}{1 - g}} $$ -->
 
 <p><i>Work in progress ...</i></p>
 
 <p>
 The shader code folds into few lines of code:
 </p>
-<pre>uniform vec3 skyCoefs[5];
+<pre>uniform vec3 sunDirectionIncoming;
+uniform vec3 skyCoefs[5];
 vec3 skyColor(vec3 ray)
 {
   float sP = abs(ray.z);
   float cYcP = dot(-sunDirectionIncoming.xy, ray.xy);
   float cS = dot(-sunDirectionIncoming, ray);
-  float vpA = exp( -2.f*sP);
-  float vpB = exp(-10.f*sP);
-  float vpC = exp(- 5.f*sP);
-  vec3  color = skyCoefs[0] +
-                skyCoefs[1] * vpA +
-                skyCoefs[2] * vpB +
-                vpC * (skyCoefs[3] * cYcP + skyCoefs[4] * cYcP*cYcP);
+  vec3  color = ...;
   return max(vec3(0.f, 0.f, 0.f), color);
 }</pre>
 
@@ -481,18 +498,49 @@ I will use an even simpler scattering phase function: a constant value.
 Indeed, the multiple scattering tends to scatter the light like if a smoother the phase function was initially used.
 The scattered light is:
 $$ \sigma_{cloud}(\rho) = \frac{1}{4 \pi} \rho $$
-where \( \rho \) is the local scattering strength, based on the cloud's particle density.
+where \( \rho \) is the local scattering strength, based on the cloud's particle local density.
 The light extinction is computed the same way:
 $$ \alpha(path) = \exp \left( - \int_{path} { \rho dl } \right) $$
-The clouds are generally localized in space, so a simple direct ray-cast method is enough to have convincing results.
-I use low-resolution 3D-textures to model the shape of the clouds, in combination of 3D-noise.
-On the texture, I can embed additional pre-computed geometry parameters, such as average optical-depth from an half-top-sphere and half-bottom-sphere.
+A simple direct ray-cast method, enhanced with some pre-computations, is enough to have convincing results.
 </p>
 
 <p><i>Work in progress ...</i></p>
 
+
+<h4>2D-based clouds:</h4>
+
+<p>
+I use 2D-textures to model the shape of the clouds, in addition of 2D-noise.
+On the view ray, the local scattering strengh of the cloud is considered constant.
+Let use a fake depth \( D \) and \( \rho \) the scattering strengh.
+Then the received scattered light can be expressed as:
+$$ L = \int_{0}^{D} { \left( \frac{1}{4 \pi} L_{sun} + L_{ambiant} \right) \rho e^{-\rho l} dl } = \left( \frac{1}{4 \pi} L_{sun} + L_{ambiant} \right) \left( 1 - e^{-\rho D} \right) $$
+We can observe that the scattered sky color is constant (leaving out the desnity-dependent multiplier).
+To obtain better results, we can fake the cloud volume by applying to fake normal, and so the sun-light intensity being scattered is modulated.
+</p>
+<!-- TODO -->
+
+<details>
+<summary>Shader code (click to expand).</summary>
+<pre>TODO
+</pre>
+</details>
+
+
+<h4>3D-based clouds:</h4>
+
+<p>
+I use 3D-textures to model the shape of the clouds, in addition of 3D-noise.
+On the texture, additional pre-computed geometry parameters are embeded.
+</p>
+<!-- TODO -->
+
+<details>
+<summary>Shader code (click to expand).</summary>
+<pre>TODO
+</pre>
+</details>
+
 </div>
-
-
 
 </body></html>

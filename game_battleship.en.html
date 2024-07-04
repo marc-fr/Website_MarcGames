@@ -22,9 +22,27 @@
   background: #081830;
 }
 
+.release {
+  margin: 20px 0px;
+  padding: 6px;
+  border: 1px solid #779;
+  background: #132340;
+}
+.release::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.release h3 { 
+  color: #AAF;
+}
+
     </style>
+
+    <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
+
   </head>
-  
+
   <body>
     <div class="header">
       <h1>Marc Games</h1>
@@ -72,31 +90,97 @@ Sit and shoot!
 
     <h2>Screenshots</h2>
 
+<div class="slideshow-container">
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">1 / 3</div>
+  <img src="images/Battleship/prototype_2024_03_wave.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">2 / 3</div>
+  <img src="images/Battleship/prototype_2024_03_sunset.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">3 / 3</div>
+  <img src="images/Battleship/prototype_2024_03_nearShip.jpg" style="width:100%">
+</div>
+
+<a class="prev" onclick="plusSlides(-1)">❮</a>
+<a class="next" onclick="plusSlides(1)">❯</a>
+
+</div>
+<script type="text/javascript" src="gallery.js"> </script>
+
+    </div>
+    <div class="main">
+
+    <h2>Dev log</h2>
+
     <p>
     The game is currently an early prototype.
-    I'm focusing on the rendering part, with a full procedural sky rendering and procedural weather.
+    I'm focusing on the rendering part, with a full procedural sky rendering and weather system.
     </p>
 
-    <img src="images/Battleship/prototype_2024_03_wave.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/prototype_2024_03_sunset.jpg" style="width: 47%; padding: max(1%,3px);">
+      <table class="backlog" style="width:100%; border-spacing: 0px;">
+       <tbody>
+<tr> <td> <code>[X]</code> </td>   <td>clouds: rework the cloud-system, improve the rendering</td> </tr>
+<tr> <td> <code>[X]</code> </td>   <td>rendering: add bloom</td> </tr>
+<tr> <td> <code>[X]</code> </td>   <td>gameplay: implement shooting and first version of the UI</td> </tr>
+<tr> <td> <code>[X]</code> </td>   <td>gameplay: realistic sun motion</td> </tr>
+<tr> <td> <code>[-]</code> </td>   <td>rendering: add stars (on the night)</td> </tr>
+<tr> <td> <code>[-]</code> </td>   <td>game-core: implement ballistics and start damage system</td> </tr>
+<tr> <td> <code>[-]</code> </td>   <td>rendering: add reflexion</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>rendering: add shadows and cloud sun-ray occlusion</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>game-core: implement the AI</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>sound: create basic sounds of the wind and gun shot</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>ocean rendering: improve the shading</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>ocean waves: improve geometry, notably the Gerstner wave</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>wave simulation (local waves)</td> </tr>
+       </tbody>
+      </table>
 
-    <p>
-    This game is inspired from a python game that I have made in the 2010's.
-    </p>    
 
-    <img src="images/Battleship/python_1.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/python_2.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/python_3.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/python_4.jpg" style="width: 47%; padding: max(1%,3px);">
+<div class="release">
+<h3>Protoptye (2024 April):</h3>
+<ul>
+  <li>Improved procedural sky rendering</li>
+  <li>First version of the weather system</li>
+  <li>Rendering of the sea</li>
+  <li>First version of the ship's modeling</li>
+</ul>
+<img src="images/Battleship/prototype_2024_03_wave.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/prototype_2024_03_sunset.jpg" style="width: 47%; padding: 1%;">
+</div>
+
+<div class="release">
+<h3>Protoptye (2023 April):</h3>
+<ul>
+  <li>First version of the procedural sky rendering</li>
+  <li>Build the game's core with placeholders</li>
+  <li>Design the camera control</li>
+</ul>
+<img src="images/Battleship/prototype_2023_04_start.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/prototype_2023_04_atmosphericScattering.jpg" style="width: 47%; padding: 1%;">
+</div>
+
+<div class="release">
+<h3>Protoptye (2010's):</h3>
+<p>
+Made with python,
+the game concept is inspired by the RTS game gendra.
+The navy played an important role during the early Word-War 2,
+before that the aviation becomes pre-dominant over the seas.
+</p>
+<img src="images/Battleship/python_1.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/python_2.jpg" style="width: 47%; padding: 1%;">
+</div>
 
     </div>
        
     <div class="footer">
       <p>Marc Landon - 2023</p>
     </div>
-
-        
-  
-  
 
 </body></html>

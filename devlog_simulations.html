@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
     <title>Devlog: Physic simulations</title>
 
@@ -34,6 +32,7 @@
         <li> <a href="devlog_planet.html">Multi-scale planet rendering</a> </li>
         <li> <a href="devlog_ISMCST.html">A.I for a card game</a> </li>
         <li> <a href="devlog_sky.html">Sky rendering</a> </li>
+        <li> <a href="devlog_simulations.html">Physics simulations</a> </li>
         <li> <a href="devlog_webgl.html">Porting to web-assembly</a> </li>
       </ul>
     </div>
@@ -42,7 +41,7 @@
 
 <h1>Real-time physic simulations</h1>
 
-<p><i>W.I.P</i></p>
+<p><i>Created on 2024, W.I.P</i></p>
 
 <p>
 I will detail some simulation techniques that can run on real-time.
@@ -146,40 +145,10 @@ where \(\phi\) is the flux limiter, \(F^{low}\) a low-order flux that is stable 
 
 <p>
 The goal is to simulate the waves on the free-surface of water.
+Such simulations are often called 2.5D simulations, because it gives a space dimension (height) over a two dimensional domain.
 Whereas the <a href="https://en.wikipedia.org/wiki/Airy_wave_theory">Airy wave theory</a> is used to simulate
 deep water simulation, the shallow water simulation can be used when the ratio of the wavelength by the depth is around 1/20.
-Such descriptions are often called 2.5D simulations, because it gives a space dimension over a two dimensional domain.
-The shallow-water equations are derived from the 3D Navier-Stokes equations, and taken in the conservative form:
-$$ \delta_t h + \delta_x (hu) + \delta_y (hv) = 0 $$
-$$ \delta_t (hu) + \delta_x (h u^2 + \frac{1}{2} g h^2) + \delta_y (huv) = - gh \delta_x (z) $$
-$$ \delta_t (hv) + \delta_x (huv) + \delta_y (h v^2 + \frac{1}{2} g h^2) = - gh \delta_y (z) $$
-where \( h \) is the water height,
-      \( u,v \) is the mean velocity of the water on the water column,
-      \( z \) is the sea-bed elevation.
-The mathematical properties of this system make it hard to simulate.
-Indeed, this system is an hyperbolic partial differential set of equations.
-Especially, discontinuities can appear in the water height when a wave on a sloped beach is going to break.
-</p>
-
-<p>
-If we consider an 1D case, where \( h, u, v, z \) are constant over the y-coordinate,
-then the 1D shallow-water equation is:
-$$
-\delta_t \begin{bmatrix} h \\ hu \\ hv \end{bmatrix} +
-\begin{bmatrix} 0 &amp; 1 &amp; 0 \\ gh - u^2 &amp; 2u &amp; 0 \\ 0 &amp; 0 &amp; u \end{bmatrix} \cdot
-\delta_x \begin{bmatrix} h \\ hu \\ hv \end{bmatrix}
-=
-\begin{bmatrix} 0 \\ - gh \delta_x (z) \\ 0 \end{bmatrix}
-$$
-We recognize a system of coupled transport equations.
-The eigenvalues of the coupling matrix are \( u - \sqrt{gh} \), \( u \), \( u + \sqrt{gh} \).
-From this, an analytic solution exists on the associated Riemann problem, also called the dam-break problem on this particular case.
-Those mathematical properties will be useful to find a proper integration scheme.
-</p>
-
-<p>
 With the shallow water approximation, the fluid velocity is considered constant over the water column.
-This approximation is not always valid, and in particular in deep water:
 </p>
 
       <table>
@@ -220,6 +189,36 @@ This approximation is not always valid, and in particular in deep water:
         </tr>
        </tbody>
       </table>
+
+<h3>The governing equations</h3>
+
+<p>
+The shallow-water equations are derived from the 3D Navier-Stokes equations, and taken in the conservative form:
+$$ \delta_t h + \delta_x (hu) + \delta_y (hv) = 0 $$
+$$ \delta_t (hu) + \delta_x (h u^2 + \frac{1}{2} g h^2) + \delta_y (huv) = - gh \delta_x (z) $$
+$$ \delta_t (hv) + \delta_x (huv) + \delta_y (h v^2 + \frac{1}{2} g h^2) = - gh \delta_y (z) $$
+where \( h \) is the water height,
+      \( u,v \) is the mean velocity of the water on the water column,
+      \( z \) is the sea-bed elevation.
+The mathematical properties of this system make it hard to simulate.
+Indeed, this system is an hyperbolic partial differential set of equations.
+Especially, discontinuities can appear in the water height when a wave on a sloped beach is going to break.
+If we consider an 1D case, where \( h, u, v, z \) are constant over the y-coordinate,
+then the 1D shallow-water equation is:
+$$
+\delta_t \begin{bmatrix} h \\ hu \\ hv \end{bmatrix} +
+\begin{bmatrix} 0 &amp; 1 &amp; 0 \\ gh - u^2 &amp; 2u &amp; 0 \\ 0 &amp; 0 &amp; u \end{bmatrix} \cdot
+\delta_x \begin{bmatrix} h \\ hu \\ hv \end{bmatrix}
+=
+\begin{bmatrix} 0 \\ - gh \delta_x (z) \\ 0 \end{bmatrix}
+$$
+We recognize a system of coupled transport equations.
+The eigenvalues of the coupling matrix are \( u - \sqrt{gh} \), \( u \), \( u + \sqrt{gh} \).
+From this, an analytic solution exists on the associated Riemann problem, also called the dam-break problem on this particular case.
+Those mathematical properties will be useful to find a proper integration scheme.
+</p>
+
+
 
 <!--
 <p>
