@@ -136,6 +136,12 @@ On the other hand, to keep the game loading smoothly, it's a good practice to "b
 </p>
 
 <p>
+<font style="color:red;">Warning:</font>
+don't use <code>std::size_t</code> to read/write file because this type may not have the same byte-size than the desktop build.
+In fact, the desktop has always 64bits <code>std::size_t</code> nowdays, but I obtain 32bits <code>std::size_t</code> on web-assembly with default configuration.
+</p>
+
+<p>
 An example of implemention of a "baker" is avaliable in <a href="https://github.com/marc-fr/TinyRenderEngine">TRE</a>.
 It uses a hand-made file format, that defines containers (called "blocks") from which the data can be accessed directly.
 If you need more features, such as versionning or safety, you can have a look on existing file formats, like HDF5.
