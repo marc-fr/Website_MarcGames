@@ -41,7 +41,7 @@
 
 <h1>Real-time procedural sky rendering</h1>
 
-<p><i>Created on 2023, last updated on June 2024</i></p>
+<p><i>Created in 2023, last updated in June 2024</i></p>
 
 <p>
 This post demonstrates how a procedural sky can be rendered in real-time.
@@ -127,7 +127,7 @@ This approximation is fairly good while the ray does not travel towards the grou
 I also use asymptotic approximations of the <code>erf</code> function to have a friendlier expression to compute.
 When the ray travels towards the ground, I compute a new starting location at the lowest altitude position:
 $$ h_{min} = (R + h_{start}) \sqrt{1 - cos \theta ^2} - R $$
-If this position is under the ground, then the extinction is infinite (the light is blocked by the ground).
+If this position is below the ground, then the extinction is infinite (the light is blocked by the ground).
 Otherwise, the optical distance between the starting point and the lower altitude position is approximated with:
 $$ d_{optic,sun,pre} = \frac{-\cos \theta}{2} \left( e^{-h_{start}/h0} + e^{-h_{min}/h0} \right) (R + h_{start}) $$
 Finally, the optical distance to the sun is expressed with:
@@ -162,7 +162,7 @@ $$
       </table>
 
 
-<h4>Local extact extinction:</h4>
+<h4>Local exact extinction:</h4>
 
 <p>
 The view ray is integrated by several segments.
@@ -495,7 +495,7 @@ vec3 skyColor(vec3 ray)
 The clouds are the visible effect of the scattering induced by the water droplets.
 Then we only need to consider the Mie scattering.
 I will use an even simpler scattering phase function: a constant value.
-Indeed, the multiple scattering tends to scatter the light like if a smoother the phase function was initially used.
+Indeed, the multiple scattering tends to scatter the light as if a smoother phase function was initially used.
 The scattered light is:
 $$ \sigma_{cloud}(\rho) = \frac{1}{4 \pi} \rho $$
 where \( \rho \) is the local scattering strength, based on the cloud's particle local density.
@@ -512,11 +512,11 @@ A simple direct ray-cast method, enhanced with some pre-computations, is enough 
 <p>
 I use 2D-textures to model the shape of the clouds, in addition of 2D-noise.
 On the view ray, the local scattering strengh of the cloud is considered constant.
-Let use a fake depth \( D \) and \( \rho \) the scattering strengh.
+Let's use \( D \) as a fake depth and \( \rho \) as the scattering strengh.
 Then the received scattered light can be expressed as:
 $$ L = \int_{0}^{D} { \left( \frac{1}{4 \pi} L_{sun} + L_{ambiant} \right) \rho e^{-\rho l} dl } = \left( \frac{1}{4 \pi} L_{sun} + L_{ambiant} \right) \left( 1 - e^{-\rho D} \right) $$
-We can observe that the scattered sky color is constant (leaving out the desnity-dependent multiplier).
-To obtain better results, we can fake the cloud volume by applying to fake normal, and so the sun-light intensity being scattered is modulated.
+We can observe that the scattered sky color is constant (leaving out the density-dependent multiplier).
+To obtain better results, we can fake the cloud volume by applying a faked normal. As such the intensity of the scattered sunlight would be modulated.
 </p>
 <!-- TODO -->
 

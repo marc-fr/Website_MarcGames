@@ -3,13 +3,13 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    <title>Devlog: Physic simulations</title>
+    <title>Devlog: Physics simulations</title>
 
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="stylesheet" type="text/css" href="style_devlog.css?v=2023.05.03">
 
-    <meta name="description" content="physic simulation numeric techniques">
-    <meta name="keywords" content="game, gamedev, physic, simulation, realtime">
+    <meta name="description" content="physics simulation numeric techniques">
+    <meta name="keywords" content="game, gamedev, physics, simulation, realtime">
     <meta name="author" content="Marc Landon">
 
     <meta name="generator" content="BlueGriffon wysiwyg editor">
@@ -39,13 +39,12 @@
 
 <div class="main">
 
-<h1>Real-time physic simulations</h1>
+<h1>Real-time physics simulations</h1>
 
-<p><i>Created on 2024, W.I.P</i></p>
+<p><i>Created in 2024, W.I.P</i></p>
 
 <p>
-I will detail some simulation techniques that can run on real-time.
-I also detail quick ways to implement them.
+I will detail some simulation techniques that can run in real-time, besides introducing quick ways to implement them.
 </p>
 
 
@@ -55,15 +54,15 @@ I also detail quick ways to implement them.
 
 <p>
 Water and outside air can be simulated as incompressible fluids.
-Such simulations are often combined with a diffuse phenomena, like the spread of smoke.
+Such simulations are often combined with a diffuse phenomenon, like the spread of smoke.
 To simulate incompressible fluid, we need to solve the Navier-Stokes equations.
-I will describe a 2D case, but all of be extended into 3D in the same manner.
+I will describe a 2D case, but it can be extended into 3D in the same manner.
 The governing equations are:
 $$ \delta_x u + \delta_y v = 0 $$
 $$ \delta_t u + \delta_x (u u) + \delta_y (u v) = - \delta_x p + \mu ( \delta_{xx} u + \delta_{yy} u ) + f_x $$
 $$ \delta_t v + \delta_x (v u) + \delta_y (v v) = - \delta_y p + \mu ( \delta_{xx} v + \delta_{yy} v ) + f_y $$
 $$ \delta_t s + \delta_x (s u) + \delta_y (s v) = k ( \delta_{xx} s + \delta_{yy} s ) + s_e $$
-where \( u,v \) are the fluid velocity component on x and y axis,
+where \( u,v \) are the fluid velocity component on x and y axes,
       \( \rho \) the density,
       \( p \) the pressure field,
       \( \mu \) the dynamic viscosity,
@@ -71,22 +70,22 @@ where \( u,v \) are the fluid velocity component on x and y axis,
       \( s \) a physical quantity (like smoke) transported by the fluid with \( k \) its dissipation factor and \( s_e \) a source term.
 </p>
 
-<h3>Part 1: the incompressibility constrain</h3>
+<h3>Part 1: the incompressibility constraint</h3>
 
 <p>
 The first equation is realizing the incompressiblity of the fluid.
 In fact, it does not contain time-derivative term.
-This equation can be taken apart, and transformed into a constrain.
+This equation can be considered seperately.
 Velocity-pressure algorithms (like the <a href="https://en.wikipedia.org/wiki/SIMPLE_algorithm">SIMPLE algorithm</a>) allow to decouple the system.
 </p>
 
 <img src="images/devnote_simu/staggeredGrid-pressure.png" style="float:right; width:150px; margin: 10px 30px 10px 30px;">
 <p>
-Starting from the previous valid state (in which the incompressibility constrain is fulfilled),
-we apply the fluid dynamics without the incompressibility constrain.
-Then we obtain new intermediate values ( \( u_\star, v_\star \) ) for which a pressure correction is applied to bring back the incompressibility constrain.
+Starting from the previous valid state (in which the incompressibility constraint is fulfilled),
+we apply the fluid dynamics without the incompressibility constraint.
+Then we obtain new intermediate values ( \( u_\star, v_\star \) ) for which a pressure correction is applied to bring back the incompressibility constraint.
 Note that the pressure is resolved on a staggered grid, to avoid the checkerboard problem.
-The pressure correction is computed from the resolution of the system:
+The pressure correction ( \( \tilde{p} \) ) is computed from the resolution of the system:
 $$ \delta_{xx} \tilde{p} + \delta_{yy} \tilde{p} = \delta_{x} u_\star + \delta_{y} v_\star $$
 Finally, the new state is:
 $$ \begin{align} u &amp;= u_\star - \delta_x \tilde{p} \\
@@ -97,21 +96,20 @@ $$ \begin{align} u &amp;= u_\star - \delta_x \tilde{p} \\
 <h3>Part 2: advection-diffusion with the finite-volume space discretization</h3>
 
 <p>
-The advection-diffusion physic phenomena is one of the big challenges for simulations.
-The advection is basically the transport phenomena.
-The diffusion is actually simpler to handle, because it tends to smooth quantities over the time.
+The advection-diffusion physical phenomenon is one of the big challenges for simulations.
+The advection is basically the transport phenomenon.
+The diffusion is actually simpler to handle, because it tends to smooth quantities over time.
 </p>
 
 <img src="images/devnote_simu/flux_2cells.png" style="float:right; width:150px; margin: 10px 30px 10px 30px;">
 <p>
-I will employ the finite-volume method, that is one of the most common spatial discretization methods for simulations.
-The finite-volume method is based on the discretization on the space by contiguous and finite volumes (or by surfaces in 2D).
-The state variables (like the fluid velocity \(u,v\) ) are considered constant over each cell (volume or surface).
-Then the goal is to compute the flux between cells.
-With \( Q = \{ U, V, S \} \) the set of the discretized (constant-per-cell) variables of the state variables \(u, v, s\).
-The initial governing equations is now taken per cell:
+I will employ the finite-volume method, which is one of the most common spatial discretization methods for simulations.
+The finite-volume method is based on the discretization of the space by contiguous and finite volumes (or by surfaces in 2D).
+The state variables (like the fluid velocity \(u,v\) and \(s\)) are considered constant over each cell (volume or surface) and will be called \( Q\).
+The initial governing equations become a single equation now taken per cell:
 $$ \delta_t Q_i + \sum_{j} { F_{ij} } = 0 $$
 where the fluxes \( F \) are evaluated such that the given equations are resulting to behave like the initial governing equations.
+The goal is then to determine the flux between cells.
 </p>
 
 <p>
@@ -312,10 +310,10 @@ X
 -->
 
 <hr style="margin-top:4em;">
-<h2 style="margin-top:1em;">Constrain-dynamics (X-PBD)</h2>
+<h2 style="margin-top:1em;">constraint-dynamics (X-PBD)</h2>
 
 <p>
-The X-PBD (Extended - Position Based Dynamics) is a simulation technique in which the physic constrains (like a fixed-distance constrain or a kinematic join constrain) are solved by successive iterations, and run directly with the position of the physic objects.
+The X-PBD (Extended - Position Based Dynamics) is a simulation technique in which the constraints (like a fixed-distance constraint or a kinematic join constraint) are solved by successive iterations, and run directly with the position of the physical objects.
 This method was been popularized by <a href="https://matthias-research.github.io/pages/">Matthias Muller</a>.
 The main advantage is that this method is quick to implement and it rapidly shows good results with good flexibility.
 However, it can fail to some instabilities and the results may depend on the time step.
