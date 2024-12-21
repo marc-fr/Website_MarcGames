@@ -111,13 +111,12 @@ where \( \alpha(path) \) is the light extinction along a straight path and \( \s
 </p>
 </div>
 
-<h4>Extinction pre-computation:</h4>
+<h4>Extinction of the sun light to a point:</h4>
 
 <p>
-The extinction is an integral that is costly to evaluate by summation.
+The extinction between the sun and a point in the atmosphere is an integral that is costly to evaluate by summation.
 To prevent this, many resources are using a pre-computed lookup texture.
-Since the altitude of the viewer and the characteristic altitudes of the scattering effect are too negligeable compared
-to the scale of the Earth's radius, I decided to use a math approximation for the extinction towards the sun.
+However, I decided to use a math approximation instead.
 I thus express the optical-distance to the sun with:
 $$ d_{optic,sun} = \int_{P}^{Sun} { e^{-h/h0} dl }
             \simeq \int_{x=0}^{+\infty} { e^{ - ( a x^2 + b x + c ) } dx }
@@ -162,16 +161,15 @@ $$
       </table>
 
 
-<h4>Local exact extinction:</h4>
+<h4>Extinction between the viewer and a point:</h4>
 
 <p>
-The view ray is integrated by several segments.
-But the scattered light is computed on a single point,
-and the position of this point for each segment has an impact on the amount of light received.
-The usual way is to have the point on the middle of the segment, and to keep small segments.
-However, the computation on each segment can be improved.
+Since the light is already accumulated along the view ray by summation,
+the extinction will be compute in the same loop.
+While the scattered light is evaluated on a single point per segment,
+the extinction can be evaluated with a more accurate formula:
 </p>
-<!-- TODO -->
+<!-- TODO ; so do it !! -->
 
 <h4>Results:</h4>
 
@@ -516,7 +514,7 @@ Let's use \( D \) as a fake depth and \( \rho \) as the scattering strengh.
 Then the received scattered light can be expressed as:
 $$ L = \int_{0}^{D} { \left( \frac{1}{4 \pi} L_{sun} + L_{ambiant} \right) \rho e^{-\rho l} dl } = \left( \frac{1}{4 \pi} L_{sun} + L_{ambiant} \right) \left( 1 - e^{-\rho D} \right) $$
 We can observe that the scattered sky color is constant (leaving out the density-dependent multiplier).
-To obtain better results, we can fake the cloud volume by applying a faked normal. As such the intensity of the scattered sunlight would be modulated.
+To obtain better results, we can fake the cloud volume by applying a faked normal. As such the intensity of the scattered sun light would be modulated.
 </p>
 <!-- TODO -->
 

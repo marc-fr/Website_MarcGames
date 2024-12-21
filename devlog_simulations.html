@@ -277,19 +277,17 @@ $$ Q^{new} = Q^0 + dt \left( F( Q^{new} ) + S( Q^{new} ) \right) $$
 This equation can be solved using <a href="https://en.wikipedia.org/wiki/Quasi-Newton_method">quasi-Newton methods</a>, where the Jacobian matrix of \( F + S \) is approximated such that its inverse is fast to compute.
 My idea is to transform the Jacobian matrix into a diagonal matrix, while keeping the spectral radius.
 I couldn't find this idea used in the literature, enve if the "Riemann" fluxes are based on the similar idea.
-That said, I didn't try yet other quasi-Newton methods for searching roots, such that the secant method.
+That said, I didn't try yet other quasi-Newton methods for searching roots.
 Then, the new values of the state variables \( Q^{new} \) is computed with the following iterative scheme:
 $$ Q^{new,k+1} = Q^{new,k} + \Lambda^{-1} ( dt ( F(Q^{new,k}) + S(Q^{new,k}) ) + Q^0 - Q^{new,k} ) $$
 $$ \Lambda = 1 + dt \left( \sum \frac{s}{2 dx} \right) $$ 
 </p>
 <!--   lambda with the viscous terms: + \begin{bmatrix} 0 \\ . \\ . \end{bmatrix} -->
 
-<!-- Validation ??? -->
-
 <h3>Results</h3>
 
 <p>
-Firstall, we can compare the obtained simulation with theorical results.
+Firstall, we can compare the obtained simulation with theoretical results.
 The dam-break problem admits a theorical solution, shown here with the lighter lines.
 The red lines show the velocity magnitude of the water column (dark red is the simulation, light red the theorical value).
 The simulation introduces some numerical damping effects, notably where the state variables are discontinuous.
@@ -299,18 +297,29 @@ The simulation introduces some numerical damping effects, notably where the stat
   <source src="images/devnote_simu/shallowWater_DamBreak.mp4" type="video/mp4">
 </video>
 
-<p><i>Work in progress ...</i></p>
+<p>
+We should keep in mind that the shallow-water equations are not valid for the deep water waves.
+I can demonstrate it by comparing the result of the shallow-water equations with the linear deep water waves solution.
+The strong blue is a full 2D Navier-Stokes simulation with a free surface.
+The green line is the deep-water wave theoretical solution.
+The lighter blue is the shallow-water simulation, that diverges with the solution given by the deep-water equations.
+The velocity profile is shown in red.
+We can see that the velocity profile is not constant over water columns, while the shallow-water equation considers it constant.
+</p>
 
-<!--
-<h3>Some thought about the deep water simulation (ocean waves)</h3>
+<video autoplay loop muted controls style="display: block; width: 90%; margin: auto; margin-top:40px;">
+  <source src="images/devnote_simu/shallowWater_DeepWaterWaves.mp4" type="video/mp4">
+</video>
 
 <p>
-X
+Finally, we should combine both the deep-water and shallow-water behaviors to have convincing results.
 </p>
--->
+
+<p><i>Work in progress ...</i></p>
+
 
 <hr style="margin-top:4em;">
-<h2 style="margin-top:1em;">constraint-dynamics (X-PBD)</h2>
+<h2 style="margin-top:1em;">Constraint dynamics (X-PBD)</h2>
 
 <p>
 The X-PBD (Extended - Position Based Dynamics) is a simulation technique in which the constraints (like a fixed-distance constraint or a kinematic join constraint) are solved by successive iterations, and run directly with the position of the physical objects.
