@@ -41,7 +41,7 @@
     
 <h1>Porting a C++/OpenGL game to web browsers</h1>
 
-<p><i>Created on 2022, last updated on May 2023</i></p>
+<p><i>Created on 2022, last updated on December 2024</i></p>
 
 <p>
 The web-assembly platform allows to run application inside web browsers.
@@ -158,6 +158,46 @@ Unlike desktop applications, the available memory is preconfigured during the co
 <p>
 I didn't try the multi-threading yet. For simplicity, the web-version of my game will stay single threaded.
 </p>
+
+<h3>Mouse tracking and pointer lock</h3>
+
+<p>
+Web browsers allow the user to restrict the mouse control,
+such that a web page cannot take full control of the mouse.
+Therefore, the usual SDL methods <code>SDL_WarpMouseInWindow()</code> won't work.
+Hopefully, Emscripten implements a way to capture the mouse with the SDL mouse relative mode.
+Here a way to handle the mouse capture:
+</p>
+<pre>#include "emscripten/html5.h"
+
+void _requestCaptureMouse()
+{
+  SDL_SetRelativeMouseMode(SDL_TRUE);
+}
+
+void _requestReleaseMouse()
+{
+  SDL_SetRelativeMouseMode(SDL_FALSE);
+}
+
+void _onMouseEvent()
+{
+  if (SDL_GetRelativeMouseMode() == SDL_TRUE)
+  {
+    m_controls.m_mousePos.x +=  2.f * float(event.motion.xrel) / m_screenResolution.x;
+    m_controls.m_mousePos.y += -2.f * float(event.motion.yrel) / m_screenResolution.y;
+  }
+  else
+  {
+    m_controls.m_mousePos.x = -1.f + 2.f * float(event.motion.x) / m_screenResolution.x;
+    m_controls.m_mousePos.y =  1.f - 2.f * float(event.motion.y) / m_screenResolution.y;
+  }
+}
+
+void _afterEvents()
+{
+  
+}</pre>
 
 <h2>Support of OpenGL ES - WebGL</h2>
 
