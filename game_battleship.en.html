@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
 
     <meta name="description" content="Battleships in shight game homepage">
-    <meta name="keywords" content="game, gamedev, battleship, strategie">
+    <meta name="keywords" content="game, gamedev, battleship, shooter">
     <meta name="author" content="Marc Landon">
 
     <meta name="generator" content="BlueGriffon wysiwyg editor">
@@ -67,23 +67,16 @@
 
     <p>
 The player controls battleships, inspired from the World-War 2.
+The game is currently an early prototype, with a playable alpha demo on web.
+There is still lot of work, notably game-play and special-effects.
     </p>
-
-    <p>
-A demo is planned to be made, in which the player controls only a ship.
-Sit and shoot!
-    </p>
-
-    </div>
-    <div class="main">
-        
-    <h2>Features</h2>
-    
     <ul>
-      <li> Play epic battles, with a challenging I.A </li>
-      <li> Fine control of every ships whenever you want </li>    
-      <li> Dynamic weather conditions, that have an impact on the strategy </li>
+      <li>Play epic battles, with a challenging AI</li>
+      <li>Fine control of aiming</li>    
+      <li>Dynamic weather conditions</li>
     </ul>
+
+<iframe frameborder="0" src="https://itch.io/embed/2732362?border_width=0&amp;bg_color=132340&amp;fg_color=fff&amp;link_color=f1fa5b&amp;border_color=3f2832" width="550" height="165"><a href="https://lanocram.itch.io/battleship-in-sight">Battleships in sight by lanocram</a></iframe>
 
     </div>
     <div class="main">
@@ -93,23 +86,33 @@ Sit and shoot!
 <div class="slideshow-container">
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">1 / 4</div>
-  <img src="images/Battleship/prototype_2024_07_start.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">1 / 6</div>
+  <img src="images/Battleship/alpha1.0_closeDay.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">2 / 4</div>
-  <img src="images/Battleship/prototype_2024_07_shipSunset.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">2 / 6</div>
+  <img src="images/Battleship/alpha1.0_closeMid.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">3 / 4</div>
-  <img src="images/Battleship/prototype_2024_07_ships.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">3 / 6</div>
+  <img src="images/Battleship/alpha1.0_smoke.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">4 / 4</div>
-  <img src="images/Battleship/prototype_2024_07_shipUI.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">4 / 6</div>
+  <img src="images/Battleship/alpha1.0_menuClear.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">5 / 6</div>
+  <img src="images/Battleship/alpha1.0_uiDay.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">6 / 6</div>
+  <img src="images/Battleship/alpha1.0_uiNight.jpg" style="width:100%">
 </div>
 
 <a class="prev" onclick="plusSlides(-1)">❮</a>
@@ -121,14 +124,24 @@ Sit and shoot!
     </div>
     <div class="main">
 
-    <h2>Dev log</h2>
+    <h2>Release history</h2>
 
-<p>
-The game is currently an early prototype.<br>
-The next goal is to release a playable alpha demo,
-that will demonstrate a small part of the game play,
-but with convincing graphics.
-</p>
+<div class="release">
+<h3>Release Alpha 1 (2025 January):</h3>
+<ul>
+  <li>Chnaged the way to aim (less arcade feeling)</li>
+  <li>Created collision-meshes and shells hit</li>
+  <li>Added shadows and SSOA</li>
+  <li>Added smoke and water splashes</li>
+  <li>Improved cloud rendering with per-example noise from specialized textures</li>
+  <li>Added game options (but not visible on the web demo)</li>
+  <li>Fixed simulation instabilities with high frame-rate</li>
+  <li>Implemented a first and quick health system</li>
+  <li>Improved night looking (post-effects)</li>
+</ul>
+<img src="images/Battleship/alpha1.0_smokeGun.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/alpha1.0_uiDay.jpg" style="width: 47%; padding: 1%;">
+</div>
 
 <div class="release">
 <h3>Protoptye (2024 July):</h3>
