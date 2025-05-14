@@ -20,11 +20,25 @@
 .main {
   margin: 20px 0px; 
   padding: 4px 10px; 
-  background: #154;
+  background: #084333;
 }
-
 .main a:visited {
   color: #FFAA55;
+}
+
+.release {
+  margin: 20px 0px;
+  padding: 6px;
+  border: 1px solid #286;
+  background: #154;
+}
+.release::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.release h3 {
+  color: #AFC;
 }
     </style>
     
@@ -45,7 +59,7 @@
             <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
             <td style="width: 20%;" class="active"><a href="#">Tarot au bout</a></td>
             <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
-            <td style="width: 20%;"><a href="devlog.html">Dev log </a></td>
+            <td style="width: 20%;"><a href="about.html">About</a></td>
           </tr>
         </tbody>
       </table>
@@ -83,23 +97,8 @@ Jouer à la version demo du jeu sur le web <a href="FF">ici</a>.
     </div>
     <div class="main">    
 
-      <h2>Carnet de développement</h2>
-
-      <h3>Prochaine version (non planifiée)</h3>
+      <h2>Captures d'écran</h2>
       
-      <p>
-      Le développement de l'intéligence artificielle est en cours. Les versions actuelles du jeu contiennent une I.A limitée.
-      </p>
-      
-     <h3>Version beta 4 (Nov 2022)</h3>
-
-     <p>
-     L'interface a été complètement refaite en utilisant ma propre librairie (TRE),
-     construite au fur-et-à-mesure en mettant en commun les parties récurrentes de mes jeux.
-     Le coeur du jeu est stabilisée.
-     L'intelligence artificielle a été améliorée, mais encore loin de l'objectif final.
-     </p>
-
 <div class="slideshow-container">
 
 <div class="slide fade">
@@ -123,26 +122,51 @@ Jouer à la version demo du jeu sur le web <a href="FF">ici</a>.
 </div>
 <script type="text/javascript" src="gallery.js"> </script>
 
-      <div>    
+    </div>
 
+    </div>
+    <div class="main">
 
-      <h3>Prototype (Jan 2018)</h3>
-      
-      <img src="images/Tarot/TarotProject_beta2_screenshot1.png" alt="Capture d'écran prototype" style="width:400px; height:auto; float:right; ">
-     
-      <p>
-      Le prototype a été développé en utilisant Qt, qui est une librairie d'interface utilisateur.
-      Cela a permi aussi de créer le coeur du jeu (en C++), qui contrôle le déroulement des parties. 
-      </p>
-      
-      <div style="clear: right; "> </div>
-      
-      </div>
-    
+      <h2>Carnet de développement</h2>
+
+    <p>
+Le jeu n'est pas activement en cours de développement, étant donné que je me concentre sur d'autres jeux.
+    </p>
+
+      <table class="backlog" style="width:100%; border-spacing: 0px;">
+       <tbody>
+<tr> <td> <code>[ ]</code> </td>   <td>jeu: developpement de l'IA</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>rendu: améliorer la scène de fond.</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>son: bruitage et musique</td> </tr>
+<tr> <td> <code>[ ]</code> </td>   <td>jeu: ajouter d'autre mode de jeu (variante du Tarot)</td> </tr>
+       </tbody>
+      </table>
+
+<div class="release">
+<h3>Version beta 4 (Nov 2022):</h3>
+<p>
+L'interface a été complètement refaite en utilisant ma propre librairie (TRE),
+construite au fur-et-à-mesure en mettant en commun les parties récurrentes de mes jeux.
+Le coeur du jeu est stabilisée.
+L'intelligence artificielle a été améliorée, mais encore loin de l'objectif final.
+</p>
+<img src="images/Tarot/TarotAuBout_beta4_InGame.png" style="width: 47%; padding: 1%;">
+<img src="images/Tarot/TarotAuBout_beta4_ModeSombre.png" style="width: 47%; padding: 1%;">
+</div>
+
+<div class="release">
+<h3>Prototype (Jan 2018):</h3>
+<p>
+Le prototype a été développé en utilisant Qt, qui est une librairie d'interface utilisateur.
+Cela a permi aussi de créer le coeur du jeu (en C++), qui contrôle le déroulement des parties.
+</p>
+<img src="images/Tarot/TarotProject_beta2_screenshot1.png" alt="Capture d'écran prototype" style="display:block; width:400px; margin: auto; ">
+</div>
+
     </div>
     
     <div class="footer">
-      <p>Marc Landon - 2023</p>
+      <p>Marc Landon</p>
     </div>
 
 </body></html>

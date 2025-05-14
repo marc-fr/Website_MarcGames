@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
 
     <meta name="description" content="Battleships in shight game homepage">
-    <meta name="keywords" content="game, gamedev, battleship, strategie">
+    <meta name="keywords" content="game, gamedev, battleship, shooter">
     <meta name="author" content="Marc Landon">
 
     <meta name="generator" content="BlueGriffon wysiwyg editor">
@@ -22,9 +22,27 @@
   background: #081830;
 }
 
+.release {
+  margin: 20px 0px;
+  padding: 6px;
+  border: 1px solid #779;
+  background: #132340;
+}
+.release::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.release h3 { 
+  color: #AAF;
+}
+
     </style>
+
+    <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
+
   </head>
-  
+
   <body>
     <div class="header">
       <h1>Marc Games</h1>
@@ -38,7 +56,7 @@
             <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
             <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
             <td style="width: 20%;" class="active"><a href="#">Battleships in sight</a></td>
-            <td style="width: 20%;"><a href="devlog.html">Dev log </a></td>
+            <td style="width: 20%;"><a href="about.html">About</a></td>
           </tr>
         </tbody>
       </table>
@@ -46,53 +64,127 @@
     <div class="main">
     
     <h2>About the game</h2>
-    
+
     <p>
-The player controls battleships, inspired from the World-War 2, in strategic battles.
+The player controls battleships, inspired from the World-War 2.
+The game is currently an early prototype, with a playable alpha demo on web.
+There is still lot of work, notably game-play and special-effects.
     </p>
-    
-    </div>
-    <div class="main">
-        
-    <h2>Features</h2>
-    
     <ul>
-      <li> Play epic battles, with a challenging I.A </li>
-      <li> Fine control of every ships whenever you want </li>    
-      <li> Dynamic weather conditions, that have an impact on the strategy </li>
+      <li>Play epic battles, with a challenging AI</li>
+      <li>Fine control of aiming</li>    
+      <li>Dynamic weather conditions</li>
     </ul>
+
+<iframe frameborder="0" src="https://itch.io/embed/2732362?border_width=0&amp;bg_color=132340&amp;fg_color=fff&amp;link_color=f1fa5b&amp;border_color=3f2832" width="550" height="165"><a href="https://lanocram.itch.io/battleship-in-sight">Battleships in sight by lanocram</a></iframe>
 
     </div>
     <div class="main">
 
     <h2>Screenshots</h2>
 
-    <p>
-    The game is currently a early prototype.<br>
-    At the moment, I focus on the rendering part, with a full procedural atmospheric scattering and ocean simulation.
-    </p>
+<div class="slideshow-container">
 
-    <img src="images/Battleship/prototype_start.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/prototype_atmosphericScattering.jpg" style="width: 47%; padding: max(1%,3px);">
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">1 / 6</div>
+  <img src="images/Battleship/alpha1.0_closeDay.jpg" style="width:100%">
+</div>
 
-    <p>
-    This game is inspired from a python game that I have made in the 2010's.<br>
-    The game is actually almost unplayable, but I still kept the idea in mind.
-    </p>    
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">2 / 6</div>
+  <img src="images/Battleship/alpha1.0_closeMid.jpg" style="width:100%">
+</div>
 
-    <img src="images/Battleship/python_1.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/python_2.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/python_3.jpg" style="width: 47%; padding: max(1%,3px);">
-    <img src="images/Battleship/python_4.jpg" style="width: 47%; padding: max(1%,3px);">
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">3 / 6</div>
+  <img src="images/Battleship/alpha1.0_smoke.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">4 / 6</div>
+  <img src="images/Battleship/alpha1.0_menuClear.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">5 / 6</div>
+  <img src="images/Battleship/alpha1.0_uiDay.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #F00">6 / 6</div>
+  <img src="images/Battleship/alpha1.0_uiNight.jpg" style="width:100%">
+</div>
+
+<a class="prev" onclick="plusSlides(-1)">❮</a>
+<a class="next" onclick="plusSlides(1)">❯</a>
+
+</div>
+<script type="text/javascript" src="gallery.js"> </script>
+
+    </div>
+    <div class="main">
+
+    <h2>Release history</h2>
+
+<div class="release">
+<h3>Release Alpha 1 (2025 January):</h3>
+<ul>
+  <li>Chnaged the way to aim (less arcade feeling)</li>
+  <li>Created collision-meshes and shells hit</li>
+  <li>Added shadows and SSOA</li>
+  <li>Added smoke and water splashes</li>
+  <li>Improved cloud rendering with per-example noise from specialized textures</li>
+  <li>Added game options (but not visible on the web demo)</li>
+  <li>Fixed simulation instabilities with high frame-rate</li>
+  <li>Implemented a first and quick health system</li>
+  <li>Improved night looking (post-effects)</li>
+</ul>
+<img src="images/Battleship/alpha1.0_smokeGun.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/alpha1.0_uiDay.jpg" style="width: 47%; padding: 1%;">
+</div>
+
+<div class="release">
+<h3>Protoptye (2024 July):</h3>
+<ul>
+  <li>Improved procedural sky rendering</li>
+  <li>Improved overall rendering (ocean shaders, clouds, added bloom effect and light reflections)</li>
+  <li>Implemented a first version of the weather system</li>
+  <li>Started to model ships</li>
+  <li>Added first version of the stars rendering, with a reallistic sky-dome motion and sun path during the day</li>
+  <li>Implemented the first UI elements</li>
+  <li>Implemented ballistics computation</li>
+</ul>
+<img src="images/Battleship/prototype_2024_07_ships.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/prototype_2024_07_shipUI.jpg" style="width: 47%; padding: 1%;">
+</div>
+
+<div class="release">
+<h3>Protoptye (2023 April):</h3>
+<ul>
+  <li>First version of the procedural sky rendering</li>
+  <li>Build the game's core with placeholders</li>
+  <li>Design the camera control</li>
+</ul>
+<img src="images/Battleship/prototype_2023_04_start.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/prototype_2023_04_atmosphericScattering.jpg" style="width: 47%; padding: 1%;">
+</div>
+
+<div class="release">
+<h3>Protoptye (2010's):</h3>
+<p>
+Made with python,
+the game concept is inspired by the RTS game gendra.
+The navy played an important role during the early Word-War 2,
+before that the aviation becomes pre-dominant over the seas.
+</p>
+<img src="images/Battleship/python_1.jpg" style="width: 47%; padding: 1%;">
+<img src="images/Battleship/python_2.jpg" style="width: 47%; padding: 1%;">
+</div>
 
     </div>
        
     <div class="footer">
-      <p>Marc Landon - 2023</p>
+      <p>Marc Landon</p>
     </div>
-
-        
-  
-  
 
 </body></html>
