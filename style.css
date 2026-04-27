@@ -57,7 +57,7 @@ a:visited {
 
 .footer {
   font-family: Tahoma, Verdana, sans-serif;
-  padding: 20px;
+  padding: 0px 20px;
   text-align: center;
   color: #888;
 }
@@ -98,12 +98,34 @@ a:visited {
   background-color: #222;
 }
 
-/* Back-log */
+/* Release (sub-content) */
 
-.backlog td {
-  border-bottom: 1px solid #333;
+.releaseColMain {
+  float: left;
+  margin: 0px;
+  padding: 1px 0px 1px 0px;
+  width: 50%;
 }
 
-.backlog  tr:hover {
-  filter: brightness(120%);
+.releaseColSub {
+  float: left;
+  margin: 0px;
+  padding: 1px 0px 1px 1%;
+  width: 24%;
+}
+
+.releaseColSub img {
+  width:100%; 
+  height:auto;
+  transition:transform 0.25s ease;
+}
+
+.releaseColSub img:hover {
+  -webkit-transform:scale(2.5);
+  transform:scale(2.5);
+ }
+
+@media screen and (max-width: 800px) {
+    .releaseColMain {   width: 100%; }
+    .releaseColSub {  display: none !important; }
 }
