@@ -20,7 +20,7 @@
 .main {
   margin: 20px 0px; 
   padding: 4px 10px; 
-  background: #084333;
+  background: #032;
 }
 .main a:visited {
   color: #FFAA55;
@@ -30,7 +30,7 @@
   margin: 20px 0px;
   padding: 6px;
   border: 1px solid #286;
-  background: #154;
+  background: #243;
 }
 .release::after {
   content: "";
@@ -38,7 +38,7 @@
   display: table;
 }
 .release h3 {
-  color: #AFC;
+  color: #CFD;
   margin: 0px;
 }
     </style>
@@ -74,11 +74,9 @@ Le jeu émule le jeu de Tarot, à 4 et 5 joueurs, en solo (un seul joueur humain
 Les règles du Tarot sont celles décrites depuis le site de la <a href="http://fftarot.fr/">Fédération Française de Tarot</a>.
 
       </p>
-
-<!--      
+<!--
 <iframe frameborder="0" src="https://itch.io/embed/4518950?border_width=0&amp;bg_color=41753e&amp;fg_color=ffffff&amp;link_color=efe83c" width="550" height="165"><a href="https://lanocram.itch.io/tarot-au-bout">Tarot au bout by lanocram</a></iframe>
 -->
-
     </div>
 
     <div class="main">    
@@ -88,18 +86,23 @@ Les règles du Tarot sont celles décrites depuis le site de la <a href="http://
 <div class="slideshow-container">
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #154">1 / 3</div>
-  <img src="images/Tarot/prototype2022_InGame.png" style="width:100%">
+  <div class="numbertext" style="color: #154">1 / 4</div>
+  <img src="images/Tarot/v01_main.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #154">2 / 3</div>
-  <img src="images/Tarot/prototype2022_CallKing.png" style="width:100%">
+  <div class="numbertext" style="color: #154">2 / 4</div>
+  <img src="images/Tarot/v01_play4p.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #154">3 / 3</div>
-  <img src="images/Tarot/prototype2022_ModeSombre.png" style="width:100%">
+  <div class="numbertext" style="color: #154">3 / 4</div>
+  <img src="images/Tarot/v01_score.jpg" style="width:100%">
+</div>
+
+<div class="slide fade">
+  <div class="numbertext" style="color: #154">4 / 4</div>
+  <img src="images/Tarot/v01_callKing.jpg" style="width:100%">
 </div>
 
 <a class="prev" onclick="plusSlides(-1)">❮</a>
@@ -117,19 +120,19 @@ Les règles du Tarot sont celles décrites depuis le site de la <a href="http://
 
 <div class="release">
 <div class="releaseColMain">
-<h3>Release beta 1 (en cours de finalisation):</h3>
+<h3>Release v0.1 (Jul 2026):</h3>
 <p>
 J'ai repris le développement du jeu après une pause.
+La principale amélioration est l'intelligence artificielle,
+mais qui est toujours en cours de développement.
 </p>
 </div>
-<!--
 <div class="releaseColSub">
-<img src="images/Tarot/TarotAuBout_X.png">
+<img src="images/Tarot/v01_play4p.jpg">
 </div>
 <div class="releaseColSub">
-<img src="images/Tarot/TarotAuBout_X.png">
+<img src="images/Tarot/v01_score.jpg">
 </div>
--->
 </div>
 
 <div class="release">
@@ -137,8 +140,8 @@ J'ai repris le développement du jeu après une pause.
 <h3>Prototype (Nov 2022):</h3>
 <p>
 L'interface a été complètement refaite en utilisant ma propre librairie (TRE),
-construite au fur-et-à-mesure en mettant en commun les parties récurrentes de mes jeux.
-Le coeur du jeu est stabilisée.
+qui permet entre-autres de publier le jeu jouable dans un navigateur web.
+Le coeur du jeu est stabilisé.
 L'intelligence artificielle a été améliorée, mais encore loin de l'objectif final.
 </p>
 </div>
