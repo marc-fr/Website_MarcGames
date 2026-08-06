@@ -54,8 +54,8 @@
           <tr>
             <td style="width: 20%;"><a href="index.html">Home</a></td>
             <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
-            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
             <td style="width: 20%;" class="active"><a href="#">Battleships in sight</a></td>
+            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
             <td style="width: 20%;"><a href="about.html">About</a></td>
           </tr>
         </tbody>
@@ -68,7 +68,6 @@
     <p>
 The player controls battleships, inspired from the early World-War II, before that the aviation becomes pre-dominant over the seas.<br>
 The goal is the aim and shoot ennemi ships, with realistic and challenging aiming control.
-The game is on early developement stage, on alpha release: only a few game elements are implemented.
     </p>
 
 <iframe frameborder="0" src="https://itch.io/embed/2732362?border_width=0&amp;bg_color=132340&amp;fg_color=fff&amp;link_color=f1fa5b&amp;border_color=3f2832" width="550" height="165"><a href="https://lanocram.itch.io/battleship-in-sight">Battleships in sight by lanocram</a></iframe>
@@ -122,12 +121,27 @@ The game is on early developement stage, on alpha release: only a few game eleme
     <h2>Release history</h2>
 
 <div class="release">
-<div class="releaseColMain">
-<h3>Release Alpha 3 (April 2026):</h3>
+<h3>Release alpha 4 (August 2026):</h3>
 <p>
-I improved the player experience, to have a playable game at least.
-I notably added a window that shows the shells hit.
-Sound effects have been implemented, and they give good feedbacks to the player.
+I worked to improve the UI: the controls are displayed more efficiently.
+The game shows the predicted trajectory of the shells. This allowed to track and fix some aiming bugs.
+I reworked the weather system, but still work in progress.
+</p>
+<p>
+On previous versions, I used volumetric-rendering for some clouds.
+But that seems excessive in terms of performance.
+Then, I replaced it by billboards the time being.
+For the next version, I'll continue to improve the game-play and work on the wheater-system, as well as the ocean rendering.
+</p>
+</div>
+
+<div class="release">
+<div class="releaseColMain">
+<h3>Release alpha 3 (April 2026):</h3>
+<p>
+I improved the player experience,
+by adding a window that shows the shells hit,
+and by introducing sound effects.
 Besides, I continued to work on the rendering and the ocean simulation.
 </p>
 </div>
@@ -141,7 +155,7 @@ Besides, I continued to work on the rendering and the ocean simulation.
 
 <div class="release">
 <div class="releaseColMain">
-<h3>Release Alpha 1 and 2 (2025):</h3>
+<h3>Release alpha 1 and 2 (2025):</h3>
 <p>
 Still focusing on rendering, with shadows, SSOA, smokes ...<br>
 The scope of the game is now better defined, even if the player experience is still very rough.
