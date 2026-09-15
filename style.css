@@ -100,6 +100,10 @@ a:visited {
 
 /* Release (sub-content) */
 
+.release h3 { 
+  margin: 0px;
+}
+
 .releaseColMain {
   float: left;
   margin: 0px;

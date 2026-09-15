@@ -37,6 +37,11 @@
   color: #AAF;
 }
 
+.li-title {
+  list-style-type: none;
+  margin-left: -1.5rem;
+}
+
     </style>
 
     <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
@@ -66,8 +71,10 @@
     <h2>About the game</h2>
 
     <p>
-The player controls battleships, inspired from the early World-War II, before that the aviation becomes pre-dominant over the seas.<br>
-The goal is the aim and shoot ennemi ships, with realistic and challenging aiming control.
+The player commands a battleship and engages enemy forces in a maritime conflict, inspired by the World War II era, before air power became dominant over the seas. The objective is to identify targets and fire accurately while managing the wind and the movement of the vessel.
+    </p>
+    <p>
+The game emphasizes tactical gunfire and situational awareness: shells follow realistic ballistic trajectories, wind and waves influence the battlefield, and enemy ships react to the evolving conditions of the fight. The result is a mix of strategic decision-making and precise aiming under pressure.
     </p>
 
 <iframe frameborder="0" src="https://itch.io/embed/2732362?border_width=0&amp;bg_color=132340&amp;fg_color=fff&amp;link_color=f1fa5b&amp;border_color=3f2832" width="550" height="165"><a href="https://lanocram.itch.io/battleship-in-sight">Battleships in sight by lanocram</a></iframe>
@@ -80,33 +87,28 @@ The goal is the aim and shoot ennemi ships, with realistic and challenging aimin
 <div class="slideshow-container">
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">1 / 6</div>
-  <img src="images/Battleship/alpha3.0_smoke.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">1 / 5</div>
+  <img src="images/Battleship/alpha5.0_day.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">2 / 6</div>
-  <img src="images/Battleship/alpha3.0_locked.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">2 / 5</div>
+  <img src="images/Battleship/alpha5.0_sunset.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">3 / 6</div>
-  <img src="images/Battleship/alpha3.0_night.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">3 / 5</div>
+  <img src="images/Battleship/alpha5.0_sunsetHUD.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">4 / 6</div>
-  <img src="images/Battleship/alpha3.0_closeview.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">4 / 5</div>
+  <img src="images/Battleship/alpha5.0_settings.jpg" style="width:100%">
 </div>
 
 <div class="slide fade">
-  <div class="numbertext" style="color: #F00">5 / 6</div>
-  <img src="images/Battleship/alpha3.0_topview.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">6 / 6</div>
-  <img src="images/Battleship/alpha3.0_newgame.jpg" style="width:100%">
+  <div class="numbertext" style="color: #F00">5 / 5</div>
+  <img src="images/Battleship/alpha5.0_dayHUD.jpg" style="width:100%">
 </div>
 
 <a class="prev" onclick="plusSlides(-1)">❮</a>
@@ -120,29 +122,58 @@ The goal is the aim and shoot ennemi ships, with realistic and challenging aimin
 
     <h2>Release history</h2>
 
+<!--
+
+* Add local wave simulation around the ship
+* Retake on the sky rendering
+
+-->
+
 <div class="release">
-<h3>Release alpha 4 (August 2026):</h3>
+<div class="releaseColMain">
+<h3>Release alpha 5 (September 2026):</h3>
 <p>
-I worked to improve the UI: the controls are displayed more efficiently.
-The game shows the predicted trajectory of the shells. This allowed to track and fix some aiming bugs.
-I reworked the weather system, but still work in progress.
+This release contains lot of changes:
 </p>
-<p>
-On previous versions, I used volumetric-rendering for some clouds.
-But that seems excessive in terms of performance.
-Then, I replaced it by billboards the time being.
-For the next version, I'll continue to improve the game-play and work on the wheater-system, as well as the ocean rendering.
-</p>
+<ul>
+<li class="li-title"> Gameplay: </li>
+<li> Improve the shoot controls (add dispersion) with more difficulty </li>
+<li> Allow the player to switch between ships </li>
+<li> Improve the ship HUD info (no longer tight to the target) </li>
+<li class="li-title"> Rendering: </li>
+<li> Render the shells in the depth-tested opaque pass </li>
+<li> Improve the water rendering (also improve perf of the shader) </li>
+<li> Rework the weather system </li>
+<li> Improve SSAO </li>
+<li class="li-title"> Misc: </li>
+<li> Allow to have nautic unit-system (knots and nautic-miles) </li>
+<li> Add photo-mode that removes the UI (press "o") </li>
+<li> Create the music (very rough at the moment) </li>
+</ul>
+</div>
+<div class="releaseColSub">
+<img src="images/Battleship/alpha5.0_dayHUD.jpg" >
+</div>
+<div class="releaseColSub">
+<img src="images/Battleship/alpha5.0_sunset.jpg" >
+</div>
+<div class="releaseColSub">
+<img src="images/Battleship/alpha5.0_settings.jpg" >
+</div>
+<div class="releaseColSub">
+<img src="images/Battleship/alpha5.0_day.jpg" >
+</div>
 </div>
 
 <div class="release">
 <div class="releaseColMain">
-<h3>Release alpha 3 (April 2026):</h3>
+<h3>Release alpha 3 and 4 (Summer 2026):</h3>
 <p>
-I improved the player experience,
-by adding a window that shows the shells hit,
-and by introducing sound effects.
-Besides, I continued to work on the rendering and the ocean simulation.
+I improved the player experience by adding a window that shows the shells hit
+and the display predicted trajectory of the shells.
+I'm keeping improving the UI.
+I also introduced sound effects.
+I made some progress on the rendering, the ocean simulation and the weather system.
 </p>
 </div>
 <div class="releaseColSub">
