@@ -1,91 +1,85 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    
-    <title>Marc Games</title>
-    
-    <link rel="icon" type="image/x-icon" href="images/Icon.png">
-    <link rel="stylesheet" type="text/css" href="style.css?v=2023.05.03">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marc Games</title>
+  <meta name="description" content="Marc Games : des jeux vidéo indépendants développés en C++. Jouez aux démos et suivez leur développement.">
+  <meta name="keywords" content="jeu, jeu vidéo, développement, C++">
+  <meta name="author" content="Marc Landon">
+  <link rel="alternate" hreflang="en" href="index.html">
+  <link rel="icon" type="image/png" href="images/Icon.png">
+  <link rel="stylesheet" href="style.css?v=2026.10.21">
+</head>
 
-    <meta name="description" content="Blog de développement de jeux vidéos en C++">
-    <meta name="keywords" content="jeu, développement, blog">
-    <meta name="author" content="Marc Landon">
+<body>
+  <header class="site-header">
+    <h1>Marc Games</h1>
+    <p class="lang-switch">
+      <img class="flag" src="images/flag-fr.png" alt=""> Français
+      <a href="index.html" hreflang="en" lang="en"><img class="flag" src="images/flag-en.png" alt=""> English</a>
+    </p>
+  </header>
 
-    <meta name="generator" content="BlueGriffon wysiwyg editor">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
-  
-  <body class="indexPage">
-    <div class="header">
-      <h1>Marc Games</h1>
-      <p>
-      actuellement en <img src="images/flag-fr.png" alt="Français" style="width:auto; height: 0.8em;">,
-      <a href="index.html">switch to <img src="images/flag-en.png" alt="English" style="width:auto; height: 0.8em;"> </a>
-      </p>
-    </div>
-    <div class="navbar">
-      <table style="width: 100%; border: none">
-        <tbody>
-          <tr>
-            <td style="width: 20%;" class="active"><a href="#">Accueil</a></td>
-            <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
-            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
-            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
-            <td style="width: 20%;"><a href="about.html">A propos</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="margin: 0px;">
-      <p style="margin: 40px;">
-Je partage des jeux de ma création, développés sur mon temps libre en C++. <br>
-Vous pouvez essayer les demos et suivre le développement des jeux.
-      </p>
-      <hr>
+  <nav class="navbar" aria-label="Menu principal">
+    <ul>
+      <li><a href="index.fr.html" aria-current="page">Accueil</a></li>
+      <li><a href="game_moonlanding.en.html" hreflang="en">Moonlanding project</a></li>
+      <li><a href="game_battleship.en.html" hreflang="en">Battleships in sight</a></li>
+      <li><a href="game_tarot.fr.html">Tarot au bout</a></li>
+      <li><a href="about.html">À propos</a></li>
+    </ul>
+  </nav>
+
+  <main class="home">
+    <p class="intro">
+      Je partage ici les jeux que je développe en C++ sur mon temps libre.<br>
+      Essayez les démos et suivez leur évolution.
+    </p>
+
+    <article class="game-card">
       <h2>Moonlanding project</h2>
-      <img src="images/Moon/cover.jpg" alt="Moon-landing screenshot" class="bigPicture">
+      <img src="images/Moon/cover.jpg" alt="Capture d'écran">
       <p>
-C'est un jeu d'adresse, dans lequel vous pilotez le module lunaire.
-Pilotez and attérissez précocieusement, mais le carburant est limité.
-      <br>
-      <a href="game_moonlanding.en.html">Voir plus de details (en anglais)</a>
-      <br>
-      <a href="https://lanocram.itch.io/moonlanding-project">Joue à la version web</a>
+        Un jeu d'adresse dans lequel vous pilotez un module lunaire.
+        Rejoignez la zone d'atterrissage et posez-vous en douceur… avant de tomber en panne sèche&nbsp;!
       </p>
+      <p class="actions">
+        <a class="button primary" href="https://lanocram.itch.io/moonlanding-project">Jouer à la version web</a>
+        <a class="button" href="game_moonlanding.en.html" hreflang="en">En savoir plus (en anglais)</a>
+      </p>
+    </article>
 
-      <hr>
+    <article class="game-card">
       <h2>Battleships in sight</h2>
-      <img src="images/Battleship/alpha5.0_day.jpg" alt="Battleships-in-sight screenshot" class="bigPicture">
+      <img src="images/Battleship/alpha5.0_day.jpg" alt="Capture d'écran" loading="lazy">
       <p>
-Un jeu de tir, mais sur l'océan.
-Profiter du combat naval, avec des navires inspirés du début de la 2ème guerre mondiale.
-      <br>
-      <a href="game_battleship.en.html">Voir plus de détails (en anglais)</a>
-      <br>
-      <a href="https://lanocram.itch.io/battleship-in-sight">Joue à la version web</a>
+        Un jeu de tir… mais en pleine mer&nbsp;!
+        Livrez des combats navals à bord de cuirassés du début de la Seconde Guerre mondiale.
       </p>
+      <p class="actions">
+        <a class="button primary" href="https://lanocram.itch.io/battleship-in-sight">Jouer à la version web</a>
+        <a class="button" href="game_battleship.en.html" hreflang="en">En savoir plus (en anglais)</a>
+      </p>
+    </article>
 
-      <hr>
+    <article class="game-card">
       <h2>Tarot au bout</h2>
-      <img src="images/Tarot/v01_play4p.jpg" alt="Tarot-au-bout screenshot" class="bigPicture">
+      <img src="images/Tarot/v01_play4p.jpg" alt="Capture d'écran" loading="lazy">
       <p>
-Enfin un jeu de cartes qui en jette ! Appel, contre-appel, l'engoisse du petit, ...
-Juste du fun, sans pubs ni multi-joueurs. Parfait pour s'exercer.
-      <br>
-      <a href="game_tarot.fr.html">Voir plus de détails</a>
-      <br>
-      <a href="https://lanocram.itch.io/tarot-au-bout">Joue à la version web</a>
+        Enfin un jeu de cartes qui en jette&nbsp;! Appel, contre-appel, l'angoisse du Petit au bout…
+        Que du plaisir, sans publicité ni jeu en ligne. Idéal pour s'entraîner.
       </p>
+      <p class="actions">
+        <a class="button primary" href="https://lanocram.itch.io/tarot-au-bout">Jouer à la version web</a>
+        <a class="button" href="game_tarot.fr.html">En savoir plus</a>
+      </p>
+    </article>
+  </main>
 
-      <hr>  
-    </div>
-    
-    <div class="footer">
-      <p>Marc Landon</p>
-    </div>
-
-  
-  
-
-</body></html>
+  <footer class="site-footer">
+    <p>Marc Landon</p>
+    <p><a href="https://lanocram.itch.io/">Tous mes jeux sur itch.io</a></p>
+  </footer>
+</body>
+</html>

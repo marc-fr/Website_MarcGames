@@ -1,105 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Dev Log</title>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
-    <meta name="description" content="Technical details">
-    <meta name="keywords" content="game, gamedev, cpp, devlog">
-    <meta name="author" content="Marc Landon">
-    <meta name="generator" content="BlueGriffon wysiwyg editor">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-/* local style ...*/
-.main {
-  margin: 20px 0px; 
-  padding: 4px 10px; 
-  background: #222;
-}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About – Marc Games</title>
+  <meta name="description" content="About Marc Landon and the technical choices behind his C++ games: custom engine, OpenGL, data-oriented design and web porting.">
+  <meta name="keywords" content="game, gamedev, C++, OpenGL, data-oriented design, Emscripten">
+  <meta name="author" content="Marc Landon">
+  <link rel="icon" type="image/png" href="images/Icon.png">
+  <link rel="stylesheet" href="style.css?v=2026.10.21">
+</head>
 
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      <h1>Marc Games</h1>
-      <p> ( only in <img src="images/flag-en.png" alt="english" style="width:auto; height: 0.8em; filter: brightness(50%)"> ) </p>
-    </div>
-    <div class="navbar">
-      <table style="width: 100%" border="0">
-        <tbody>
-          <tr>
-            <td style="width: 20%;"><a href="index.html">Home</a></td>
-            <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
-            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
-            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
-            <td style="width: 20%;" class="active"><a href="#">About</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+<body class="theme-about">
+  <header class="site-header">
+    <h1>Marc Games</h1>
+    <p>This page is in English only <img class="flag flag-dim" src="images/flag-en.png" alt=""></p>
+  </header>
 
-    <div class="main">
+  <nav class="navbar" aria-label="Main">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="game_moonlanding.en.html">Moonlanding project</a></li>
+      <li><a href="game_battleship.en.html">Battleships in sight</a></li>
+      <li><a href="game_tarot.fr.html" hreflang="fr">Tarot au bout</a></li>
+      <li><a href="about.html" aria-current="page">About</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section class="panel">
       <h2 id="AboutMe">About me</h2>
       <p>
-I'm an engineer in computer science, with a strong interest on applied mathematics.
-I'm currently working on the video-game industry, and I'm keeping developping on my free time too
-(alongside my other hobby ... the jazz music).
+        I'm a computer science engineer with a strong interest in applied mathematics.
+        I keep developing games in my spare time, alongside my other main hobby: jazz music.
       </p>
       <p>
-        <img src="images/Tools/IcoMail2.png" alt="Email:" style="height: 1em;">
+        <img class="icon" src="images/Tools/IcoMail2.png" alt="Email:">
         <a href="mailto:landon.marc@outlook.fr">landon.marc@outlook.fr</a>
       </p>
-    </div>
+    </section>
 
-    <div class="main">
-      <h2>Behind the scene</h2>
+    <section class="panel">
+      <h2>Behind the scenes</h2>
       <p>
-I choose to not use an existing game engine, such as Unity or Unreal.
-Indeed, I like to program, within all aspects.
-I created TRE (<a href="https://github.com/marc-fr/TinyRenderEngine">TinyRenderEngine</a>),
-which is a toolkit built on the top of SDL2 and OpenGL.
-This is the basement of my games.
-However, TRE is not a game-engine, but it helps with mesh operations, UI, shaders, contact algorithms and sound thread.
+        I chose not to use an existing game engine such as Unity or Unreal,
+        because I enjoy programming every part myself and discovering techniques.
+        Therefore, I created TRE (<a href="https://github.com/marc-fr/TinyRenderEngine">TinyRenderEngine</a>),
+        a toolkit built on top of SDL2 and OpenGL that is the foundation of all my games.
+        TRE is not a game engine, but it provides mesh operations, UI, shaders,
+        contact algorithms and a sound thread.
       </p>
-      <h3>Some though about C++ feature-sets for games</h3>
+
+      <h3>Some thoughts on C++ features for games</h3>
       <p>
-TRE is using the STL, that uses exceptions for error handling.
-Exceptions have no impact on performances, while they are not triggered.
-Indeed, c++ has a nice paradigm that says: "don't pay for what you don't use".
-As far as exceptions are considered as nonrecoverable fatal errors,
-then the STL can still be used (in a solo-developer point of view).
+        TRE uses the STL but limits to C++17 features-set.
+        Even if STL relies on exceptions for error handling, it costs virtually nothing at runtime as long as none is thrown.
+        As long as exceptions are treated as fatal, unrecoverable errors,
+        the STL remains perfectly usable, at least from a solo developer's point of view.
+        I also like one of the C++ principle: "you don't pay for what you don't use".
       </p>
+
       <h3>Rendering API: modern OpenGL vs. Vulkan</h3>
       <p>
-Even though OpenGL is a pretty old rendering API, it is still used in legacy applications and small projects.
-Vulkan offers a great opportunity to tune the code that submits commands to the GPU, including multi-thread possibilities.
-While my games won't be limited by the rendering CPU thread, OpenGL will stay the default rendering API.
+        Although OpenGL is an old rendering API, it is still widely used in legacy applications and small projects.
+        Vulkan gives fine-grained control, and it allows the rendering part to be multi-threaded.
+        Since my games are not limited by the CPU-side rendering thread, OpenGL remains my default rendering API.
       </p>
-      <h3>Oriented-Object vs. Data-Driven paradigm for games</h3>
+
+      <h3>Object-oriented vs. data-oriented design for games</h3>
       <p>
-The oriented-object paradigm is often adopted by software engineers.
-For generic game engines, this paradigm implies to have an "entity" oriented architecture
-(<a href="https://www.youtube.com/watch?v=tONOW7Luln8">Data Driven Entity Component System in C++17</a> for example).
-But, at a coarse level, a game is basically a software that transforms data into rendering of frames (video and sound).<br>
-For games, the data can be split by the usage: the player's data (mouse, keyboard, joystick), the game's data (game logic, physics) and the rendering data.
-The data-driven paradigm allows better scopes for data, and facilitates parallelism.
-I found those two talks that helped me to put in practice data-driven programming:
-<a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">CppCon 2014: Mike Acton "Data-Oriented Design and C++"</a> and
-<a href="https://www.youtube.com/watch?v=yy8jQgmhbAU">CppCon 2018: Stoyan Nikolov “OOP Is Dead, Long Live Data-oriented Design”</a>
+        Software engineers often adopt the object-oriented paradigm.
+        For generic game engines, it usually leads to an architecture built around entities
+        (see for example <a href="https://www.youtube.com/watch?v=tONOW7Luln8">Data Driven Entity Component System in C++17</a>).
+        Yet at a coarse level, a game is simply software that turns data into rendered frames, both image and sound.
       </p>
+      <p>
+        In a game, data can be split by usage: player input (mouse, keyboard, joystick),
+        game state (game logic, physics) and rendering data.
+        Data-oriented design gives each kind of data a clearer scope and makes parallelism easier.
+        These two talks helped me put it into practice:
+      </p>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">CppCon 2014: Mike Acton, “Data-Oriented Design and C++”</a></li>
+        <li><a href="https://www.youtube.com/watch?v=yy8jQgmhbAU">CppCon 2018: Stoyan Nikolov, “OOP Is Dead, Long Live Data-oriented Design”</a></li>
+      </ul>
+
       <h3>Porting a C++/OpenGL game to web browsers</h3>
       <p>
-The web-assembly platform allows to run application inside web browsers.
-From a C++ desktop application using SDL2 and OpenGL,
-I found the <a href="https://emscripten.org/">Emscripten</a> toolchain that offers a way to port them on web browsers.
-Web browsers have specific restrictions, like using WebGL2 for rendering and security limitations.
+        WebAssembly makes it possible to run native applications inside web browsers.
+        For a C++ desktop application built on SDL2 and OpenGL,
+        the <a href="https://emscripten.org/">Emscripten</a> toolchain provides a way to port it to the web.
+        Browsers do come with their own constraints, such as WebGL2 for rendering and security restrictions.
       </p>
-    </div>
+    </section>
+  </main>
 
-    <div class="footer">
-      <p>Marc Landon</p>
-    </div>
-
-  </body>
+  <footer class="site-footer">
+    <p>Marc Landon</p>
+  </footer>
+</body>
 </html>

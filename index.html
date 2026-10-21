@@ -1,86 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    
-    <title>Marc Games</title>
-    
-    <link rel="icon" type="image/x-icon" href="images/Icon.png">
-    <link rel="stylesheet" type="text/css" href="style.css?v=2023.05.03">
-    
-    <meta name="description" content="C++ game-dev blog">
-    <meta name="keywords" content="game, gamedev">
-    <meta name="author" content="Marc Landon">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marc Games</title>
+  <meta name="description" content="Marc Games: indie games developed in C++. Play the web demos and follow their development.">
+  <meta name="keywords" content="game, gamedev, indie, C++">
+  <meta name="author" content="Marc Landon">
+  <link rel="alternate" hreflang="fr" href="index.fr.html">
+  <link rel="icon" type="image/png" href="images/Icon.png">
+  <link rel="stylesheet" href="style.css?v=2026.10.21">
+</head>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
-  
-  <body class="indexPage">
-    <div class="header">
-      <h1>Marc Games</h1>
-      <p>
-      currently in  <img src="images/flag-en.png" alt="English" style="width:auto; height: 0.8em;">, <a href="index.fr.html">switch to <img src="images/flag-fr.png" alt="Français" style="width:auto; height: 0.8em;">  </a>
-      </p>
-    </div>
-    <div class="navbar">
-      <table style="width: 100%; border: none">
-        <tbody>
-          <tr>
-            <td style="width: 20%;" class="active"><a href="#">Home</a></td>
-            <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
-            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
-            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
-            <td style="width: 20%;"><a href="about.html">About</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="margin: 0px;">
-      <p style="margin: 40px;">
-I intend to share self-made games, made as a C++ programmer enthusiast. <br>
-You can play the demo versions and follow the development of the games.
-      </p>
-      <hr>
+<body>
+  <header class="site-header">
+    <h1>Marc Games</h1>
+    <p class="lang-switch">
+      <img class="flag" src="images/flag-en.png" alt=""> English
+      <a href="index.fr.html" hreflang="fr" lang="fr"><img class="flag" src="images/flag-fr.png" alt=""> Français</a>
+    </p>
+  </header>
+
+  <nav class="navbar" aria-label="Main">
+    <ul>
+      <li><a href="index.html" aria-current="page">Home</a></li>
+      <li><a href="game_moonlanding.en.html">Moonlanding project</a></li>
+      <li><a href="game_battleship.en.html">Battleships in sight</a></li>
+      <li><a href="game_tarot.fr.html" hreflang="fr">Tarot au bout</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </nav>
+
+  <main class="home">
+    <p class="intro">
+      I share the games I develop in C++ in my spare time.<br>
+      Play the demos and follow how the game evolves.
+    </p>
+
+    <article class="game-card">
       <h2>Moonlanding project</h2>
-      <img src="images/Moon/cover.jpg" alt="Moon-landing screenshot" class="bigPicture">
+      <img src="images/Moon/cover.jpg" alt="screenshot">
       <p>
-This is a skill game where you pilot the lunar landing module.
-Fly to the designated area and land safely, but with limited fuel.
-      <br>
-      <a href="game_moonlanding.en.html">Learn more</a>
-      <br>
-      <a href="https://lanocram.itch.io/moonlanding-project">Play the web version</a>
+        A skill game in which you pilot a lunar module.
+        Fly to the landing zone and touch down safely before you run out of fuel.
       </p>
+      <p class="actions">
+        <a class="button primary" href="https://lanocram.itch.io/moonlanding-project">Play the web version</a>
+        <a class="button" href="game_moonlanding.en.html">Learn more</a>
+      </p>
+    </article>
 
-      <hr>
+    <article class="game-card">
       <h2>Battleships in sight</h2>
-      <img src="images/Battleship/alpha5.0_day.jpg" alt="Battleships-in-sight screenshot" class="bigPicture">
+      <img src="images/Battleship/alpha5.0_day.jpg" alt="screenshot" loading="lazy">
       <p>
-A shooter game, but on the sea!
-Enjoy naval combat with battleships from the begin of WWII.
-      <br>
-      <a href="game_battleship.en.html">Learn more</a>
-      <br>
-      <a href="https://lanocram.itch.io/battleship-in-sight">Play the web version</a>
+        A shooter, but at sea!
+        Enjoy naval combat with battleships from the early days of World War II.
       </p>
+      <p class="actions">
+        <a class="button primary" href="https://lanocram.itch.io/battleship-in-sight">Play the web version</a>
+        <a class="button" href="game_battleship.en.html">Learn more</a>
+      </p>
+    </article>
 
-      <hr>
+    <article class="game-card">
       <h2>Tarot au bout</h2>
-      <img src="images/Tarot/v01_play4p.jpg" alt="Tarot-au-bout screenshot" class="bigPicture">
+      <img src="images/Tarot/v01_play4p.jpg" alt="screenshot" loading="lazy">
       <p>
-The French-Tarot is one of the ultimate card games with tactics and fears.
-Just have fun! no advert or networking.
-      <br>
-      <a href="game_tarot.fr.html">Learn more (in French)</a>
-      <br>
-      <a href="https://lanocram.itch.io/tarot-au-bout">Play the web version</a>
+        French Tarot is one of the great card games, full of tactics and suspense.
+        Just have fun: no ads, no online play.
       </p>
+      <p class="actions">
+        <a class="button primary" href="https://lanocram.itch.io/tarot-au-bout">Play the web version</a>
+        <a class="button" href="game_tarot.fr.html" hreflang="fr">Learn more (in French)</a>
+      </p>
+    </article>
+  </main>
 
-      <hr>
-    </div>
-
-    <div class="footer">
-      <p>Marc Landon</p>
-    </div>
-
-</body></html>
+  <footer class="site-footer">
+    <p>Marc Landon</p>
+    <p><a href="https://lanocram.itch.io/">All my games on itch.io</a></p>
+  </footer>
+</body>
+</html>

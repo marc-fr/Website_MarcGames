@@ -1,135 +1,473 @@
-/* Global */
+/* ---------- Colors ---------- */
+
+:root {
+  --bg: #000;
+  --text: #bbb;
+  --heading: #e6e6e6;
+  --link: #ee7;
+  --link-visited: #b8a57c;
+  --nav-bg: #111;
+  --nav-hover: #333;
+  --nav-active: #222;
+
+/* Game generic panels */
+  --panel: #111;
+  --card: #222;
+  --card-border: #555;
+  --card-title: #ddd;
+  --accent: #ee7;
+}
+
+.theme-moon {
+  --panel: #111;
+  --card: #222;
+  --card-border: #777;
+  --card-title: #ddd;
+  --accent: #e7f746;
+}
+
+.theme-battleship {
+  --panel: #081830;
+  --card: #132340;
+  --card-border: #779;
+  --card-title: #aaf;
+  --accent: #f1fa5b;
+}
+
+.theme-tarot {
+  --panel: #032;
+  --card: #243;
+  --card-border: #286;
+  --card-title: #cfd;
+  --accent: #efe83c;
+  --link-visited: #fa5;
+}
+
+.theme-about {
+  --panel: #222;
+  --card-title: #ddd;
+}
+
+/* ---------- Global ---------- */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 body {
   max-width: 1024px;
-  margin: auto;
-  font-family: arial sans-serif;
+  margin: 0 auto;
+  padding: 0 12px;
+  font-family: system-ui, Roboto, sans-serif;
   font-size: 16px;
-  background-color: #000;
-  color: #BBB;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
 }
 
-pre, code {
-  font-family: monospace;
-}
-
-a:link {
-  color: #eeee77;
-}
-
-a:visited {
-  color: #998866;
-}
-
-/* index pages */
-
-.indexPage
-{
-  text-align: center;
-}
-
-.bigPicture
-{
-  width:70%;
+img {
+  max-width: 100%;
   height: auto;
 }
 
+h2 {
+  color: var(--heading);
+}
 
-/* Header */
+pre, code, kbd {
+  font-family: monospace;
+}
 
-.header {
+kbd {
+  padding: 0 .35em;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: .9em;
+}
+
+a:link    { color: var(--link); }
+a:visited { color: var(--link-visited); }
+a:hover   { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
   font-family: Tahoma, Verdana, sans-serif;
   padding: 20px;
   text-align: center;
 }
 
-.header h1 {
-  font-size: 52px;
+.site-header h1 {
+  margin: .3em 0;
+  font-size: clamp(2.2rem, 7vw, 3.25rem);
   font-weight: lighter;
-  color: #FFF
+  color: #fff;
 }
 
-.header p {
-  color: #555;
+.site-header p {
+  margin: 0;
+  color: #777;
 }
 
-/* Footer */
+.flag {
+  width: auto;
+  height: .8em;
+}
 
-.footer {
+.flag-dim {
+  filter: brightness(50%);
+}
+
+.lang-switch a {
+  margin-left: 1.2em;
+}
+
+/* ---------- Sticky navigation bar ---------- */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--nav-bg);
+}
+
+.navbar ul {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navbar li {
+  flex: 1 1 auto;
+}
+
+.navbar a,
+.navbar a:visited {
+  display: block;
+  padding: 10px 6px;
+  color: #ccc;
+  text-align: center;
+  text-decoration: none;
+}
+
+.navbar a:hover {
+  background: var(--nav-hover);
+}
+
+.navbar a[aria-current="page"] {
+  background: var(--nav-active);
+  color: #fff;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* On phones the menu wraps on several lines instead of disappearing */
+@media (max-width: 600px) {
+  .navbar {
+    position: static;
+  }
+  .navbar li {
+    flex-basis: 50%;
+  }
+  .navbar a {
+    padding: 8px 4px;
+  }
+}
+
+/* ---------- Game pages: content panels ---------- */
+
+.panel {
+  margin: 20px 0;
+  padding: 4px 16px 16px;
+  background: var(--panel);
+}
+
+.itch-embed {
+  display: block;
+  max-width: 100%;
+  margin: 1em 0;
+  border: 0;
+}
+
+.panel h3 {
+  margin: 1.4em 0 .4em;
+  color: var(--card-title);
+}
+
+.icon {
+  width: auto;
+  height: 1em;
+  vertical-align: -.1em;
+}
+
+/* ---------- Screenshot gallery (pure CSS) ---------- */
+
+.gallery {
+  position: relative;
+}
+
+.gallery > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gallery .slide {
+  display: none;
+  position: relative;
+  margin: 0;
+  animation: fade .6s ease;
+}
+
+.gallery .slide img {
+  display: block;
+  width: 100%;
+}
+
+.gallery figcaption {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, .6);
+  color: #fff;
+  font-size: 13px;
+}
+
+.gallery .prev,
+.gallery .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, .35);
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  transition: background .2s;
+}
+
+.gallery .prev { left: 0;  border-radius: 0 4px 4px 0; }
+.gallery .next { right: 0; border-radius: 4px 0 0 4px; }
+
+.gallery .prev:hover,
+.gallery .next:hover {
+  background: rgba(0, 0, 0, .75);
+}
+
+/* Show the slide matching the checked radio button */
+.gallery > input:nth-of-type(1):checked ~ .slides > .slide:nth-child(1),
+.gallery > input:nth-of-type(2):checked ~ .slides > .slide:nth-child(2),
+.gallery > input:nth-of-type(3):checked ~ .slides > .slide:nth-child(3),
+.gallery > input:nth-of-type(4):checked ~ .slides > .slide:nth-child(4),
+.gallery > input:nth-of-type(5):checked ~ .slides > .slide:nth-child(5),
+.gallery > input:nth-of-type(6):checked ~ .slides > .slide:nth-child(6),
+.gallery > input:nth-of-type(7):checked ~ .slides > .slide:nth-child(7),
+.gallery > input:nth-of-type(8):checked ~ .slides > .slide:nth-child(8) {
+  display: block;
+}
+
+.gallery > input:focus-visible ~ .slides {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@keyframes fade {
+  from { opacity: .4; }
+  to   { opacity: 1; }
+}
+
+/* ---------- Release history ---------- */
+
+.release {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 20px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+}
+
+.release h3 {
+  margin: 0 0 .4em;
+  color: var(--card-title);
+}
+
+.release h3 .date {
+  margin-left: .4em;
+  font-size: .85em;
+  font-weight: normal;
+  opacity: .75;
+}
+
+.release h4 {
+  margin: .8em 0 .2em;
+  font-size: 1em;
+  color: var(--card-title);
+}
+
+.release p {
+  margin: 0 0 .6em;
+}
+
+.release ul {
+  margin: 0;
+  padding-left: 1.3em;
+}
+
+/* A release without screenshots uses the full width */
+.release-text:only-child {
+  grid-column: 1 / -1;
+}
+
+.release-shots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  align-content: start;
+}
+
+.release-shots a {
+  display: block;
+}
+
+.release-shots img {
+  display: block;
+  width: 100%;
+  transition: transform .25s ease;
+}
+
+/* A single (portrait) picture, e.g. the TI-82 */
+.release-shots > a:only-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+.release-shots > a:only-child img {
+  width: auto;
+  max-height: 18em;
+}
+
+/* Zoom on hover, only with a mouse on a wide screen; click opens full size */
+@media (hover: hover) and (min-width: 801px) {
+  .release-shots > a:not(:only-child) img:hover {
+    position: relative;
+    z-index: 5;
+    transform: scale(2);
+    box-shadow: 0 6px 24px #000;
+  }
+}
+
+@media (max-width: 800px) {
+  .release {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Home pages ---------- */
+
+.home {
+  text-align: center;
+}
+
+.intro {
+  max-width: 38em;
+  margin: 32px auto;
+  font-size: 1.1em;
+}
+
+.game-card {
+  padding: 8px 0 32px;
+  border-top: 1px solid #444;
+}
+
+.game-card:last-of-type {
+  border-bottom: 1px solid #444;
+}
+
+.game-card > img {
+  display: block;
+  width: 70%;
+  margin: 0 auto 1em;
+}
+
+.game-card h2 {
+  margin: .8em 0 .6em;
+  color: var(--card-title);
+}
+
+@media (max-width: 600px) {
+  .game-card > img {
+    width: 100%;
+  }
+}
+
+.game-card p {
+  max-width: 36em;
+  margin: 0 auto 1em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.button:link,
+.button:visited {
+  display: inline-block;
+  padding: .45em 1.1em;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  background: var(--card);
+  color: #ddd;
+  text-decoration: none;
+}
+
+.button:hover {
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.button.primary:link,
+.button.primary:visited {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #111;
+  font-weight: bold;
+}
+
+.button.primary:hover {
+  filter: brightness(1.12);
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  padding: 12px 20px 24px;
   font-family: Tahoma, Verdana, sans-serif;
-  padding: 0px 20px;
   text-align: center;
   color: #888;
 }
 
-/* (Sticky) Navbar */
-
-.navbar {
-  overflow: hidden;
-  position: sticky;
-  position: -webkit-sticky;
-  top: 0;
-  text-align: center;
-  z-index:10;
+.site-footer p {
+  margin: .3em 0;
 }
 
-@media screen and (max-width: 600px) {
-    .navbar { display: none !important; }
-}
+/* ---------- Reduced motion ---------- */
 
-.navbar a {
-  color: #CCC;
-  text-decoration: none;
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: 10px 4px;
-}
-     
-.navbar td {
-  background-color: #111;
-}
-      
-.navbar td:hover {
-  background-color: #444;
-}
-
-.navbar td.active {
-  background-color: #222;
-}
-
-/* Release (sub-content) */
-
-.release h3 { 
-  margin: 0px;
-}
-
-.releaseColMain {
-  float: left;
-  margin: 0px;
-  padding: 1px 0px 1px 0px;
-  width: 50%;
-}
-
-.releaseColSub {
-  float: left;
-  margin: 0px;
-  padding: 1px 0px 1px 1%;
-  width: 24%;
-}
-
-.releaseColSub img {
-  width:100%; 
-  height:auto;
-  transition:transform 0.25s ease;
-}
-
-.releaseColSub img:hover {
-  -webkit-transform:scale(2.5);
-  transform:scale(2.5);
- }
-
-@media screen and (max-width: 800px) {
-    .releaseColMain {   width: 100%; }
-    .releaseColSub {  display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .gallery .slide { animation: none; }
+  .release-shots img { transition: none; }
 }

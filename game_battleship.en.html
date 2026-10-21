@@ -1,126 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-    
-    <title>Battleships in sight</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Battleships in sight – Marc Games</title>
+  <meta name="description" content="Battleships in sight: WWII-inspired naval gunnery with realistic ballistics. Play the web demo and follow its development.">
+  <meta name="keywords" content="game, gamedev, battleship, naval, shooter">
+  <meta name="author" content="Marc Landon">
+  <link rel="icon" type="image/png" href="images/Icon.png">
+  <link rel="stylesheet" href="style.css?v=2026.10.21">
+</head>
 
-    <link rel="icon" type="image/x-icon" href="images/Icon.png">
-    <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
+<body class="theme-battleship">
+  <header class="site-header">
+    <h1>Marc Games</h1>
+    <p>This page is in English only <img class="flag flag-dim" src="images/flag-en.png" alt=""></p>
+  </header>
 
-    <meta name="description" content="Battleships in shight game homepage">
-    <meta name="keywords" content="game, gamedev, battleship, shooter">
-    <meta name="author" content="Marc Landon">
+  <nav class="navbar" aria-label="Main">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="game_moonlanding.en.html">Moonlanding project</a></li>
+      <li><a href="game_battleship.en.html" aria-current="page">Battleships in sight</a></li>
+      <li><a href="game_tarot.fr.html" hreflang="fr">Tarot au bout</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </nav>
 
-    <meta name="generator" content="BlueGriffon wysiwyg editor">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    /* local style ...*/
-.main {
-  margin: 20px 0px; 
-  padding: 4px 10px; 
-  background: #081830;
-}
+  <main>
+    <section class="panel">
+      <h2>About the game</h2>
+      <p>
+        You command a battleship and engage enemy forces in a naval conflict inspired by World War II,
+        in the years before air power came to dominate the seas.
+        Your objective: spot your targets and fire accurately, while accounting for the wind
+        and the motion of your own ship.
+      </p>
+      <p>
+        The game focuses on tactical gunnery and situational awareness: shells follow realistic
+        ballistic trajectories, wind and waves shape the battlefield, and enemy ships adapt as the
+        fight unfolds. The result is a mix of strategic decision-making and precise aiming under pressure.
+      </p>
+      <iframe class="itch-embed" src="https://itch.io/embed/2732362?border_width=0&amp;bg_color=132340&amp;fg_color=fff&amp;link_color=f1fa5b&amp;border_color=3f2832" width="550" height="165" title="Battleships in sight on itch.io"><a href="https://lanocram.itch.io/battleship-in-sight">Battleships in sight by lanocram</a></iframe>
+    </section>
 
-.release {
-  margin: 20px 0px;
-  padding: 6px;
-  border: 1px solid #779;
-  background: #132340;
-}
-.release::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-.release h3 { 
-  color: #AAF;
-}
+    <section class="panel">
+      <h2>Screenshots</h2>
+      <div class="gallery">
+        <input type="radio" name="shots" id="shot1" checked aria-label="Screenshot 1">
+        <input type="radio" name="shots" id="shot2" aria-label="Screenshot 2">
+        <input type="radio" name="shots" id="shot3" aria-label="Screenshot 3">
+        <input type="radio" name="shots" id="shot4" aria-label="Screenshot 4">
+        <input type="radio" name="shots" id="shot5" aria-label="Screenshot 5">
 
-.li-title {
-  list-style-type: none;
-  margin-left: -1.5rem;
-}
+        <div class="slides">
+          <figure class="slide">
+            <img src="images/Battleship/alpha5.0_day.jpg" alt="Battleships at sea in daylight">
+            <figcaption>1 / 5</figcaption>
+            <label class="prev" for="shot5" title="Previous">❮</label>
+            <label class="next" for="shot2" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Battleship/alpha5.0_sunset.jpg" alt="Battleship at sunset">
+            <figcaption>2 / 5</figcaption>
+            <label class="prev" for="shot1" title="Previous">❮</label>
+            <label class="next" for="shot3" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Battleship/alpha5.0_sunsetHUD.jpg" alt="Sunset battle with the HUD">
+            <figcaption>3 / 5</figcaption>
+            <label class="prev" for="shot2" title="Previous">❮</label>
+            <label class="next" for="shot4" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Battleship/alpha5.0_settings.jpg" alt="Settings menu">
+            <figcaption>4 / 5</figcaption>
+            <label class="prev" for="shot3" title="Previous">❮</label>
+            <label class="next" for="shot5" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Battleship/alpha5.0_dayHUD.jpg" alt="Daytime battle with the HUD">
+            <figcaption>5 / 5</figcaption>
+            <label class="prev" for="shot4" title="Previous">❮</label>
+            <label class="next" for="shot1" title="Next">❯</label>
+          </figure>
+        </div>
+      </div>
+    </section>
 
-    </style>
-
-    <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
-
-  </head>
-
-  <body>
-    <div class="header">
-      <h1>Marc Games</h1>
-      <p> ( only in  <img src="images/flag-en.png" alt="english" style="width:auto; height: 0.8em; filter: brightness(50%)"> ) </p>
-    </div>
-    <div class="navbar">
-      <table style="width: 100%" border="0">
-        <tbody>
-          <tr>
-            <td style="width: 20%;"><a href="index.html">Home</a></td>
-            <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
-            <td style="width: 20%;" class="active"><a href="#">Battleships in sight</a></td>
-            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
-            <td style="width: 20%;"><a href="about.html">About</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="main">
-    
-    <h2>About the game</h2>
-
-    <p>
-The player commands a battleship and engages enemy forces in a maritime conflict, inspired by the World War II era, before air power became dominant over the seas. The objective is to identify targets and fire accurately while managing the wind and the movement of the vessel.
-    </p>
-    <p>
-The game emphasizes tactical gunfire and situational awareness: shells follow realistic ballistic trajectories, wind and waves influence the battlefield, and enemy ships react to the evolving conditions of the fight. The result is a mix of strategic decision-making and precise aiming under pressure.
-    </p>
-
-<iframe frameborder="0" src="https://itch.io/embed/2732362?border_width=0&amp;bg_color=132340&amp;fg_color=fff&amp;link_color=f1fa5b&amp;border_color=3f2832" width="550" height="165"><a href="https://lanocram.itch.io/battleship-in-sight">Battleships in sight by lanocram</a></iframe>
-
-    </div>
-    <div class="main">
-
-    <h2>Screenshots</h2>
-
-<div class="slideshow-container">
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">1 / 5</div>
-  <img src="images/Battleship/alpha5.0_day.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">2 / 5</div>
-  <img src="images/Battleship/alpha5.0_sunset.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">3 / 5</div>
-  <img src="images/Battleship/alpha5.0_sunsetHUD.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">4 / 5</div>
-  <img src="images/Battleship/alpha5.0_settings.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">5 / 5</div>
-  <img src="images/Battleship/alpha5.0_dayHUD.jpg" style="width:100%">
-</div>
-
-<a class="prev" onclick="plusSlides(-1)">❮</a>
-<a class="next" onclick="plusSlides(1)">❯</a>
-
-</div>
-<script type="text/javascript" src="gallery.js"> </script>
-
-    </div>
-    <div class="main">
-
-    <h2>Release history</h2>
+    <section class="panel">
+      <h2>Release history</h2>
 
 <!--
 
@@ -129,114 +98,93 @@ The game emphasizes tactical gunfire and situational awareness: shells follow re
 
 -->
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Release alpha 5 (September 2026):</h3>
-<p>
-This release contains lot of changes:
-</p>
-<ul>
-<li class="li-title"> Gameplay: </li>
-<li> Improve the shoot controls (add dispersion) with more difficulty </li>
-<li> Allow the player to switch between ships </li>
-<li> Improve the ship HUD info (no longer tight to the target) </li>
-<li class="li-title"> Rendering: </li>
-<li> Render the shells in the depth-tested opaque pass </li>
-<li> Improve the water rendering (also improve perf of the shader) </li>
-<li> Rework the weather system </li>
-<li> Improve SSAO </li>
-<li class="li-title"> Misc: </li>
-<li> Allow to have nautic unit-system (knots and nautic-miles) </li>
-<li> Add photo-mode that removes the UI (press "o") </li>
-<li> Create the music (very rough at the moment) </li>
-</ul>
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha5.0_dayHUD.jpg" >
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha5.0_sunset.jpg" >
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha5.0_settings.jpg" >
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha5.0_day.jpg" >
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Alpha 5 <span class="date">September 2026</span></h3>
+          <p>This release brings many changes:</p>
+          <p><strong>Gameplay:</strong>
+            firing has been reworked, and shell dispersion now makes aiming more challenging. 
+            You can also switch between ships, while the HUD has been improved and is no longer tied to the current target.
+          </p>
+          <p><strong>Rendering:</strong>
+            shells are now drawn in the opaque pass, water looks better and renders faster, 
+            and the weather system has been reworked. SSAO has also been improved.
+          </p>
+          <p><strong>Misc:</strong> 
+            nautical units are now optional, and a new photo mode hides the UI (press <kbd>O</kbd>).
+            Finally, a first, still rough, version of the music has been added.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Battleship/alpha5.0_dayHUD.jpg"><img src="images/Battleship/alpha5.0_dayHUD.jpg" alt="Alpha 5: daytime battle with the HUD" loading="lazy"></a>
+          <a href="images/Battleship/alpha5.0_sunset.jpg"><img src="images/Battleship/alpha5.0_sunset.jpg" alt="Alpha 5: battleship at sunset" loading="lazy"></a>
+          <a href="images/Battleship/alpha5.0_settings.jpg"><img src="images/Battleship/alpha5.0_settings.jpg" alt="Alpha 5: settings menu" loading="lazy"></a>
+          <a href="images/Battleship/alpha5.0_day.jpg"><img src="images/Battleship/alpha5.0_day.jpg" alt="Alpha 5: battleships in daylight" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Release alpha 3 and 4 (Summer 2026):</h3>
-<p>
-I improved the player experience by adding a window that shows the shells hit
-and the display predicted trajectory of the shells.
-I'm keeping improving the UI.
-I also introduced sound effects.
-I made some progress on the rendering, the ocean simulation and the weather system.
-</p>
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha3.0_locked.jpg" >
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha3.0_closeview.jpg" >
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Alpha 3 and 4 <span class="date">Summer 2026</span></h3>
+          <p>
+            I improved the player experience with a window showing where the shells land,
+            and a display of their predicted trajectories.
+            I've added a first draft of sound effects, while making progress on the rendering, the ocean simulation and the weather system.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Battleship/alpha3.0_locked.jpg"><img src="images/Battleship/alpha3.0_locked.jpg" alt="Alpha 3: target locked" loading="lazy"></a>
+          <a href="images/Battleship/alpha3.0_closeview.jpg"><img src="images/Battleship/alpha3.0_closeview.jpg" alt="Alpha 3: close view of a ship" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Release alpha 1 and 2 (2025):</h3>
-<p>
-Still focusing on rendering, with shadows, SSOA, smokes ...<br>
-The scope of the game is now better defined, even if the player experience is still very rough.
-</p>
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha2.0_uiShootDay.jpg" >
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/alpha2.0_farSunset.jpg" >
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Alpha 1 and 2 <span class="date">2025</span></h3>
+          <p>
+            Still focused on rendering: shadows, SSAO, smoke…
+            The scope of the game is now better defined, even though the player experience remains very rough.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Battleship/alpha2.0_uiShootDay.jpg"><img src="images/Battleship/alpha2.0_uiShootDay.jpg" alt="Alpha 2: firing interface in daylight" loading="lazy"></a>
+          <a href="images/Battleship/alpha2.0_farSunset.jpg"><img src="images/Battleship/alpha2.0_farSunset.jpg" alt="Alpha 2: distant view at sunset" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Protoptye (July 2024):</h3>
-<p>
-With the game being ported to Desktop, I want realistic visuals.
-Therefore, I worked during a long time on the procedural sky rendering and the ocean rendering.
-</p>
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/prototype_2024_07_ships.jpg" >
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/prototype_2024_07_shipSunset.jpg" >
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Prototype <span class="date">July 2024</span></h3>
+          <p>
+            With the move to desktop, I wanted realistic visuals,
+            so I spent a long time on procedural sky and ocean rendering.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Battleship/prototype_2024_07_ships.jpg"><img src="images/Battleship/prototype_2024_07_ships.jpg" alt="2024 prototype: ships" loading="lazy"></a>
+          <a href="images/Battleship/prototype_2024_07_shipSunset.jpg"><img src="images/Battleship/prototype_2024_07_shipSunset.jpg" alt="2024 prototype: ship at sunset" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Protoptye (2010's):</h3>
-<p>
-Made with python, the game concept is inspired by the RTS game gendra.
-The player controls the ships movements and the raw shooting parameters (heading and distance).
-The gameplay is very dynamic and chaotic.
-</p>
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/python_1.jpg" >
-</div>
-<div class="releaseColSub">
-<img src="images/Battleship/python_2.jpg" >
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Python prototype <span class="date">2010s</span></h3>
+          <p>
+            Written in Python, this first version was inspired by the RTS game Gendra.
+            The player controlled the ships' movements and the raw firing parameters (bearing and range).
+            The gameplay was very fast-paced and chaotic.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Battleship/python_1.jpg"><img src="images/Battleship/python_1.jpg" alt="Python prototype screenshot" loading="lazy"></a>
+          <a href="images/Battleship/python_2.jpg"><img src="images/Battleship/python_2.jpg" alt="Python prototype screenshot" loading="lazy"></a>
+        </div>
+      </article>
+    </section>
+  </main>
 
-    </div>
-       
-    <div class="footer">
-      <p>Marc Landon</p>
-    </div>
-
-</body></html>
+  <footer class="site-footer">
+    <p>Marc Landon</p>
+  </footer>
+</body>
+</html>

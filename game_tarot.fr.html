@@ -1,177 +1,130 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tarot au bout – Marc Games</title>
+  <meta name="description" content="Tarot au bout : le Tarot à 4 ou 5 joueurs, en solo contre l'ordinateur, gratuit et sans publicité.">
+  <meta name="keywords" content="jeu, Tarot, jeu de cartes, gratuit, solo">
+  <meta name="author" content="Marc Landon">
+  <link rel="icon" type="image/png" href="images/Icon.png">
+  <link rel="stylesheet" href="style.css?v=2026.10.21">
+</head>
 
-    
-    <title>Tarot au bout</title>
+<body class="theme-tarot">
+  <header class="site-header">
+    <h1>Marc Games</h1>
+    <p>Page disponible uniquement en français <img class="flag flag-dim" src="images/flag-fr.png" alt=""></p>
+  </header>
 
-    <link rel="icon" type="image/x-icon" href="images/Icon.png">
-    <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
+  <nav class="navbar" aria-label="Menu principal">
+    <ul>
+      <li><a href="index.fr.html">Accueil</a></li>
+      <li><a href="game_moonlanding.en.html" hreflang="en">Moonlanding project</a></li>
+      <li><a href="game_battleship.en.html" hreflang="en">Battleships in sight</a></li>
+      <li><a href="game_tarot.fr.html" aria-current="page">Tarot au bout</a></li>
+      <li><a href="about.html">À propos</a></li>
+    </ul>
+  </nav>
 
-    <meta name="description" content="Page d'accuiel du jeu Tarot au bout">
-    <meta name="keywords" content="game, gamedev, jeu, Tarot, carte, gratuit, solo">
-    <meta name="author" content="Marc Landon">
-
-    <meta name="generator" content="BlueGriffon wysiwyg editor">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    /* local style ...*/
-.main {
-  margin: 20px 0px; 
-  padding: 4px 10px; 
-  background: #032;
-}
-.main a:visited {
-  color: #FFAA55;
-}
-
-.release {
-  margin: 20px 0px;
-  padding: 6px;
-  border: 1px solid #286;
-  background: #243;
-}
-.release::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-.release h3 {
-  color: #CFD;
-  margin: 0px;
-}
-    </style>
-    
-    <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
-
-  </head>
-  
-  <body>
-    <div class="header">
-      <h1>Marc Games</h1>
-      <p> ( only in <img src="images/flag-fr.png" alt="français" style="width:auto; height: 0.8em; filter: brightness(50%)"> ) </p>
-    </div>
-    <div class="navbar">
-      <table style="width: 100%" border="0">
-        <tbody>
-          <tr>
-            <td style="width: 20%;"><a href="index.fr.html">Accueil</a></td>
-            <td style="width: 20%;"><a href="game_moonlanding.en.html">Moonlanding project</a></td>
-            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
-            <td style="width: 20%;" class="active"><a href="#">Tarot au bout</a></td>
-            <td style="width: 20%;"><a href="about.html">About</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="main">
-    
+  <main>
+    <section class="panel">
       <h2>Description du jeu</h2>
-    
       <p>
-Le jeu émule le jeu de Tarot, à 4 et 5 joueurs, en solo (un seul joueur humain).
-Les règles du Tarot sont celles décrites depuis le site de la <a href="http://fftarot.fr/">Fédération Française de Tarot</a>.
+        Tarot au bout reproduit le jeu de Tarot à 4 ou 5 joueurs, en solo&nbsp;: vous jouez contre l'ordinateur.
+        Les règles appliquées sont celles de la <a href="http://fftarot.fr/">Fédération Française de Tarot</a>.
       </p>
+      <iframe class="itch-embed" src="https://itch.io/embed/4518950?border_width=0&amp;bg_color=41753e&amp;fg_color=ffffff&amp;link_color=efe83c" width="550" height="165" title="Tarot au bout sur itch.io" loading="lazy"><a href="https://lanocram.itch.io/tarot-au-bout">Tarot au bout par lanocram</a></iframe>
+    </section>
 
-<iframe frameborder="0" src="https://itch.io/embed/4518950?border_width=0&amp;bg_color=41753e&amp;fg_color=ffffff&amp;link_color=efe83c" width="550" height="165"><a href="https://lanocram.itch.io/tarot-au-bout">Tarot au bout by lanocram</a></iframe>
-
-    </div>
-
-    <div class="main">    
-
+    <section class="panel">
       <h2>Captures d'écran</h2>
-      
-<div class="slideshow-container">
+      <div class="gallery">
+        <input type="radio" name="shots" id="shot1" checked aria-label="Capture 1">
+        <input type="radio" name="shots" id="shot2" aria-label="Capture 2">
+        <input type="radio" name="shots" id="shot3" aria-label="Capture 3">
+        <input type="radio" name="shots" id="shot4" aria-label="Capture 4">
 
-<div class="slide fade">
-  <div class="numbertext" style="color: #154">1 / 4</div>
-  <img src="images/Tarot/v01_main.jpg" style="width:100%">
-</div>
+        <div class="slides">
+          <figure class="slide">
+            <img src="images/Tarot/v01_main.jpg" alt="Écran principal">
+            <figcaption>1 / 4</figcaption>
+            <label class="prev" for="shot4" title="Précédente">❮</label>
+            <label class="next" for="shot2" title="Suivante">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Tarot/v01_play4p.jpg" alt="Partie à 4 joueurs" loading="lazy">
+            <figcaption>2 / 4</figcaption>
+            <label class="prev" for="shot1" title="Précédente">❮</label>
+            <label class="next" for="shot3" title="Suivante">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Tarot/v01_score.jpg" alt="Tableau des scores" loading="lazy">
+            <figcaption>3 / 4</figcaption>
+            <label class="prev" for="shot2" title="Précédente">❮</label>
+            <label class="next" for="shot4" title="Suivante">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Tarot/v01_callKing.jpg" alt="Appel au roi" loading="lazy">
+            <figcaption>4 / 4</figcaption>
+            <label class="prev" for="shot3" title="Précédente">❮</label>
+            <label class="next" for="shot1" title="Suivante">❯</label>
+          </figure>
+        </div>
+      </div>
+    </section>
 
-<div class="slide fade">
-  <div class="numbertext" style="color: #154">2 / 4</div>
-  <img src="images/Tarot/v01_play4p.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #154">3 / 4</div>
-  <img src="images/Tarot/v01_score.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #154">4 / 4</div>
-  <img src="images/Tarot/v01_callKing.jpg" style="width:100%">
-</div>
-
-<a class="prev" onclick="plusSlides(-1)">❮</a>
-<a class="next" onclick="plusSlides(1)">❯</a>
-
-</div>
-<script type="text/javascript" src="gallery.js"> </script>
-
-    </div>
-
-    </div>
-    <div class="main">
-
+    <section class="panel">
       <h2>Carnet de développement</h2>
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Release alpha 1 (Jul 2026):</h3>
-<p>
-J'ai repris le développement du jeu après une pause.
-La principale amélioration est l'intelligence artificielle,
-mais qui est toujours en cours de développement.
-</p>
-</div>
-<div class="releaseColSub">
-<img src="images/Tarot/v01_play4p.jpg">
-</div>
-<div class="releaseColSub">
-<img src="images/Tarot/v01_score.jpg">
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Version alpha 1 <span class="date">juillet 2026</span></h3>
+          <p>
+            J'ai repris le développement du jeu après une pause.
+            La principale amélioration concerne l'intelligence artificielle, qui reste en cours de développement.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Tarot/v01_play4p.jpg"><img src="images/Tarot/v01_play4p.jpg" alt="Alpha 1 : partie à 4 joueurs" loading="lazy"></a>
+          <a href="images/Tarot/v01_score.jpg"><img src="images/Tarot/v01_score.jpg" alt="Alpha 1 : tableau des scores" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Prototype (Nov 2022):</h3>
-<p>
-L'interface a été complètement refaite en utilisant ma propre librairie (TRE),
-qui permet entre-autres de publier le jeu jouable dans un navigateur web.
-Le coeur du jeu est stabilisé.
-L'intelligence artificielle a été améliorée, mais encore loin de l'objectif final.
-</p>
-</div>
-<div class="releaseColSub">
-<img src="images/Tarot/prototype2022_InGame.png">
-</div>
-<div class="releaseColSub">
-<img src="images/Tarot/prototype2022_ModeSombre.png">
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Prototype <span class="date">novembre 2022</span></h3>
+          <p>
+            L'interface a été entièrement refaite avec ma propre bibliothèque (TRE),
+            qui permet notamment de rendre le jeu jouable dans un navigateur web.
+            Le cœur du jeu est stabilisé.
+            L'intelligence artificielle a progressé, mais reste encore loin de l'objectif final.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Tarot/prototype2022_InGame.png"><img src="images/Tarot/prototype2022_InGame.png" alt="Prototype 2022 : partie en cours" ></a>
+          <a href="images/Tarot/prototype2022_ModeSombre.png"><img src="images/Tarot/prototype2022_ModeSombre.png" alt="Prototype 2022 : mode sombre"></a>
+        </div>
+      </article>
 
-<div class="release">
-<div class="releaseColMain">
-<h3>Prototype (Jan 2018):</h3>
-<p>
-J'ai créé le coeur du jeu (en C++), qui contrôle le déroulement des parties, avec une IA basique.
-Le rendu est fait avec Qt et d'interfaçage de Qt avec OpenGL 2.
-</p>
-</div>
-<div class="releaseColSub">
-<img src="images/Tarot/prototype2018_screenshot1.png">
-</div>
-<div class="releaseColSub">
-<img src="images/Tarot/prototype2018_screenshot2.png">
-</div>
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Prototype <span class="date">janvier 2018</span></h3>
+          <p>
+            J'ai développé le cœur du jeu en C++&nbsp;: il gère le déroulement des parties, avec une IA basique.
+            L'affichage repose sur Qt, via son interface avec OpenGL 2.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Tarot/prototype2018_screenshot1.png"><img src="images/Tarot/prototype2018_screenshot1.png" alt="Prototype 2018 : capture d'écran" ></a>
+          <a href="images/Tarot/prototype2018_screenshot2.png"><img src="images/Tarot/prototype2018_screenshot2.png" alt="Prototype 2018 : capture d'écran" ></a>
+        </div>
+      </article>
+    </section>
+  </main>
 
-    </div>
-    
-    <div class="footer">
-      <p>Marc Landon</p>
-    </div>
-
-</body></html>
+  <footer class="site-footer">
+    <p>Marc Landon</p>
+  </footer>
+</body>
+</html>

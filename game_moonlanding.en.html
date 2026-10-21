@@ -1,260 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-    
-    <title>Moonlanding project</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moonlanding project – Marc Games</title>
+  <meta name="description" content="Moonlanding project: pilot a lunar module with realistic, unforgiving gravity. Play the web demo and follow its development.">
+  <meta name="keywords" content="game, gamedev, moon, lunar lander, platformer">
+  <meta name="author" content="Marc Landon">
+  <link rel="icon" type="image/png" href="images/Icon.png">
+  <link rel="stylesheet" href="style.css?v=2026.10.21">
+</head>
 
-    <link rel="icon" type="image/x-icon" href="images/Icon.png">
-    <link rel="stylesheet" type="text/css" href="style.css?v=2023.01.08">
+<body class="theme-moon">
+  <header class="site-header">
+    <h1>Marc Games</h1>
+    <p>This page is in English only <img class="flag flag-dim" src="images/flag-en.png" alt=""></p>
+  </header>
 
-    <meta name="description" content="Moonlanding project game homepage">
-    <meta name="keywords" content="game, gamedev, moon, platformer">
-    <meta name="author" content="Marc Landon">
+  <nav class="navbar" aria-label="Main">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="game_moonlanding.en.html" aria-current="page">Moonlanding project</a></li>
+      <li><a href="game_battleship.en.html">Battleships in sight</a></li>
+      <li><a href="game_tarot.fr.html" hreflang="fr">Tarot au bout</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </nav>
 
-    <meta name="generator" content="BlueGriffon wysiwyg editor">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    /* local style ...*/
-.main {
-  margin: 20px 0px; 
-  padding: 4px 10px; 
-  background: #111;
-}
+  <main>
+    <section class="panel">
+      <h2>About the game</h2>
+      <p>
+        You pilot a lunar module, and your goal is to reach the landing platform before you run out of fuel.
+        Inspired by the classic Lunar Lander genre, the game takes it to a whole new dimension,
+        with realistic and unforgiving gravity controls.
+        Are you up to the challenge?
+      </p>
+      <iframe class="itch-embed" src="https://itch.io/embed/1848974?bg_color=04071e&amp;fg_color=ffffff&amp;link_color=e7f746&amp;border_color=333333" width="552" height="167" title="Moonlanding project on itch.io"><a href="https://lanocram.itch.io/moonlanding-project">Moonlanding project by lanocram</a></iframe>
+    </section>
 
-.release {
-  margin: 20px 0px;
-  padding: 6px;
-  border: 1px solid #777;
-  background: #222;
-}
-.release::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-.release h3 { 
-  color: #DDD;
-  margin: 0px;
-}
+    <section class="panel">
+      <h2>Screenshots</h2>
+      <div class="gallery">
+        <input type="radio" name="shots" id="shot1" checked aria-label="Screenshot 1">
+        <input type="radio" name="shots" id="shot2" aria-label="Screenshot 2">
+        <input type="radio" name="shots" id="shot3" aria-label="Screenshot 3">
+        <input type="radio" name="shots" id="shot4" aria-label="Screenshot 4">
+        <input type="radio" name="shots" id="shot5" aria-label="Screenshot 5">
+        <input type="radio" name="shots" id="shot6" aria-label="Screenshot 6">
 
-    </style>
+        <div class="slides">
+          <figure class="slide">
+            <img src="images/Moon/moon_release3_high.jpg" alt="Lunar module flying high above the surface">
+            <figcaption>1 / 6</figcaption>
+            <label class="prev" for="shot6" title="Previous">❮</label>
+            <label class="next" for="shot2" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Moon/moon_release3_debris.jpg" alt="Lunar module among debris">
+            <figcaption>2 / 6</figcaption>
+            <label class="prev" for="shot1" title="Previous">❮</label>
+            <label class="next" for="shot3" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Moon/moon_release3_warning.jpg" alt="In-flight warning">
+            <figcaption>3 / 6</figcaption>
+            <label class="prev" for="shot2" title="Previous">❮</label>
+            <label class="next" for="shot4" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Moon/moon_release3_completed.jpg" alt="Level completed">
+            <figcaption>4 / 6</figcaption>
+            <label class="prev" for="shot3" title="Previous">❮</label>
+            <label class="next" for="shot5" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Moon/moon_release3_menu.jpg" alt="Main menu">
+            <figcaption>5 / 6</figcaption>
+            <label class="prev" for="shot4" title="Previous">❮</label>
+            <label class="next" for="shot6" title="Next">❯</label>
+          </figure>
+          <figure class="slide">
+            <img src="images/Moon/moon_release3_low.jpg" alt="Lunar module flying close to the ground">
+            <figcaption>6 / 6</figcaption>
+            <label class="prev" for="shot5" title="Previous">❮</label>
+            <label class="next" for="shot1" title="Next">❯</label>
+          </figure>
+        </div>
+      </div>
+    </section>
 
-    <link rel="stylesheet" type="text/css" href="gallery.css?v=2023.01.08">
+    <section class="panel">
+      <h2>Release history</h2>
 
-  </head>
-  
-  <body>
-    <div class="header">
-      <h1>Marc Games</h1>
-      <p> ( only in  <img src="images/flag-en.png" alt="english" style="width:auto; height: 0.8em; filter: brightness(50%)"> ) </p>
-    </div>
-    <div class="navbar">
-      <table style="width: 100%" border="0">
-        <tbody>
-          <tr>
-            <td style="width: 20%;"><a href="index.html">Home</a></td>
-            <td style="width: 20%;" class="active"><a href="#">Moonlanding project</a></td>
-            <td style="width: 20%;"><a href="game_battleship.en.html">Battleships in sight</a></td>
-            <td style="width: 20%;"><a href="game_tarot.fr.html">Tarot au bout</a></td>
-            <td style="width: 20%;"><a href="about.html">About</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="main">
-    
-    <h2>About the game</h2>
-    
-    <p>
-The player pilots the lunar module and the goal is to reach the arrival platform before running out of fuel.
-Take up the challenge to pilot safely to the destination.<br>
-Inspired from the classic moon lander genre, this game takes it into a whole another dimension.<br>
-It gives realistic unforgiving gravity controls.
-    </p>
+      <article class="release">
+        <div class="release-text">
+          <h3>Release 3.1 <span class="date">August 2026</span></h3>
+          <p>
+            This release fixes a few annoying gameplay issues:
+            faster respawn, and better detection of when the vessel runs out of fuel.
+            On the rendering side, global illumination has been improved.
+            The level editor has also been removed from the game.
+          </p>
+        </div>
+      </article>
 
-<iframe src="https://itch.io/embed/1848974?bg_color=04071e&amp;fg_color=ffffff&amp;link_color=e7f746&amp;border_color=333333" width="552" height="167" frameborder="0"><a href="https://lanocram.itch.io/moonlanding-project">MoonLanding Project by lanocram</a></iframe>
+      <article class="release">
+        <div class="release-text">
+          <h3>Release 3.0 <span class="date">April 2026</span></h3>
+          <p>
+            I used the feedback from the game jam to improve the game, hopefully on the way to finishing my first game.
+            The main weaknesses were the visuals and the lack of sound:
+            I reworked the lighting and added normal mapping.
+            I also added sound effects, as heard from inside the cockpit, which greatly improves the player experience.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Moon/moon_release3_high.jpg"><img src="images/Moon/moon_release3_high.jpg" alt="Release 3.0: flying high" loading="lazy"></a>
+          <a href="images/Moon/moon_release3_menu.jpg"><img src="images/Moon/moon_release3_menu.jpg" alt="Release 3.0: main menu" loading="lazy"></a>
+          <a href="images/Moon/moon_release3_warning.jpg"><img src="images/Moon/moon_release3_warning.jpg" alt="Release 3.0: in-flight warning" loading="lazy"></a>
+          <a href="images/Moon/moon_release3_completed.jpg"><img src="images/Moon/moon_release3_completed.jpg" alt="Release 3.0: level completed" loading="lazy"></a>
+        </div>
+      </article>
 
-    </div>
-    <div class="main">
+      <article class="release">
+        <div class="release-text">
+          <h3>Release 2.0 <span class="date">October 2025</span></h3>
+          <p>
+            I kept improving the game and took part in my first game jam.
+            Improvements include better joystick controls and menu navigation,
+            as well as enhanced visuals (ground rendering, dynamic lighting range, etc.).
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Moon/moon_release2_2.jpg"><img src="images/Moon/moon_release2_2.jpg" alt="Release 2.0 screenshot" loading="lazy"></a>
+          <a href="images/Moon/moon_release2_4.jpg"><img src="images/Moon/moon_release2_4.jpg" alt="Release 2.0 screenshot" loading="lazy"></a>
+        </div>
+      </article>
 
-    <h2>Screenshots</h2>
+      <article class="release">
+        <div class="release-text">
+          <h3>Release 1.0 <span class="date">January 2024</span></h3>
+          <p>
+            I finally released version 1.0, focusing on polishing the user experience.
+            Achievements were replaced by a scoring system, and you can now replay your best
+            successful attempt as a ghost vessel.
+            The web version now has its own dedicated build: a portable version.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Moon/moon_release1_4.jpg"><img src="images/Moon/moon_release1_4.jpg" alt="Release 1.0 screenshot" loading="lazy"></a>
+          <a href="images/Moon/moon_release1_3.jpg"><img src="images/Moon/moon_release1_3.jpg" alt="Release 1.0 screenshot" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="slideshow-container">
+      <article class="release">
+        <div class="release-text">
+          <h3>Betas 5, 6 and 7 <span class="date">2022–2023</span></h3>
+          <p>
+            I focused on the features that round out the user experience,
+            such as checkpoints, achievements and joystick support.
+            The web version was also released.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Moon/moon_beta7_3.jpg"><img src="images/Moon/moon_beta7_3.jpg" alt="Beta 7 screenshot" loading="lazy"></a>
+          <a href="images/Moon/moon_beta7_1.jpg"><img src="images/Moon/moon_beta7_1.jpg" alt="Beta 7 screenshot" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">1 / 6</div>
-  <img src="images/Moon/moon_release3_high.jpg" style="width:100%">
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Beta 4 <span class="date">May 2020</span></h3>
+          <p>
+            Many improvements to the models and the rendering,
+            including a complete rework of the Moon model.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Moon/moon_beta4_4.png"><img src="images/Moon/moon_beta4_4.png" alt="Beta 4 screenshot" loading="lazy"></a>
+          <a href="images/Moon/moon_beta4_1.png"><img src="images/Moon/moon_beta4_1.png" alt="Beta 4 screenshot" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">2 / 6</div>
-  <img src="images/Moon/moon_release3_debris.jpg" style="width:100%">
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Beta 3 and earlier <span class="date">November 2018</span></h3>
+          <p>
+            I rebuilt the game from scratch on PC with OpenGL, learning OpenGL along the way.
+            The concept grew into a 2D platformer with 3D rendering.
+            I put a lot of effort into the custom physics engine
+            (see the <a href="https://lanocram.itch.io/moonlanding-project/devlog">dev log</a>).
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Moon/moon_beta2_3.png"><img src="images/Moon/moon_beta2_3.png" alt="Beta 2 screenshot" loading="lazy"></a>
+          <a href="images/Moon/moon_beta3_2.png"><img src="images/Moon/moon_beta3_2.png" alt="Beta 3 screenshot" loading="lazy"></a>
+        </div>
+      </article>
 
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">3 / 6</div>
-  <img src="images/Moon/moon_release3_warning.jpg" style="width:100%">
-</div>
+      <article class="release">
+        <div class="release-text">
+          <h3>Prototype <span class="date">around 2003</span></h3>
+          <p>
+            The idea was born in math class, where I wrote the first version on a TI-82 programmable calculator.
+            Unfortunately, the program has been lost.
+          </p>
+          <p>
+            The player controlled the engine thrust of a vessel pulled down by the Moon's gravity,
+            and the vessel could only move vertically.
+            The goal was to land below a maximum speed, with limited fuel.
+          </p>
+        </div>
+        <div class="release-shots">
+          <a href="images/Moon/TI-82.jpg"><img src="images/Moon/TI-82.jpg" alt="TI-82 calculator" loading="lazy"></a>
+        </div>
+      </article>
+    </section>
+  </main>
 
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">4 / 6</div>
-  <img src="images/Moon/moon_release3_completed.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">5 / 6</div>
-  <img src="images/Moon/moon_release3_menu.jpg" style="width:100%">
-</div>
-
-<div class="slide fade">
-  <div class="numbertext" style="color: #F00">6 / 6</div>
-  <img src="images/Moon/moon_release3_low.jpg" style="width:100%">
-</div>
-
-<a class="prev" onclick="plusSlides(-1)">❮</a>
-<a class="next" onclick="plusSlides(1)">❯</a>
-
-</div>
-<script type="text/javascript" src="gallery.js"> </script>
-
-    </div>
-    <div class="main">
-
-    <h2>Release history</h2>
-
-    <div class="release">
-    <h3>Release 3.1 (August 2026)</h3>
-    <p>
-    This release contains few fixes of some annoying gameplay elements:
-    quicker respawn and better detection when the vessel runs out of fuel.<br>
-    On the rendering side, the global-illumination was improved.
-    Also, the level editor has been completely removed from the game.
-    </p>
-    </div>
-
-    <div class="release">
-    <div class="releaseColMain">
-    <h3>Release 3.0 (April 2026)</h3>
-    <p>
-    I took the feedbacks from the game-jam to improve the game, and hopefully to finish my first game.<br>
-    The main weakness was the visuals and the lack of sound effects:
-    I reworked the lighting and added normal-mapping.
-    About the sound, I added sound-effects that can be heard from the cockpit. It improves a lot the player experience.
-    </p>
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release3_high.jpg">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release3_menu.jpg">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release3_warning.jpg">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release3_completed.jpg">
-    </div>
-    </div>
-
-    <div class="release">
-    <div class="releaseColMain">
-    <h3>Release 2.0 (Oct 2025)</h3>
-    <p>
-    I continued to improve the game, with my first participation to a game-jam.
-    The improvements include better joystick controls and menu navigation,
-    as well as enhanced visuals (ground rendering, dynamic lighting range, ...).
-    </p>
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release2_2.jpg">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release2_4.jpg">
-    </div>
-    </div>
-
-    <div class="release">
-    <div class="releaseColMain">
-    <h3>Release 1.0 (Jan 2024)</h3>
-    <p>
-    I finally decided to release the main version, for which I focused on polishing the user-experience.
-    I setup a score instead of the acheivements and I added a replay the best successful attempt with a phantom vessel.
-    The web-version has now the specific build mode: a portable version.
-    </p>
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release1_4.jpg">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_release1_3.jpg">
-    </div>
-    </div>
-
-    <div class="release">
-    <div class="releaseColMain">
-    <h3>Release beta 5, 6, 7 (from 2022 to 2023)</h3>
-    <p>
-    I focused to implement all side elements that improve the user experience,
-    such as check-points, achievements and the support of joysticks.
-    The web-version has also been released.
-    </p>
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_beta7_3.jpg">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_beta7_1.jpg">
-    </div>
-    </div>
-
-    <div class="release">
-    <div class="releaseColMain">
-    <h3>Release beta 4 (May 2020)</h3>
-    <p>
-    Lot of improvements have been made on the models and the rendering, with a complete rework of the moon modeling.
-    </p>
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_beta4_4.png">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_beta4_1.png">
-    </div>
-    </div>
-
-    <div class="release">
-    <div class="releaseColMain">
-    <h3>Release beta 3 (Nov 2018) and before</h3>
-    <p>
-    I built from scratch the game on PC with OpenGL and I learnt OpenGL in the same time.
-    The game concept has been extended to a 2D platformer with 3D rendering.
-    I put lot of efforts to create the custom physic engine (<a href="https://lanocram.itch.io/moonlanding-project/devlog/XXX">dev-log</a>).
-    </p>
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_beta2_3.png">
-    </div>
-    <div class="releaseColSub">
-    <img src="images/Moon/moon_beta3_2.png">
-    </div>
-    </div>
-
-    <div class="release">
-    <img src="images/Moon/TI-82.jpg" style="width: auto; height: 18em; float:right">
-    <h3>Prototype (~2003)</h3>
-    <p>
-    The initial idea was born in my math class, and so I implemented a game on the programmable calculator TI-82.
-    The program is lost unfortunately.<br>
-    The player controls the engine thrust of a vessel attracted by the moon's gravity, while the vessel can only move vertically.
-    The goal is to land without exceeding a certain speed and with limited fuel.
-    </p>
-    </div>
-    </div>
-
-    <div class="footer">
-      <p>Marc Landon</p>
-    </div>
-
-
-</body></html>
+  <footer class="site-footer">
+    <p>Marc Landon</p>
+  </footer>
+</body>
+</html>
